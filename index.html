@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fundação Viva — Reunião Intermediária 1 · 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 /* ── TOKENS ───────────────────────────────────────── */
@@ -44,8 +44,8 @@ html{scroll-behavior:smooth}
 body{
   background:var(--bg);
   color:var(--text);
-  font-family:'DM Sans',sans-serif;
-  font-size:14px;
+  font-family:'Syne', 'Inter', system-ui, sans-serif;
+  font-size:15px;
   line-height:1.6;
   min-height:100vh;
 }
@@ -459,44 +459,67 @@ footer span{color:var(--gold)}
 }
 .login-box{
   position:relative;z-index:1;
-  width:100%;max-width:360px;
-  padding:2.5rem 2rem;
+  width:100%;max-width:380px;
+  padding:2.8rem 2.2rem;
   background:rgba(255,255,255,.04);
   border:1px solid rgba(255,255,255,.09);
   border-radius:14px;
-  display:flex;flex-direction:column;gap:1.1rem;
+  display:flex;flex-direction:column;gap:1.2rem;
 }
-.login-header{text-align:center;margin-bottom:.25rem}
-.login-header .logo-mark{font-size:26px;display:block}
-.login-header .logo-sub{font-size:10px;display:block;margin-top:.2rem}
+.login-header{text-align:center;margin-bottom:.5rem}
+.login-logo-img{
+  width:80px;height:80px;
+  border-radius:50%;
+  display:block;margin:0 auto .8rem;
+  object-fit:contain;
+}
+.login-brand{
+  font-family:'Syne',sans-serif;
+  font-size:22px;font-weight:700;
+  color:#BE620F;letter-spacing:.12em;
+  text-transform:uppercase;display:block;
+}
+.login-brand-sub{
+  font-family:'Syne',sans-serif;
+  font-size:12px;font-weight:400;
+  color:#07C0BD;letter-spacing:.18em;
+  text-transform:uppercase;display:block;margin-top:.15rem;
+}
 .login-title{
-  font-family:'Cormorant Garamond',serif;
-  font-size:20px;font-weight:500;color:#fff;
+  font-family:'Syne',sans-serif;
+  font-size:22px;font-weight:600;color:#E6E4DB;
   text-align:center;
 }
-.login-hint{font-size:11px;color:rgba(255,255,255,.3);text-align:center}
-.login-field{display:flex;flex-direction:column;gap:.35rem}
-.login-field label{font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+.login-hint{font-family:'Syne',sans-serif;font-size:13px;color:rgba(230,228,219,.4);text-align:center}
+.login-field{display:flex;flex-direction:column;gap:.4rem}
+.login-field label{
+  font-family:'Syne',sans-serif;
+  font-size:11px;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(230,228,219,.55);
+}
 .login-field input{
   background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.12);
   border-radius:8px;
-  padding:.65rem 1rem;
-  color:#fff;font-size:13px;font-family:'DM Sans',sans-serif;
+  padding:.75rem 1rem;
+  color:#E6E4DB;font-size:15px;font-family:'Syne',sans-serif;
   outline:none;transition:border-color .15s;
 }
-.login-field input::placeholder{color:rgba(255,255,255,.25)}
-.login-field input:focus{border-color:var(--teal)}
+.login-field input::placeholder{color:rgba(230,228,219,.22)}
+.login-field input:focus{border-color:#1D9492}
 .login-btn{
-  margin-top:.25rem;padding:.75rem;
-  background:var(--teal);color:var(--bg-dark);
+  margin-top:.3rem;padding:.85rem;
+  background:#1D9492;color:#fff;
   border:none;border-radius:8px;
-  font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;
-  cursor:pointer;transition:opacity .15s;
+  font-size:15px;font-weight:600;font-family:'Syne',sans-serif;
+  letter-spacing:.05em;
+  cursor:pointer;transition:background .15s;
 }
-.login-btn:hover{opacity:.88}
+.login-btn:hover{background:#07C0BD}
 .login-error{
-  font-size:11px;color:#e05c5c;text-align:center;
+  font-family:'Syne',sans-serif;
+  font-size:12px;color:#e05c5c;text-align:center;
   display:none;margin-top:-.4rem;
 }
 </style>
@@ -506,8 +529,9 @@ footer span{color:var(--gold)}
 <div id="login-overlay">
   <div class="login-box">
     <div class="login-header">
-      <span class="logo-mark">Raya</span>
-      <span class="logo-sub">Advisory</span>
+      <img src="mono_umaCORescuro.png" alt="Raya Advisory" class="login-logo-img" />
+      <span class="login-brand">RAYA</span>
+      <span class="login-brand-sub">Advisory</span>
     </div>
     <p class="login-title">Acesso Restrito</p>
     <p class="login-hint">Fundação Viva de Previdência · 2026</p>
