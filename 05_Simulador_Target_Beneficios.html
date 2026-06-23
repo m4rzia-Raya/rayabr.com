@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raya Advisory — Fundação Viva · Simulador de Target de Benefícios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --raya-dark:#122028; --raya-navy:#20353A; --raya-slate:#364F53;
+  --raya-teal:#1D9492; --raya-teal-light:#07C0BD; --raya-copper:#BE620F;
+  --raya-copper-mid:#B0742A; --raya-rust:#993715; --raya-deep-rust:#651F0B;
+  --raya-gold:#B59875; --raya-cream:#F0EEE6; --raya-petrol:#134E58;
+  --font-display:'Cormorant Garamond',Georgia,serif; --font-body:'DM Sans',system-ui,sans-serif;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.18); --shadow-md:0 4px 16px rgba(0,0,0,.22);
+  --radius-sm:6px; --radius-md:10px; --radius-lg:14px;
+  --fs-base:16px; --fs-sm:14px; --fs-xs:12px; --fs-eyebrow:12px; --fs-kpi-value:30px; --fs-title:40px; --scale:1;
+}
+:root[data-theme="dark"]{--bg:var(--raya-dark);--bg-elev:var(--raya-navy);--bg-card:#1A2C32;--bg-card-2:#243A40;--text:var(--raya-cream);--text-2:#B8BDB9;--text-3:#8A938F;--border:rgba(29,148,146,.22);--border-soft:rgba(255,255,255,.06);}
+:root[data-theme="light"]{--bg:#FAF8F2;--bg-elev:#F1EEE6;--bg-card:#FFFFFF;--bg-card-2:#FFFFFF;--text:#122028;--text-2:#364F53;--text-3:#6B7B7E;--border:rgba(18,32,40,.12);--border-soft:rgba(18,32,40,.06);}
+:root[data-presentation="on"]{--scale:1.18;--fs-base:19px;--fs-sm:17px;--fs-xs:14px;--fs-eyebrow:14px;--fs-kpi-value:38px;--fs-title:52px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:var(--fs-base);line-height:1.65;-webkit-font-smoothing:antialiased;zoom:var(--zoom,1);}
+.header{background:var(--raya-petrol);border-bottom:1px solid rgba(255,255,255,.12);position:sticky;top:0;z-index:100;box-shadow:var(--shadow-md);}
+.header-inner{max-width:1400px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.header-logo svg{height:44px;width:auto;display:block;}
+.header-meta{text-align:right;}
+.header-title{font-family:var(--font-display);font-size:calc(20px*var(--scale));color:#fff;font-weight:500;letter-spacing:.02em;}
+.header-date{font-size:var(--fs-xs);color:var(--raya-teal-light);letter-spacing:.2em;text-transform:uppercase;margin-top:2px;}
+.header-controls{display:flex;gap:8px;}
+.ctrl-btn{background:transparent;border:1px solid rgba(255,255,255,.28);color:rgba(255,255,255,.88);padding:8px 14px;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:var(--fs-xs);font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.ctrl-btn:hover{border-color:#fff;color:#fff;background:rgba(255,255,255,.10);}
+.zoom-group{display:flex;align-items:center;border:1px solid rgba(255,255,255,.28);border-radius:var(--radius-sm);overflow:hidden;}
+.zoom-btn{background:transparent;border:none;color:rgba(255,255,255,.88);width:34px;height:34px;font-size:16px;font-weight:600;cursor:pointer;}
+.zoom-btn:hover{background:rgba(255,255,255,.15);color:#fff;}
+.zoom-indicator{font-size:12px;font-weight:600;color:rgba(255,255,255,.88);min-width:48px;text-align:center;cursor:pointer;padding:0 4px;}
+.main{max-width:1400px;margin:0 auto;padding:32px;}
+.eyebrow{font-size:var(--fs-eyebrow);font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--raya-teal);margin-bottom:8px;}
+.sec-title{font-family:var(--font-display);font-size:var(--fs-title);font-weight:500;color:var(--text);line-height:1.1;margin-bottom:8px;}
+.src-note{font-size:var(--fs-xs);color:var(--text-3);font-style:italic;margin-bottom:18px;line-height:1.6;}
+.divider{height:1px;background:linear-gradient(to right,var(--raya-gold),transparent);margin:38px 0 26px;opacity:.5;}
+.grp-eyebrow{font-size:var(--fs-eyebrow);font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--raya-copper);margin-bottom:4px;}
+.grp-title{font-family:var(--font-display);font-size:calc(30px*var(--scale));font-weight:500;color:var(--text);margin-bottom:6px;}
+.grp-lead{font-size:var(--fs-sm);color:var(--text-2);margin-bottom:18px;max-width:980px;line-height:1.6;}
+.subblock-head{font-family:var(--font-display);font-size:calc(21px*var(--scale));color:var(--text);font-weight:600;margin:30px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:14px;}
+.kpi-card{background:var(--raya-teal);color:#fff;border-radius:var(--radius-md);padding:16px 18px 14px;box-shadow:var(--shadow-sm);}
+.kpi-card.teal{background:var(--raya-teal);}.kpi-card.rust{background:var(--raya-rust);}.kpi-card.copper{background:var(--raya-copper);}
+.kpi-card.navy{background:var(--raya-dark);}.kpi-card.slate{background:var(--raya-slate);}.kpi-card.gold{background:var(--raya-copper-mid);}
+.kpi-label{font-size:var(--fs-xs);font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.82);margin-bottom:8px;}
+.kpi-value{font-family:var(--font-display);font-size:var(--fs-kpi-value);font-weight:500;color:#fff;line-height:1;font-variant-numeric:tabular-nums;}
+.kpi-sub{font-size:11px;color:rgba(255,255,255,.78);margin-top:8px;line-height:1.45;}
+.note{background:var(--bg-card);border:1px solid var(--border);border-left:5px solid var(--raya-teal);border-radius:var(--radius-md);padding:14px 18px;margin:16px 0;font-size:var(--fs-sm);color:var(--text-2);line-height:1.65;}
+.note strong{color:var(--text);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
+@media(max-width:900px){.grid2{grid-template-columns:1fr;}.header-inner,.main{padding-left:16px;padding-right:16px;}}
+.chart-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:18px 20px;box-shadow:var(--shadow-sm);}
+.chart-card-title{font-family:var(--font-display);font-size:calc(18px*var(--scale));color:var(--text);font-weight:500;margin-bottom:2px;}
+.chart-card-sub{font-size:var(--fs-xs);color:var(--text-3);margin-bottom:12px;}
+.chart-wrap{position:relative;height:280px;}
+.table-wrap{background:var(--bg-card-2);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);margin-bottom:12px;overflow-x:auto;}
+.tbl-cap{font-size:var(--fs-xs);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);padding:12px 16px 0;}
+.pbi{width:100%;border-collapse:collapse;font-size:var(--fs-sm);}
+.pbi thead th{background:var(--raya-petrol);color:#fff;padding:10px 14px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;text-align:right;white-space:nowrap;}
+.pbi thead th:first-child{text-align:left;}
+.pbi tbody td{padding:9px 14px;border-bottom:1px solid var(--border-soft);text-align:right;font-variant-numeric:tabular-nums;color:var(--text-2);white-space:nowrap;}
+.pbi tbody td:first-child{text-align:left;color:var(--text);font-weight:500;}
+.pbi tr.tot td{background:rgba(19,78,88,.10);color:var(--raya-petrol);font-weight:700;}
+.pbi small{font-weight:600;}
+.tg{color:var(--raya-teal);}.tm{color:var(--raya-copper);}.tl{color:var(--raya-rust);}
+.insights{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:8px;}
+.insight{background:var(--bg-card);border:1px solid var(--border);border-left:5px solid var(--raya-teal);border-radius:var(--radius-md);padding:16px 18px;}
+.insight.rust{border-left-color:var(--raya-rust);}.insight.copper{border-left-color:var(--raya-copper);}.insight.teal{border-left-color:var(--raya-teal);}.insight.navy{border-left-color:var(--raya-navy);}
+.insight-title{font-family:var(--font-display);font-size:calc(18px*var(--scale));font-weight:600;color:var(--text);margin-bottom:6px;}
+.insight-text{font-size:var(--fs-sm);color:var(--text-2);line-height:1.55;}
+.footer{background:var(--bg-elev);border-top:1px solid var(--border);margin-top:48px;padding:24px 32px;}
+.footer-inner{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+.footer-brand{font-family:var(--font-display);font-size:calc(18px*var(--scale));color:var(--text-2);}
+.footer-disc{font-size:var(--fs-xs);color:var(--text-3);max-width:760px;line-height:1.6;}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-logo" aria-label="Raya Advisory">
+      <svg viewBox="0 0 220 56" width="220" height="56" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#1D9492"/><stop offset="100%" stop-color="#07C0BD"/></linearGradient></defs>
+        <text x="0" y="32" font-family="'Cormorant Garamond',Georgia,serif" font-size="34" font-weight="500" letter-spacing="6" fill="url(#rg)">RAYA</text>
+        <line x1="0" y1="40" x2="120" y2="40" stroke="#B59875" stroke-width="1" opacity="0.6"/>
+        <text x="0" y="52" font-family="'DM Sans',system-ui,sans-serif" font-size="8" letter-spacing="3" fill="#B59875" opacity="0.9">A D V I S O R Y</text>
+      </svg>
+    </div>
+    <div class="header-meta">
+      <div class="header-title">Fundação Viva · Simulador de Target de Benefícios</div>
+      <div class="header-date">Participante típico · acumulação de 30 anos</div>
+    </div>
+    <div class="header-controls">
+      <a class="ctrl-btn" href="PORTAL_Viva_Viabilidade_Perfis.html" style="text-decoration:none;">← Portal</a>
+      <a class="ctrl-btn" href="RAYA_analise_VIVA_v3.html" style="text-decoration:none;">← Visão Geral</a>
+      <div class="zoom-group"><button class="zoom-btn" id="zoom-out">A−</button><span class="zoom-indicator" id="zoom-val">100%</span><button class="zoom-btn" id="zoom-in">A+</button></div>
+      <button class="ctrl-btn" id="theme-toggle"><span id="theme-icon">☾</span> <span id="theme-label">Escuro</span></button>
+      <button class="ctrl-btn" id="present-toggle">▣ Apresentação</button>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="eyebrow">05 · Simulador de Target de Benefícios</div>
+  <h1 class="sec-title">Participante típico — projeção de acumulação e reposição</h1>
+  <p class="src-note">Premissas: participante de 30 anos, aposentadoria aos 60 (30 anos de acumulação), meta de reposição (TBR) de 60% do último salário, crescimento salarial de 3% a.a., teto INSS R$ 7.786,02, tábua AT-2000 suavizada 10% (FEM). TBR = Benefício Total (INSS + plano) ÷ último salário. Valores ilustrativos.</p>
+
+  <!-- ===== INSTITUÍDOS ===== -->
+  <section>
+    <div class="grp-eyebrow">Simulação · Instituídos</div>
+    <h2 class="grp-title">Participante típico — Instituídos</h2>
+    <p class="grp-lead">Planos instituídos não têm matching — a contribuição é integralmente do participante. No perfil base (7% do salário = R$ 700/mês sobre salário de R$ 10.000), a rentabilidade alvo para atingir 60% de reposição é alta porque não há contrapartida patronal.</p>
+    <div class="kpi-grid">
+      <div class="kpi-card copper"><div class="kpi-label">Contrib. empregado</div><div class="kpi-value">R$ 700</div><div class="kpi-sub">/mês · sem matching (100% participante)</div></div>
+      <div class="kpi-card copper"><div class="kpi-label">Contrib. total / mês</div><div class="kpi-value">R$ 700</div><div class="kpi-sub">salário base R$ 10.000</div></div>
+      <div class="kpi-card gold"><div class="kpi-label">Rent. alvo (TBR 60%)</div><div class="kpi-value">7,49%</div><div class="kpi-sub">a.a. para 60% de reposição</div></div>
+      <div class="kpi-card teal"><div class="kpi-label">TBR moderado</div><div class="kpi-value">46,0%</div><div class="kpi-sub">benefício R$ 11.145/mês</div></div>
+      <div class="kpi-card navy"><div class="kpi-label">Saldo moderado (30a)</div><div class="kpi-value">R$ 0,92 mi</div><div class="kpi-sub">5,68% a.a.</div></div>
+    </div>
+    <div class="grid2">
+      <div class="chart-card"><div class="chart-card-title">Evolução do saldo acumulado — 7%</div><div class="chart-card-sub">Salário R$ 10.000 · R$ 700/mês · 30 anos · R$ mil</div><div class="chart-wrap"><canvas id="evol_inst"></canvas></div></div>
+      <div>
+        <div class="table-wrap"><div class="tbl-cap">Comparativo por cenário — salário R$ 10.000</div>
+          <table class="pbi"><thead><tr><th>Cenário</th><th>Saldo final</th><th>Benef. total/mês</th><th>TBR</th></tr></thead><tbody>
+            <tr><td>Ciclo de Vida</td><td>R$ 0,83 mi</td><td>R$ 9.723</td><td class="tm">40,2%</td></tr>
+            <tr><td>Super Conserv. 3,83%</td><td>R$ 0,69 mi</td><td>R$ 8.965</td><td class="tl">37,0%</td></tr>
+            <tr><td>Conserv. 4,48%</td><td>R$ 0,76 mi</td><td>R$ 9.618</td><td class="tl">39,7%</td></tr>
+            <tr><td>Moderado 5,68%</td><td>R$ 0,92 mi</td><td>R$ 11.145</td><td class="tm">46,0%</td></tr>
+            <tr><td>Agressivo 6,40%</td><td>R$ 1,03 mi</td><td>R$ 12.307</td><td class="tm">50,8%</td></tr>
+            <tr><td>Super Agress. 7,50%</td><td>R$ 1,24 mi</td><td>R$ 14.540</td><td class="tg">60,1%</td></tr>
+            <tr class="tot"><td>Target</td><td>R$ 1,24 mi</td><td>R$ 14.528</td><td>60,0%</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+    <div class="table-wrap" style="margin-top:14px"><div class="tbl-cap">Simulação por faixa salarial — benef. total/mês + TBR</div>
+      <table class="pbi"><thead><tr><th>Salário inicial</th><th>Ciclo Vida</th><th>4,48%</th><th>5,68%</th><th>6,40%</th><th>7,50%</th></tr></thead><tbody>
+        <tr><td>R$ 5.000</td><td>R$ 7.598 <small class="tg">62,8%</small></td><td>R$ 7.546 <small class="tg">62,3%</small></td><td>R$ 8.309 <small class="tg">68,6%</small></td><td>R$ 8.890 <small class="tg">73,4%</small></td><td>R$ 10.007 <small class="tg">82,7%</small></td></tr>
+        <tr><td>R$ 10.000</td><td>R$ 9.723 <small class="tm">40,2%</small></td><td>R$ 9.618 <small class="tl">39,7%</small></td><td>R$ 11.145 <small class="tm">46,0%</small></td><td>R$ 12.307 <small class="tm">50,8%</small></td><td>R$ 14.540 <small class="tg">60,1%</small></td></tr>
+        <tr><td>R$ 15.000</td><td>R$ 11.847 <small class="tl">32,6%</small></td><td>R$ 11.691 <small class="tl">32,2%</small></td><td>R$ 13.980 <small class="tl">38,5%</small></td><td>R$ 15.724 <small class="tm">43,3%</small></td><td>R$ 19.074 <small class="tm">52,5%</small></td></tr>
+        <tr><td>R$ 20.000</td><td>R$ 13.972 <small class="tl">28,8%</small></td><td>R$ 13.763 <small class="tl">28,4%</small></td><td>R$ 16.816 <small class="tl">34,7%</small></td><td>R$ 19.141 <small class="tl">39,5%</small></td><td>R$ 23.607 <small class="tm">48,8%</small></td></tr>
+        <tr><td>R$ 25.000</td><td>R$ 16.096 <small class="tl">26,6%</small></td><td>R$ 15.836 <small class="tl">26,2%</small></td><td>R$ 19.652 <small class="tl">32,5%</small></td><td>R$ 22.557 <small class="tl">37,3%</small></td><td>R$ 28.141 <small class="tm">46,5%</small></td></tr>
+      </tbody></table>
+    </div>
+    <div class="note"><strong>Leitura.</strong> Benef. total/mês = INSS + plano. TBR = benef. total ÷ último salário. Salários menores atingem reposição alta (INSS pesa mais); salários altos exigem rentabilidade elevada para se aproximar dos 60%.</div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ===== PATROCINADOS ===== -->
+  <section>
+    <div class="grp-eyebrow">Simulação · Patrocinados</div>
+    <h2 class="grp-title">Participante típico — Patrocinados</h2>
+    <p class="grp-lead">Planos patrocinados têm matching 1:1 — a empresa aporta igual ao empregado. A rentabilidade alvo diminui conforme a alíquota aumenta: quanto mais contribuição, menor o retorno necessário para atingir 60% de reposição.</p>
+    <div class="table-wrap" style="max-width:560px"><div class="tbl-cap">Rentabilidade alvo por alíquota — salário R$ 10.000 · TBR 60%</div>
+      <table class="pbi"><thead><tr><th>Alíquota</th><th>Contrib. total/mês</th><th>Rent. alvo</th></tr></thead><tbody>
+        <tr><td>2%</td><td>R$ 400</td><td class="tl">9,70% a.a.</td></tr>
+        <tr><td>7%</td><td>R$ 1.400</td><td class="tm">4,82% a.a.</td></tr>
+        <tr><td>8,5%</td><td>R$ 1.700</td><td class="tg">4,08% a.a.</td></tr>
+        <tr><td>15%</td><td>R$ 3.000</td><td class="tg">1,96% a.a.</td></tr>
+      </tbody></table>
+    </div>
+
+    <h3 class="subblock-head">Alíquota 2% — contrib. total R$ 400/mês (R$ 200 + R$ 200, matching 1:1)</h3>
+    <div class="kpi-grid">
+      <div class="kpi-card copper"><div class="kpi-label">Contrib. empregado</div><div class="kpi-value">R$ 200</div><div class="kpi-sub">empresa aporta R$ 200/mês</div></div>
+      <div class="kpi-card copper"><div class="kpi-label">Contrib. total / mês</div><div class="kpi-value">R$ 400</div><div class="kpi-sub">salário base R$ 10.000</div></div>
+      <div class="kpi-card gold"><div class="kpi-label">Rent. alvo (TBR 60%)</div><div class="kpi-value">9,70%</div><div class="kpi-sub">a.a. para 60% de reposição</div></div>
+      <div class="kpi-card teal"><div class="kpi-label">TBR moderado</div><div class="kpi-value">36,0%</div><div class="kpi-sub">benefício R$ 8.714/mês</div></div>
+      <div class="kpi-card navy"><div class="kpi-label">Saldo moderado (30a)</div><div class="kpi-value">R$ 0,52 mi</div><div class="kpi-sub">5,68% a.a.</div></div>
+    </div>
+    <div class="grid2">
+      <div class="chart-card"><div class="chart-card-title">Evolução do saldo — 2%</div><div class="chart-card-sub">R$ 400/mês total · 30 anos · R$ mil</div><div class="chart-wrap" style="height:240px"><canvas id="evol_patr_2"></canvas></div></div>
+      <div class="table-wrap"><div class="tbl-cap">2% — cenários</div>
+        <table class="pbi"><thead><tr><th>Cenário</th><th>Saldo final</th><th>Benef./mês</th><th>TBR</th></tr></thead><tbody>
+          <tr><td>Ciclo de Vida</td><td>R$ 0,48 mi</td><td>R$ 7.902</td><td class="tl">32,6%</td></tr>
+          <tr><td>Super Conserv. 3,83%</td><td>R$ 0,39 mi</td><td>R$ 7.469</td><td class="tl">30,9%</td></tr>
+          <tr><td>Conserv. 4,48%</td><td>R$ 0,43 mi</td><td>R$ 7.842</td><td class="tl">32,4%</td></tr>
+          <tr><td>Moderado 5,68%</td><td>R$ 0,52 mi</td><td>R$ 8.714</td><td class="tl">36,0%</td></tr>
+          <tr><td>Agressivo 6,40%</td><td>R$ 0,59 mi</td><td>R$ 9.378</td><td class="tl">38,7%</td></tr>
+          <tr><td>Super Agress. 7,50%</td><td>R$ 0,71 mi</td><td>R$ 10.655</td><td class="tm">44,0%</td></tr>
+          <tr class="tot"><td>Target</td><td>R$ 1,03 mi</td><td>R$ 14.528</td><td>60,0%</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div class="table-wrap" style="margin-top:12px"><div class="tbl-cap">2% — faixa salarial (benef./mês + TBR)</div>
+      <table class="pbi"><thead><tr><th>Salário</th><th>Ciclo Vida</th><th>4,48%</th><th>5,68%</th><th>6,40%</th><th>7,50%</th></tr></thead><tbody>
+        <tr><td>R$ 5.000</td><td>R$ 6.688 <small class="tm">55,2%</small></td><td>R$ 6.658 <small class="tm">55,0%</small></td><td>R$ 7.094 <small class="tm">58,6%</small></td><td>R$ 7.426 <small class="tg">61,3%</small></td><td>R$ 8.064 <small class="tg">66,6%</small></td></tr>
+        <tr><td>R$ 10.000</td><td>R$ 7.902 <small class="tl">32,6%</small></td><td>R$ 7.842 <small class="tl">32,4%</small></td><td>R$ 8.714 <small class="tl">36,0%</small></td><td>R$ 9.378 <small class="tl">38,7%</small></td><td>R$ 10.655 <small class="tm">44,0%</small></td></tr>
+        <tr><td>R$ 15.000</td><td>R$ 9.116 <small class="tl">25,1%</small></td><td>R$ 9.026 <small class="tl">24,9%</small></td><td>R$ 10.335 <small class="tl">28,4%</small></td><td>R$ 11.331 <small class="tl">31,2%</small></td><td>R$ 13.245 <small class="tl">36,5%</small></td></tr>
+        <tr><td>R$ 20.000</td><td>R$ 10.330 <small class="tl">21,3%</small></td><td>R$ 10.210 <small class="tl">21,1%</small></td><td>R$ 11.955 <small class="tl">24,7%</small></td><td>R$ 13.283 <small class="tl">27,4%</small></td><td>R$ 15.836 <small class="tl">32,7%</small></td></tr>
+        <tr><td>R$ 25.000</td><td>R$ 11.544 <small class="tl">19,1%</small></td><td>R$ 11.395 <small class="tl">18,8%</small></td><td>R$ 13.575 <small class="tl">22,4%</small></td><td>R$ 15.236 <small class="tl">25,2%</small></td><td>R$ 18.426 <small class="tl">30,4%</small></td></tr>
+      </tbody></table>
+    </div>
+
+    <h3 class="subblock-head">Alíquota 7% — contrib. total R$ 1.400/mês (R$ 700 + R$ 700, matching 1:1)</h3>
+    <div class="kpi-grid">
+      <div class="kpi-card copper"><div class="kpi-label">Contrib. empregado</div><div class="kpi-value">R$ 700</div><div class="kpi-sub">empresa aporta R$ 700/mês</div></div>
+      <div class="kpi-card copper"><div class="kpi-label">Contrib. total / mês</div><div class="kpi-value">R$ 1.400</div><div class="kpi-sub">salário base R$ 10.000</div></div>
+      <div class="kpi-card gold"><div class="kpi-label">Rent. alvo (TBR 60%)</div><div class="kpi-value">4,82%</div><div class="kpi-sub">a.a. para 60% de reposição</div></div>
+      <div class="kpi-card teal"><div class="kpi-label">TBR moderado</div><div class="kpi-value">69,5%</div><div class="kpi-sub">benefício R$ 16.816/mês</div></div>
+      <div class="kpi-card navy"><div class="kpi-label">Saldo moderado (30a)</div><div class="kpi-value">R$ 1,84 mi</div><div class="kpi-sub">5,68% a.a.</div></div>
+    </div>
+    <div class="grid2">
+      <div class="chart-card"><div class="chart-card-title">Evolução do saldo — 7%</div><div class="chart-card-sub">R$ 1.400/mês total · 30 anos · R$ mil</div><div class="chart-wrap" style="height:240px"><canvas id="evol_patr_7"></canvas></div></div>
+      <div class="table-wrap"><div class="tbl-cap">7% — cenários</div>
+        <table class="pbi"><thead><tr><th>Cenário</th><th>Saldo final</th><th>Benef./mês</th><th>TBR</th></tr></thead><tbody>
+          <tr><td>Ciclo de Vida</td><td>R$ 1,67 mi</td><td>R$ 13.972</td><td class="tm">57,7%</td></tr>
+          <tr><td>Super Conserv. 3,83%</td><td>R$ 1,38 mi</td><td>R$ 12.457</td><td class="tm">51,4%</td></tr>
+          <tr><td>Conserv. 4,48%</td><td>R$ 1,52 mi</td><td>R$ 13.763</td><td class="tm">56,8%</td></tr>
+          <tr><td>Moderado 5,68%</td><td>R$ 1,84 mi</td><td>R$ 16.816</td><td class="tg">69,5%</td></tr>
+          <tr><td>Agressivo 6,40%</td><td>R$ 2,06 mi</td><td>R$ 19.141</td><td class="tg">79,0%</td></tr>
+          <tr><td>Super Agress. 7,50%</td><td>R$ 2,48 mi</td><td>R$ 23.607</td><td class="tg">97,5%</td></tr>
+          <tr class="tot"><td>Target</td><td>R$ 1,60 mi</td><td>R$ 14.528</td><td>60,0%</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div class="table-wrap" style="margin-top:12px"><div class="tbl-cap">7% — faixa salarial (benef./mês + TBR)</div>
+      <table class="pbi"><thead><tr><th>Salário</th><th>Ciclo Vida</th><th>4,48%</th><th>5,68%</th><th>6,40%</th><th>7,50%</th></tr></thead><tbody>
+        <tr><td>R$ 5.000</td><td>R$ 9.723 <small class="tg">80,3%</small></td><td>R$ 9.618 <small class="tg">79,5%</small></td><td>R$ 11.145 <small class="tg">92,1%</small></td><td>R$ 12.307 <small class="tg">101,7%</small></td><td>R$ 14.540 <small class="tg">120,1%</small></td></tr>
+        <tr><td>R$ 10.000</td><td>R$ 13.972 <small class="tm">57,7%</small></td><td>R$ 13.763 <small class="tm">56,8%</small></td><td>R$ 16.816 <small class="tg">69,5%</small></td><td>R$ 19.141 <small class="tg">79,0%</small></td><td>R$ 23.607 <small class="tg">97,5%</small></td></tr>
+        <tr><td>R$ 15.000</td><td>R$ 18.220 <small class="tm">50,2%</small></td><td>R$ 17.908 <small class="tm">49,3%</small></td><td>R$ 22.487 <small class="tg">61,9%</small></td><td>R$ 25.974 <small class="tg">71,5%</small></td><td>R$ 32.674 <small class="tg">90,0%</small></td></tr>
+        <tr><td>R$ 20.000</td><td>R$ 22.469 <small class="tm">46,4%</small></td><td>R$ 22.053 <small class="tm">45,5%</small></td><td>R$ 28.158 <small class="tm">58,1%</small></td><td>R$ 32.808 <small class="tg">67,8%</small></td><td>R$ 41.741 <small class="tg">86,2%</small></td></tr>
+        <tr><td>R$ 25.000</td><td>R$ 26.718 <small class="tm">44,1%</small></td><td>R$ 26.197 <small class="tm">43,3%</small></td><td>R$ 33.830 <small class="tm">55,9%</small></td><td>R$ 39.641 <small class="tg">65,5%</small></td><td>R$ 50.808 <small class="tg">83,9%</small></td></tr>
+      </tbody></table>
+    </div>
+
+    <h3 class="subblock-head">Alíquota 8,5% — contrib. total R$ 1.700/mês (R$ 850 + R$ 850, matching 1:1)</h3>
+    <div class="kpi-grid">
+      <div class="kpi-card copper"><div class="kpi-label">Contrib. empregado</div><div class="kpi-value">R$ 850</div><div class="kpi-sub">empresa aporta R$ 850/mês</div></div>
+      <div class="kpi-card copper"><div class="kpi-label">Contrib. total / mês</div><div class="kpi-value">R$ 1.700</div><div class="kpi-sub">salário base R$ 10.000</div></div>
+      <div class="kpi-card gold"><div class="kpi-label">Rent. alvo (TBR 60%)</div><div class="kpi-value">4,08%</div><div class="kpi-sub">a.a. para 60% de reposição</div></div>
+      <div class="kpi-card teal"><div class="kpi-label">TBR moderado</div><div class="kpi-value">79,5%</div><div class="kpi-sub">benefício R$ 19.246/mês</div></div>
+      <div class="kpi-card navy"><div class="kpi-label">Saldo moderado (30a)</div><div class="kpi-value">R$ 2,23 mi</div><div class="kpi-sub">5,68% a.a.</div></div>
+    </div>
+    <div class="grid2">
+      <div class="chart-card"><div class="chart-card-title">Evolução do saldo — 8,5%</div><div class="chart-card-sub">R$ 1.700/mês total · 30 anos · R$ mil</div><div class="chart-wrap" style="height:240px"><canvas id="evol_patr_8"></canvas></div></div>
+      <div class="table-wrap"><div class="tbl-cap">8,5% — cenários</div>
+        <table class="pbi"><thead><tr><th>Cenário</th><th>Saldo final</th><th>Benef./mês</th><th>TBR</th></tr></thead><tbody>
+          <tr><td>Ciclo de Vida</td><td>R$ 2,03 mi</td><td>R$ 15.792</td><td class="tg">65,2%</td></tr>
+          <tr><td>Super Conserv. 3,83%</td><td>R$ 1,67 mi</td><td>R$ 13.953</td><td class="tm">57,6%</td></tr>
+          <tr><td>Conserv. 4,48%</td><td>R$ 1,85 mi</td><td>R$ 15.539</td><td class="tg">64,2%</td></tr>
+          <tr><td>Moderado 5,68%</td><td>R$ 2,23 mi</td><td>R$ 19.246</td><td class="tg">79,5%</td></tr>
+          <tr><td>Agressivo 6,40%</td><td>R$ 2,51 mi</td><td>R$ 22.069</td><td class="tg">91,1%</td></tr>
+          <tr><td>Super Agress. 7,50%</td><td>R$ 3,01 mi</td><td>R$ 27.493</td><td class="tg">113,5%</td></tr>
+          <tr class="tot"><td>Target</td><td>R$ 1,74 mi</td><td>R$ 14.528</td><td>60,0%</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div class="table-wrap" style="margin-top:12px"><div class="tbl-cap">8,5% — faixa salarial (benef./mês + TBR)</div>
+      <table class="pbi"><thead><tr><th>Salário</th><th>Ciclo Vida</th><th>4,48%</th><th>5,68%</th><th>6,40%</th><th>7,50%</th></tr></thead><tbody>
+        <tr><td>R$ 5.000</td><td>R$ 10.633 <small class="tg">87,8%</small></td><td>R$ 10.507 <small class="tg">86,8%</small></td><td>R$ 12.360 <small class="tg">102,1%</small></td><td>R$ 13.771 <small class="tg">113,8%</small></td><td>R$ 16.483 <small class="tg">136,2%</small></td></tr>
+        <tr><td>R$ 10.000</td><td>R$ 15.792 <small class="tg">65,2%</small></td><td>R$ 15.539 <small class="tg">64,2%</small></td><td>R$ 19.246 <small class="tg">79,5%</small></td><td>R$ 22.069 <small class="tg">91,1%</small></td><td>R$ 27.493 <small class="tg">113,5%</small></td></tr>
+        <tr><td>R$ 15.000</td><td>R$ 20.952 <small class="tm">57,7%</small></td><td>R$ 20.572 <small class="tm">56,6%</small></td><td>R$ 26.133 <small class="tg">72,0%</small></td><td>R$ 30.367 <small class="tg">83,6%</small></td><td>R$ 38.503 <small class="tg">106,0%</small></td></tr>
+        <tr><td>R$ 20.000</td><td>R$ 26.111 <small class="tm">53,9%</small></td><td>R$ 25.605 <small class="tm">52,9%</small></td><td>R$ 33.019 <small class="tg">68,2%</small></td><td>R$ 38.665 <small class="tg">79,8%</small></td><td>R$ 49.513 <small class="tg">102,2%</small></td></tr>
+        <tr><td>R$ 25.000</td><td>R$ 31.271 <small class="tm">51,7%</small></td><td>R$ 30.638 <small class="tm">50,6%</small></td><td>R$ 39.906 <small class="tg">65,9%</small></td><td>R$ 46.963 <small class="tg">77,6%</small></td><td>R$ 60.522 <small class="tg">100,0%</small></td></tr>
+      </tbody></table>
+    </div>
+
+    <h3 class="subblock-head">Alíquota 15% — contrib. total R$ 3.000/mês (R$ 1.500 + R$ 1.500, matching 1:1)</h3>
+    <div class="kpi-grid">
+      <div class="kpi-card copper"><div class="kpi-label">Contrib. empregado</div><div class="kpi-value">R$ 1.500</div><div class="kpi-sub">empresa aporta R$ 1.500/mês</div></div>
+      <div class="kpi-card copper"><div class="kpi-label">Contrib. total / mês</div><div class="kpi-value">R$ 3.000</div><div class="kpi-sub">salário base R$ 10.000</div></div>
+      <div class="kpi-card gold"><div class="kpi-label">Rent. alvo (TBR 60%)</div><div class="kpi-value">1,96%</div><div class="kpi-sub">a.a. para 60% de reposição</div></div>
+      <div class="kpi-card teal"><div class="kpi-label">TBR moderado</div><div class="kpi-value">123,0%</div><div class="kpi-sub">benefício R$ 29.779/mês</div></div>
+      <div class="kpi-card navy"><div class="kpi-label">Saldo moderado (30a)</div><div class="kpi-value">R$ 3,94 mi</div><div class="kpi-sub">5,68% a.a.</div></div>
+    </div>
+    <div class="grid2">
+      <div class="chart-card"><div class="chart-card-title">Evolução do saldo — 15%</div><div class="chart-card-sub">R$ 3.000/mês total · 30 anos · R$ mil</div><div class="chart-wrap" style="height:240px"><canvas id="evol_patr_15"></canvas></div></div>
+      <div class="table-wrap"><div class="tbl-cap">15% — cenários</div>
+        <table class="pbi"><thead><tr><th>Cenário</th><th>Saldo final</th><th>Benef./mês</th><th>TBR</th></tr></thead><tbody>
+          <tr><td>Ciclo de Vida</td><td>R$ 3,58 mi</td><td>R$ 23.683</td><td class="tg">97,8%</td></tr>
+          <tr><td>Super Conserv. 3,83%</td><td>R$ 2,96 mi</td><td>R$ 20.437</td><td class="tg">84,4%</td></tr>
+          <tr><td>Conserv. 4,48%</td><td>R$ 3,26 mi</td><td>R$ 23.237</td><td class="tg">96,0%</td></tr>
+          <tr><td>Moderado 5,68%</td><td>R$ 3,94 mi</td><td>R$ 29.779</td><td class="tg">123,0%</td></tr>
+          <tr><td>Agressivo 6,40%</td><td>R$ 4,42 mi</td><td>R$ 34.760</td><td class="tg">143,6%</td></tr>
+          <tr><td>Super Agress. 7,50%</td><td>R$ 5,30 mi</td><td>R$ 44.331</td><td class="tg">183,1%</td></tr>
+          <tr class="tot"><td>Target</td><td>R$ 2,25 mi</td><td>R$ 14.528</td><td>60,0%</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div class="table-wrap" style="margin-top:12px"><div class="tbl-cap">15% — faixa salarial (benef./mês + TBR)</div>
+      <table class="pbi"><thead><tr><th>Salário</th><th>Ciclo Vida</th><th>4,48%</th><th>5,68%</th><th>6,40%</th><th>7,50%</th></tr></thead><tbody>
+        <tr><td>R$ 5.000</td><td>R$ 14.578 <small class="tg">120,4%</small></td><td>R$ 14.355 <small class="tg">118,6%</small></td><td>R$ 17.626 <small class="tg">145,6%</small></td><td>R$ 20.117 <small class="tg">166,2%</small></td><td>R$ 24.903 <small class="tg">205,7%</small></td></tr>
+        <tr><td>R$ 10.000</td><td>R$ 23.683 <small class="tg">97,8%</small></td><td>R$ 23.237 <small class="tg">96,0%</small></td><td>R$ 29.779 <small class="tg">123,0%</small></td><td>R$ 34.760 <small class="tg">143,6%</small></td><td>R$ 44.331 <small class="tg">183,1%</small></td></tr>
+        <tr><td>R$ 15.000</td><td>R$ 32.788 <small class="tg">90,3%</small></td><td>R$ 32.119 <small class="tg">88,4%</small></td><td>R$ 41.931 <small class="tg">115,5%</small></td><td>R$ 49.404 <small class="tg">136,0%</small></td><td>R$ 63.760 <small class="tg">175,6%</small></td></tr>
+        <tr><td>R$ 20.000</td><td>R$ 41.893 <small class="tg">86,5%</small></td><td>R$ 41.000 <small class="tg">84,7%</small></td><td>R$ 54.084 <small class="tg">111,7%</small></td><td>R$ 64.047 <small class="tg">132,3%</small></td><td>R$ 83.189 <small class="tg">171,8%</small></td></tr>
+        <tr><td>R$ 25.000</td><td>R$ 50.998 <small class="tg">84,2%</small></td><td>R$ 49.882 <small class="tg">82,4%</small></td><td>R$ 66.236 <small class="tg">109,4%</small></td><td>R$ 78.690 <small class="tg">130,0%</small></td><td>R$ 102.618 <small class="tg">169,5%</small></td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="insights" style="margin-top:18px">
+      <div class="insight rust"><div class="insight-title">Alíquota 2% — pressão sobre a rentabilidade</div><div class="insight-text">Requer 9,70% a.a. para atingir TBR 60% — acima de qualquer retorno esperado de renda fixa conservadora. No cenário moderado (5,68%), a TBR cai para 36% — insuficiente. Esses participantes precisam de aporte adicional ou ajuste da meta.</div></div>
+      <div class="insight copper"><div class="insight-title">Alíquota 7% — perfil equilibrado</div><div class="insight-text">Rentabilidade alvo de 4,82% é factível em cenários moderado a agressivo. TBR moderado = 69,5%, acima da meta de 60%. Ponto de entrada razoável para equilíbrio entre esforço e benefício.</div></div>
+      <div class="insight teal"><div class="insight-title">Alíquota 15% — folga significativa</div><div class="insight-text">Rentabilidade alvo de apenas 1,96% para TBR 60%. No moderado, a TBR atinge 123% — o benefício supera o próprio salário. Adequado para alta capacidade contributiva ou aposentadoria antecipada.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ===== PECÚLIO ===== -->
+  <section>
+    <div class="grp-eyebrow">Simulação · Viva de Previdência e Pecúlio</div>
+    <h2 class="grp-title">Viva de Previdência e Pecúlio — sem simulação de participante típico</h2>
+    <p class="grp-lead">O Pecúlio opera com benefício de pecúlio (prestação única ou pensão) — estrutura distinta dos demais planos de renda complementar. A simulação de acumulação progressiva com TBR não se aplica. A análise relevante é o fluxo de benefícios em pagamento e o saldo da massa assistida.</p>
+    <div class="insights">
+      <div class="insight navy"><div class="insight-title">7.177 aguardando pensão</div><div class="insight-text">Beneficiários de Pecúlio por Morte/Resgate Herdeiros (6.917) + assistidos com saldo remanescente (260), conforme a Fundação. Saldo médio R$ 59.851 (todos); R$ 81.991 entre os 5.239 com saldo &gt; 0. Fluxo de saída estimado em ~R$ 2,5 mi/mês — maior pressão de caixa da Fundação.</div></div>
+      <div class="insight rust"><div class="insight-title">161 em benefício</div><div class="insight-text">Assistidos em gozo de benefício de prestação contínua. Benefício médio R$ 885/mês (160 dos 161 com valor &gt; 0). Saldo remanescente pequeno — a maior parte já foi convertida em renda.</div></div>
+      <div class="insight copper"><div class="insight-title">22.995 ativos</div><div class="insight-text">Contribuição média R$ 115/mês · salário médio R$ 2.679 · saldo médio R$ 90.816. Idade média 75,8 anos (só ativos) / 77,4 anos (toda a população) — base em maturação avançada.</div></div>
+    </div>
+    <div class="note" style="border-left-color:var(--raya-copper)"><strong>Por que não há simulação de target.</strong> O Pecúlio não acumula saldo individual projetável como os planos de renda: o benefício é de pecúlio (parcela única) e a massa é majoritariamente assistida/idosa. Os valores de fluxo e saldo desse plano estão detalhados nos módulos Visão Geral e Movimentação.</div>
+  </section>
+</main>
+
+<footer class="footer"><div class="footer-inner">
+  <div class="footer-brand">Raya Advisory · Fundação Viva de Previdência · Simulador de Target de Benefícios</div>
+  <div class="footer-disc">Material informativo, com simulações ilustrativas (participante típico, premissas indicadas). Não constitui recomendação de investimento nem promessa de rentabilidade. Documento em validação.</div>
+</div></footer>
+
+<script>
+const root=document.documentElement,tBtn=document.getElementById('theme-toggle'),tIc=document.getElementById('theme-icon'),tLb=document.getElementById('theme-label');
+function ac(){return root.getAttribute('data-theme')==='dark'?'#B8BDB9':'#364F53';}
+function gc(){return root.getAttribute('data-theme')==='dark'?'rgba(255,255,255,.08)':'rgba(0,0,0,.06)';}
+const LAB=Array.from({length:30},(_,i)=>i+1);
+const EVOL={
+ evol_inst:[[8.7,17.9,27.8,38.3,49.5,61.5,74.2,87.7,102.0,117.2,133.3,150.4,168.6,187.7,208.0,229.5,252.2,276.2,301.5,328.2,356.4,386.2,417.6,450.7,485.5,522.3,561.0,601.7,644.6,689.7],[8.7,18.2,28.5,39.7,51.8,64.8,78.9,94.2,110.6,128.3,147.3,167.7,189.7,213.3,238.6,265.8,294.9,326.1,359.5,395.2,433.4,474.3,518.0,564.6,614.5,667.7,724.4,785.0,849.5,918.4],[8.8,18.5,29.3,41.1,54.0,68.3,83.9,101.0,119.8,140.2,162.6,186.9,213.5,242.4,273.9,308.2,345.4,385.8,429.7,477.3,529.0,585.0,645.7,711.5,782.7,859.8,943.2,1033.5,1131.1,1236.6],[8.8,18.5,29.3,41.1,54.1,68.3,83.9,101.1,119.8,140.3,162.6,187.0,213.6,242.5,274.0,308.3,345.5,386.0,429.9,477.6,529.3,585.4,646.2,712.0,783.3,860.5,944.0,1034.4,1132.1,1237.7]],
+ evol_patr_2:[[5.0,10.2,15.9,21.9,28.3,35.1,42.4,50.1,58.3,67.0,76.2,86.0,96.3,107.3,118.9,131.1,144.1,157.8,172.3,187.6,203.7,220.7,238.6,257.5,277.5,298.4,320.6,343.8,368.3,394.1],[5.0,10.4,16.3,22.7,29.6,37.0,45.1,53.8,63.2,73.3,84.2,95.8,108.4,121.9,136.4,151.9,168.5,186.3,205.4,225.8,247.7,271.0,296.0,322.7,351.1,381.5,413.9,448.5,485.4,524.8],[5.1,10.8,17.2,24.5,32.5,41.6,51.7,62.9,75.5,89.4,104.9,122.1,141.2,162.3,185.7,211.6,240.3,272.0,307.0,345.7,388.4,435.5,487.4,544.7,607.8,677.4,754.0,838.4,931.3,1033.5],[5.0,10.6,16.7,23.5,30.9,39.0,48.0,57.8,68.5,80.2,92.9,106.9,122.0,138.6,156.6,176.2,197.4,220.6,245.7,272.9,302.5,334.5,369.2,406.9,447.6,491.7,539.4,591.1,646.9,707.3]],
+ evol_patr_7:[[17.3,35.8,55.6,76.6,99.1,123.0,148.4,175.3,204.0,234.4,266.7,300.9,337.1,375.5,416.1,459.0,504.4,552.3,603.0,656.4,712.9,772.4,835.2,901.4,971.1,1044.6,1121.9,1203.4,1289.1,1379.3],[17.5,36.4,57.0,79.4,103.5,129.7,157.9,188.3,221.2,256.5,294.6,335.5,379.4,426.6,477.3,531.6,589.8,652.2,719.0,790.4,866.9,948.6,1036.0,1129.3,1228.9,1335.3,1448.8,1569.9,1699.0,1836.7],[17.4,36.2,56.4,78.1,101.4,126.5,153.4,182.1,213.0,245.9,281.2,318.8,358.9,401.8,447.5,496.1,547.9,603.1,661.7,724.1,790.4,860.9,935.7,1015.1,1099.3,1188.7,1283.5,1384.0,1490.4,1603.2],[17.6,37.1,58.5,82.1,108.1,136.6,167.9,202.1,239.6,280.5,325.2,374.0,427.2,485.0,548.0,616.6,691.1,772.0,859.9,955.2,1058.7,1170.8,1292.4,1424.0,1566.6,1721.0,1888.0,2068.7,2264.2,2475.4]],
+ evol_patr_8:[[21.0,43.5,67.5,93.1,120.3,149.3,180.1,212.9,247.7,284.7,323.8,365.4,409.4,455.9,505.2,557.3,612.4,670.7,732.2,797.1,865.6,937.9,1014.1,1094.5,1179.2,1268.4,1362.4,1461.3,1565.4,1674.9],[21.2,44.3,69.3,96.4,125.7,157.5,191.7,228.7,268.6,311.5,357.7,407.4,460.7,518.0,579.6,645.5,716.2,792.0,873.0,959.8,1052.6,1151.9,1258.0,1371.3,1492.3,1621.4,1759.3,1906.3,2063.1,2230.3],[21.1,43.6,67.7,93.5,121.0,150.4,181.7,215.0,250.4,288.1,328.2,370.7,415.8,463.7,514.5,568.3,625.3,685.6,749.4,816.9,888.2,963.6,1043.3,1127.4,1216.2,1309.8,1408.7,1512.9,1622.8,1738.6],[21.4,45.0,71.1,99.7,131.3,165.9,203.9,245.5,290.9,340.7,394.9,454.1,518.7,589.0,665.5,748.7,839.2,937.4,1044.1,1159.9,1285.5,1421.7,1569.3,1729.2,1902.3,2089.8,2292.6,2512.0,2749.3,3005.9]],
+ evol_patr_15:[[37.1,76.8,119.1,164.2,212.3,263.5,317.9,375.7,437.2,502.3,571.5,644.8,722.4,804.6,891.5,983.5,1080.8,1183.5,1292.1,1406.6,1527.6,1655.1,1789.7,1931.5,2080.9,2238.4,2404.1,2578.7,2762.4,2955.7],[37.4,78.1,122.2,170.1,221.9,277.9,338.3,403.6,473.9,549.7,631.2,718.9,813.1,914.2,1022.7,1139.1,1263.9,1397.6,1540.7,1693.8,1857.6,2032.7,2219.9,2419.9,2633.4,2861.4,3104.6,3364.1,3640.8,3935.8],[36.8,75.5,116.0,158.5,203.0,249.7,298.5,349.7,403.1,459.1,517.5,578.6,642.4,709.1,778.7,851.3,927.0,1006.0,1088.4,1174.2,1263.7,1356.9,1454.0,1555.1,1660.4,1770.0,1884.0,2002.7,2126.1,2254.5],[37.7,79.4,125.4,176.0,231.7,292.8,359.8,433.2,513.4,601.2,696.9,801.4,915.3,1039.4,1174.4,1321.2,1480.9,1654.3,1842.6,2046.9,2268.6,2508.9,2769.3,3051.5,3357.0,3687.8,4045.7,4433.0,4851.8,5304.5]]
+};
+const SER=[{n:'Super Conservador 3,83%',c:'#6B7B7E',w:1,d:[4,4]},{n:'Moderado 5,68%',c:'#1D9492',w:2.4,d:[]},{n:'Target 60%',c:'#B59875',w:2,d:[6,3]},{n:'Super Agressivo 7,50%',c:'#993715',w:1.2,d:[2,2]}];
+const CHARTS={};
+function draw(id){const el=document.getElementById(id);if(!el)return;if(CHARTS[id])CHARTS[id].destroy();
+  CHARTS[id]=new Chart(el,{type:'line',data:{labels:LAB,datasets:EVOL[id].map((arr,i)=>({label:SER[i].n,data:arr,borderColor:SER[i].c,borderWidth:SER[i].w,borderDash:SER[i].d,pointRadius:0,fill:false,tension:.15}))},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:true,labels:{color:ac(),font:{family:'DM Sans',size:11},boxWidth:18}},tooltip:{callbacks:{label:c=>c.dataset.label+': R$ '+c.parsed.y.toFixed(0)+' mil'}}},
+      scales:{x:{ticks:{color:ac(),font:{size:10}},grid:{display:false},title:{display:true,text:'Ano de acumulação',color:ac(),font:{size:10}}},
+              y:{ticks:{color:ac(),callback:v=>'R$ '+v+'k'},grid:{color:gc()},title:{display:true,text:'Saldo (R$ mil)',color:ac(),font:{size:10}}}}}});}
+function drawAll(){Object.keys(EVOL).forEach(draw);}
+
+function applyTheme(t){root.setAttribute('data-theme',t);if(t==='dark'){tIc.textContent='☀';tLb.textContent='Claro';}else{tIc.textContent='☾';tLb.textContent='Escuro';}try{localStorage.setItem('raya-theme',t);}catch(e){}drawAll();}
+tBtn.addEventListener('click',()=>applyTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+try{const s=localStorage.getItem('raya-theme');if(s)root.setAttribute('data-theme',s);}catch(e){}
+const ZMIN=.8,ZMAX=2,ZS=.1,ZD=1;let zB=ZD;const zv=document.getElementById('zoom-val'),zi=document.getElementById('zoom-in'),zo=document.getElementById('zoom-out');
+function aZoom(z,save=true){z=Math.round(z*10)/10;z=Math.max(ZMIN,Math.min(ZMAX,z));document.body.style.zoom=z;zv.textContent=Math.round(z*100)+'%';if(save){try{localStorage.setItem('raya-zoom',z);}catch(e){}}return z;}
+function gZoom(){const v=parseFloat(document.body.style.zoom||ZD);return isNaN(v)?ZD:v;}
+zi.onclick=()=>aZoom(gZoom()+ZS);zo.onclick=()=>aZoom(gZoom()-ZS);zv.onclick=()=>aZoom(ZD);
+try{const sz=parseFloat(localStorage.getItem('raya-zoom'));aZoom(isNaN(sz)?ZD:sz,false);}catch(e){aZoom(ZD,false);}
+const PZ=1.4,pBtn=document.getElementById('present-toggle');
+pBtn.onclick=()=>{const c=root.getAttribute('data-presentation');if(c==='on'){root.removeAttribute('data-presentation');pBtn.textContent='▣ Apresentação';aZoom(zB||ZD);if(document.fullscreenElement)document.exitFullscreen();}else{zB=gZoom();root.setAttribute('data-presentation','on');pBtn.textContent='▣ Sair Apres.';aZoom(PZ,false);if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});}};
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&root.getAttribute('data-presentation')==='on'){root.removeAttribute('data-presentation');pBtn.textContent='▣ Apresentação';aZoom(zB||ZD);}});
+drawAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raya Advisory — Fundação Viva de Previdência · v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --raya-dark:#122028; --raya-navy:#20353A; --raya-slate:#364F53;
+  --raya-teal:#1D9492; --raya-teal-light:#07C0BD; --raya-copper:#BE620F;
+  --raya-copper-mid:#B0742A; --raya-rust:#993715; --raya-deep-rust:#651F0B;
+  --raya-gold:#B59875; --raya-cream:#F0EEE6; --raya-petrol:#134E58;
+  --font-display:'Cormorant Garamond',Georgia,serif; --font-body:'DM Sans',system-ui,sans-serif;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.18); --shadow-md:0 4px 16px rgba(0,0,0,.22);
+  --radius-sm:6px; --radius-md:10px; --radius-lg:14px;
+  --fs-base:16px; --fs-sm:14px; --fs-xs:12px; --fs-eyebrow:12px; --fs-kpi-value:34px; --fs-title:40px; --scale:1;
+}
+:root[data-theme="dark"]{--bg:var(--raya-dark);--bg-elev:var(--raya-navy);--bg-card:#1A2C32;--bg-card-2:#243A40;--text:var(--raya-cream);--text-2:#B8BDB9;--text-3:#8A938F;--border:rgba(29,148,146,.22);--border-soft:rgba(255,255,255,.06);}
+:root[data-theme="light"]{--bg:#FAF8F2;--bg-elev:#F1EEE6;--bg-card:#FFFFFF;--bg-card-2:#FFFFFF;--text:#122028;--text-2:#364F53;--text-3:#6B7B7E;--border:rgba(18,32,40,.12);--border-soft:rgba(18,32,40,.06);}
+:root[data-presentation="on"]{--scale:1.18;--fs-base:19px;--fs-sm:17px;--fs-xs:14px;--fs-eyebrow:14px;--fs-kpi-value:44px;--fs-title:52px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:var(--fs-base);line-height:1.65;-webkit-font-smoothing:antialiased;zoom:var(--zoom,1);}
+.header{background:var(--raya-petrol);border-bottom:1px solid rgba(255,255,255,.12);position:sticky;top:0;z-index:100;box-shadow:var(--shadow-md);}
+.header-inner{max-width:1400px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.header-logo svg{height:44px;width:auto;display:block;}
+.header-meta{text-align:right;}
+.header-title{font-family:var(--font-display);font-size:calc(20px*var(--scale));color:#fff;font-weight:500;letter-spacing:.02em;}
+.header-date{font-size:var(--fs-xs);color:var(--raya-teal-light);letter-spacing:.2em;text-transform:uppercase;margin-top:2px;}
+.header-controls{display:flex;gap:8px;}
+.ctrl-btn{background:transparent;border:1px solid rgba(255,255,255,.28);color:rgba(255,255,255,.88);padding:8px 14px;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:var(--fs-xs);font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.ctrl-btn:hover{border-color:#fff;color:#fff;background:rgba(255,255,255,.10);}
+.ctrl-btn.active{background:var(--raya-teal);border-color:var(--raya-teal);color:#fff;}
+.zoom-group{display:flex;align-items:center;border:1px solid rgba(255,255,255,.28);border-radius:var(--radius-sm);overflow:hidden;}
+.zoom-btn{background:transparent;border:none;color:rgba(255,255,255,.88);width:34px;height:34px;font-size:16px;font-weight:600;cursor:pointer;}
+.zoom-btn:hover{background:rgba(255,255,255,.15);color:#fff;}
+.zoom-indicator{font-size:12px;font-weight:600;color:rgba(255,255,255,.88);min-width:48px;text-align:center;cursor:pointer;padding:0 4px;}
+.nav{background:var(--bg-elev);border-bottom:1px solid var(--border);position:sticky;top:73px;z-index:90;}
+.nav-inner{max-width:1400px;margin:0 auto;padding:0 32px;display:flex;gap:0;overflow-x:auto;}
+.nav-btn{background:none;border:none;color:var(--text-3);font-family:var(--font-body);font-size:var(--fs-xs);font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:16px 22px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
+.nav-btn:hover{color:var(--text);}
+.nav-btn.active{color:var(--raya-petrol);border-bottom-color:var(--raya-petrol);}
+.main{max-width:1400px;margin:0 auto;padding:32px;}
+.section{display:none;} .section.active{display:block;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+.eyebrow{font-size:var(--fs-eyebrow);font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--raya-teal);margin-bottom:8px;}
+.sec-title{font-family:var(--font-display);font-size:var(--fs-title);font-weight:500;color:var(--text);line-height:1.1;margin-bottom:8px;}
+.sec-title.sm{font-size:calc(30px*var(--scale));}
+.src-note{font-size:var(--fs-xs);color:var(--text-3);font-style:italic;margin-bottom:22px;line-height:1.6;}
+.divider{height:1px;background:linear-gradient(to right,var(--raya-gold),transparent);margin:30px 0;opacity:.4;}
+.subhead{font-family:var(--font-display);font-size:calc(24px*var(--scale));font-weight:500;color:var(--text);margin:30px 0 14px;}
+/* KPI sólidos */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:14px;}
+.kpi-card{background:var(--raya-teal);color:#fff;border-radius:var(--radius-md);padding:20px 22px 18px;box-shadow:var(--shadow-sm);transition:transform .2s;}
+.kpi-card:hover{transform:translateY(-2px);}
+.kpi-card.teal{background:var(--raya-teal);}.kpi-card.rust{background:var(--raya-rust);}.kpi-card.copper{background:var(--raya-copper);}
+.kpi-card.navy{background:var(--raya-dark);}.kpi-card.slate{background:var(--raya-slate);}.kpi-card.deep{background:var(--raya-deep-rust);}.kpi-card.gold{background:var(--raya-copper-mid);}
+.kpi-label{font-size:var(--fs-xs);font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.82);margin-bottom:12px;}
+.kpi-value{font-family:var(--font-display);font-size:var(--fs-kpi-value);font-weight:500;color:#fff;line-height:1;font-variant-numeric:tabular-nums;}
+.kpi-sub{font-size:var(--fs-xs);color:rgba(255,255,255,.78);margin-top:10px;line-height:1.5;}
+/* nota */
+.note{background:var(--bg-card);border:1px solid var(--border);border-left:5px solid var(--raya-teal);border-radius:var(--radius-md);padding:14px 18px;margin:16px 0;font-size:var(--fs-sm);color:var(--text-2);line-height:1.65;}
+.note strong{color:var(--text);}
+/* composição */
+.compo-head{font-size:var(--fs-xs);font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3);margin:20px 0 8px;}
+.compo-bar{display:flex;height:48px;border-radius:var(--radius-sm);overflow:hidden;box-shadow:var(--shadow-sm);}
+.compo-bar>span{display:flex;align-items:center;padding:0 14px;color:#fff;font-size:var(--fs-xs);font-weight:600;white-space:nowrap;overflow:hidden;}
+.compo-legend{font-size:var(--fs-xs);color:var(--text-3);margin-top:8px;}
+/* grupos */
+.group-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:8px;}
+.group-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:transform .2s;}
+.group-card:hover{transform:translateY(-2px);}
+.gc-head{padding:18px 20px;background:var(--raya-teal);color:#fff;}
+.group-card.copper .gc-head{background:var(--raya-copper);} .group-card.navy .gc-head{background:var(--raya-dark);}
+.gc-name{font-family:var(--font-display);font-size:calc(23px*var(--scale));color:#fff;font-weight:600;line-height:1.15;}
+.gc-tag{font-size:var(--fs-xs);color:rgba(255,255,255,.82);margin-top:6px;line-height:1.5;}
+.gc-body{padding:8px 20px 16px;}
+.gc-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-soft);}
+.gc-row:last-child{border-bottom:none;}
+.gc-k{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.12em;color:var(--text-3);}
+.gc-v{font-family:var(--font-display);font-size:calc(21px*var(--scale));color:var(--text);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;}
+.gc-v small{display:block;font-family:var(--font-body);font-size:var(--fs-xs);color:var(--text-3);margin-top:2px;}
+/* filtro por plano (submenu) */
+.filter-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:4px 0 22px;}
+.filter-label{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.14em;color:var(--text-3);font-weight:600;margin-right:6px;}
+.filter-btn{background:var(--bg-card);border:1px solid var(--border);color:var(--text-2);padding:7px 14px;border-radius:999px;font-family:var(--font-body);font-size:var(--fs-xs);font-weight:600;cursor:pointer;transition:all .18s;}
+.filter-btn:hover{border-color:var(--raya-teal);color:var(--raya-teal);}
+.filter-btn.active{background:var(--raya-petrol);border-color:var(--raya-petrol);color:#fff;}
+/* chart */
+.chart-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 22px;box-shadow:var(--shadow-sm);margin-top:8px;}
+.chart-card-title{font-family:var(--font-display);font-size:calc(20px*var(--scale));color:var(--text);font-weight:500;margin-bottom:14px;}
+.chart-wrap{position:relative;height:360px;}
+/* tabela dinâmica */
+.table-wrap{background:var(--bg-card-2);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);margin-bottom:10px;}
+.pbi{width:100%;border-collapse:collapse;font-size:var(--fs-sm);}
+.pbi thead th{background:var(--raya-petrol);color:#fff;padding:13px 16px;font-size:var(--fs-xs);font-weight:600;letter-spacing:.10em;text-transform:uppercase;text-align:right;white-space:nowrap;}
+.pbi thead th:first-child{text-align:left;}
+.pbi tbody td{padding:11px 16px;border-bottom:1px solid var(--border-soft);text-align:right;font-variant-numeric:tabular-nums;color:var(--text-2);}
+.pbi tbody td:first-child{text-align:left;color:var(--text);font-weight:500;}
+.pbi tr.grp td{background:rgba(19,78,88,.10);color:var(--raya-petrol);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:var(--fs-xs);}
+.pbi tr.subtot td{background:rgba(19,78,88,.045);font-weight:600;color:var(--text);}
+.pbi tr.tot td{background:var(--raya-petrol);color:#fff;font-weight:700;}
+.pbi td.drill{cursor:pointer;} .pbi td.drill:hover{background:rgba(29,148,146,.10);color:var(--raya-teal);}
+.pbi td.drill::after{content:' ▾';font-size:10px;opacity:.45;}
+.pbi tr.det td{background:var(--bg-elev);padding:0;}
+.det-inner{padding:14px 22px;}
+.det-title{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.12em;color:var(--raya-teal);font-weight:700;margin-bottom:10px;}
+.det-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:2px 28px;}
+.det-row{display:flex;justify-content:space-between;gap:14px;border-bottom:1px solid var(--border-soft);padding:6px 0;font-size:var(--fs-sm);color:var(--text-2);}
+.det-row span:last-child{font-variant-numeric:tabular-nums;font-weight:600;color:var(--text);white-space:nowrap;}
+.det-row.sub span{color:var(--raya-teal);font-weight:700;}
+.footer{background:var(--bg-elev);border-top:1px solid var(--border);margin-top:48px;padding:24px 32px;}
+.footer-inner{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+.footer-brand{font-family:var(--font-display);font-size:calc(18px*var(--scale));color:var(--text-2);}
+.footer-disc{font-size:var(--fs-xs);color:var(--text-3);max-width:720px;line-height:1.6;}
+@media(max-width:900px){.group-grid{grid-template-columns:1fr;}.header-inner,.nav-inner,.main{padding-left:16px;padding-right:16px;}.nav{top:69px;}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-logo" aria-label="Raya Advisory">
+      <svg viewBox="0 0 220 56" width="220" height="56" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#1D9492"/><stop offset="100%" stop-color="#07C0BD"/></linearGradient></defs>
+        <text x="0" y="32" font-family="'Cormorant Garamond',Georgia,serif" font-size="34" font-weight="500" letter-spacing="6" fill="url(#rg)">RAYA</text>
+        <line x1="0" y1="40" x2="120" y2="40" stroke="#B59875" stroke-width="1" opacity="0.6"/>
+        <text x="0" y="52" font-family="'DM Sans',system-ui,sans-serif" font-size="8" letter-spacing="3" fill="#B59875" opacity="0.9">A D V I S O R Y</text>
+      </svg>
+    </div>
+    <div class="header-meta">
+      <div class="header-title">Fundação Viva de Previdência</div>
+      <div class="header-date">Análise · Junho 2026 · v3</div>
+    </div>
+    <div class="header-controls">
+      <a class="ctrl-btn" href="PORTAL_Viva_Viabilidade_Perfis.html" style="text-decoration:none;">← Portal</a>
+      <div class="zoom-group"><button class="zoom-btn minus" id="zoom-out">A−</button><span class="zoom-indicator" id="zoom-val">100%</span><button class="zoom-btn plus" id="zoom-in">A+</button></div>
+      <button class="ctrl-btn" id="theme-toggle"><span id="theme-icon">☾</span> <span id="theme-label">Escuro</span></button>
+      <button class="ctrl-btn" id="present-toggle">▣ Apresentação</button>
+    </div>
+  </div>
+</header>
+
+<nav class="nav"><div class="nav-inner" id="tabs">
+  <button class="nav-btn active" onclick="showTab('visao-geral',this)">Visão Geral</button>
+  <button class="nav-btn" onclick="showTab('contribuicoes',this)">Contribuições</button>
+  <button class="nav-btn" onclick="showTab('beneficios',this)">Benefícios</button>
+  <button class="nav-btn" onclick="showTab('saldos',this)">Saldos</button>
+  <a class="nav-btn" href="02_Movimentacao.html" style="text-decoration:none;display:inline-block;">Movimentação ↗</a>
+</div></nav>
+
+<main class="main" id="content">
+
+<!-- ===== VISÃO GERAL ===== -->
+<section id="visao-geral" class="section active">
+  <div class="eyebrow">01 · Visão Geral</div>
+  <h1 class="sec-title">Posição e perfil dos planos — fev/2026</h1>
+  <p class="src-note">Participantes e saldos da base de fev/2026 (40.005 registros). Selecione um grupo ou um plano. Saldo = saldo das contas dos participantes; difere do PL contábil dos balancetes (dez/25, R$ 3.269,2 mi) por data e conceito.</p>
+  <div class="filter-row" id="vg-fgrupo"></div>
+  <div class="filter-row" id="vg-fplano" style="margin-top:-8px"></div>
+  <div id="vg-grprow"></div>
+  <div id="vg-ficha"></div>
+  <h2 class="subhead" id="vg-h-part" style="font-size:calc(22px*var(--scale))">Participantes e saldos</h2>
+  <div class="kpi-grid" id="vg-kpis"></div>
+  <h2 class="subhead" style="font-size:calc(22px*var(--scale))">Contribuições / mês</h2>
+  <div class="kpi-grid" id="vg-kpis2"></div>
+  <h2 class="subhead" style="font-size:calc(22px*var(--scale))">Benefícios pagos / mês — por tipo</h2>
+  <div class="kpi-grid" id="vg-kpis3"></div>
+  <div id="vg-bevnote"></div>
+  <div class="chart-card"><div class="chart-card-title">Participantes por tipo</div><div class="chart-wrap" style="height:300px"><canvas id="vg-tipo"></canvas></div></div>
+  <div id="vg-plantab"></div>
+  <h2 class="subhead" style="font-size:calc(22px*var(--scale))">Resumo por tipo de participante</h2>
+  <div class="table-wrap" style="margin-bottom:18px"><table class="pbi"><thead><tr><th>Tipo de participante</th><th>Participantes</th><th>Contribuição / mês</th><th>Saldo</th><th>Benefício / mês</th></tr></thead><tbody id="vg-tiptab"></tbody></table></div>
+  <div id="vg-peculio"></div>
+  <div id="vg-grupos">
+    <div class="compo-head">Composição do saldo total</div>
+    <div class="compo-bar">
+      <span style="width:84.5%;background:var(--raya-teal);">Participante · 84,5%</span>
+      <span style="width:12.9%;background:var(--raya-slate);">Remanescente · 12,9%</span>
+      <span style="width:2.6%;background:var(--raya-copper);">2,6%</span>
+    </div>
+    <div class="compo-legend">Participante R$ 2.839,1 mi · Remanescente R$ 433,5 mi · Patrocinadora R$ 86,1 mi (2,6%)</div>
+    <div class="note" style="border-left-color:var(--raya-slate);"><strong>O que é cada parcela:</strong> <strong>Participante</strong> = saldo de quem ainda está acumulando; <strong>Remanescente</strong> = saldo da Conta Assistido de quem <strong>já está em benefício</strong>; <strong>Patrocinadora</strong> = parcela aportada pela patrocinadora.</div>
+  </div>
+  <div class="note" style="border-left-color:var(--raya-teal);"><strong>Este painel é um resumo.</strong> Há mais informações nos outros módulos do portal — Estatística da População (demografia, clusters, dispersões, alíquotas), Movimentação, Análise Técnica e os demais em desenvolvimento.</div>
+</section>
+
+<!-- ===== CONTRIBUIÇÕES ===== -->
+<section id="contribuicoes" class="section">
+  <div class="eyebrow">02 · Contribuições</div>
+  <h1 class="sec-title sm">Contribuição mensal</h1>
+  <p class="src-note">Fonte: base de participantes da Fundação (fev/2026). Contribuição mensal por origem: participante, patrocinadora e co-participante. Filtre por plano abaixo.</p>
+  <div class="filter-row" id="fgrupo-contrib"></div>
+  <div class="filter-row" id="fplano-contrib" style="margin-top:-8px"></div>
+  <div class="kpi-grid" id="kpi-contrib"></div>
+  <div class="chart-card"><div class="chart-card-title" id="title-contrib">Contribuição por plano (R$/mês)</div><div class="chart-wrap"><canvas id="chart-contrib"></canvas></div></div>
+  <div id="contrib-detail"></div>
+</section>
+
+<!-- ===== BENEFÍCIOS ===== -->
+<section id="beneficios" class="section">
+  <div class="eyebrow">03 · Benefícios</div>
+  <h1 class="sec-title sm">Benefícios pagos / mês</h1>
+  <p class="src-note">Fonte: base de participantes da Fundação (fev/2026). Benefícios de renda dos assistidos formais "Em Benefício" — não inclui a massa de Pecúlio por Morte/BEV (parcela única). Filtre por plano.</p>
+  <div class="filter-row" id="fgrupo-benef"></div>
+  <div class="filter-row" id="fplano-benef" style="margin-top:-8px"></div>
+  <div class="kpi-grid" id="kpi-benef"></div>
+  <div class="chart-card"><div class="chart-card-title" id="title-benef">Benefícios por plano (R$/mês)</div><div class="chart-wrap"><canvas id="chart-benef"></canvas></div></div>
+  <div id="benef-detail"></div>
+</section>
+
+<!-- ===== SALDOS ===== -->
+<section id="saldos" class="section">
+  <div class="eyebrow">04 · Saldos</div>
+  <h1 class="sec-title sm">Saldo por plano</h1>
+  <p class="src-note">Fonte: base de participantes (Excel · fev/2026). Saldo = Participante (quem ainda acumula) + Remanescente (Conta Assistido de quem já está em benefício, a pagar como renda) + Patrocinadora (planos patrocinados). As parcelas de portabilidade entram como memo. Filtre por plano.</p>
+  <div class="filter-row" id="filter-saldo"></div>
+  <div class="kpi-grid" id="kpi-saldo"></div>
+  <div class="chart-card"><div class="chart-card-title" id="title-saldo">Saldo por plano (R$ mi)</div><div class="chart-wrap"><canvas id="chart-saldo"></canvas></div></div>
+  <div id="saldo-detail"></div>
+</section>
+
+
+</main>
+
+<footer class="footer"><div class="footer-inner">
+  <div class="footer-brand">Raya Advisory · Fundação Viva de Previdência · v3 (rascunho)</div>
+  <div class="footer-disc">Material informativo, elaborado com base em dados da Fundação Viva (base de participantes fev/2026, balancetes dez/2025 e relatórios de fluxo). Não constitui recomendação de investimento. Documento em validação.</div>
+</div></footer>
+
+<script>
+/* tabs */
+function showTab(id,btn){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));const el=document.getElementById(id);if(el)el.classList.add('active');if(btn)btn.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+/* tema */
+const root=document.documentElement,tBtn=document.getElementById('theme-toggle'),tIc=document.getElementById('theme-icon'),tLb=document.getElementById('theme-label');
+function applyTheme(t){root.setAttribute('data-theme',t);if(t==='dark'){tIc.textContent='☀';tLb.textContent='Claro';}else{tIc.textContent='☾';tLb.textContent='Escuro';}try{localStorage.setItem('raya-theme',t);}catch(e){}redrawAll();}
+tBtn.addEventListener('click',()=>applyTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+try{const s=localStorage.getItem('raya-theme');if(s)root.setAttribute('data-theme',s);}catch(e){}
+/* zoom */
+const ZMIN=.8,ZMAX=2,ZS=.1,ZD=1;let zB=ZD;const zv=document.getElementById('zoom-val'),zi=document.getElementById('zoom-in'),zo=document.getElementById('zoom-out');
+function aZoom(z,save=true){z=Math.round(z*10)/10;z=Math.max(ZMIN,Math.min(ZMAX,z));document.body.style.zoom=z;zv.textContent=Math.round(z*100)+'%';if(save){try{localStorage.setItem('raya-zoom',z);}catch(e){}}return z;}
+function gZoom(){const v=parseFloat(document.body.style.zoom||ZD);return isNaN(v)?ZD:v;}
+zi.onclick=()=>aZoom(gZoom()+ZS);zo.onclick=()=>aZoom(gZoom()-ZS);zv.onclick=()=>aZoom(ZD);
+document.addEventListener('keydown',e=>{if(/INPUT|TEXTAREA/.test(e.target.tagName))return;if(e.ctrlKey||e.metaKey||e.altKey)return;if(e.key==='+'||e.key==='='){aZoom(gZoom()+ZS);e.preventDefault();}else if(e.key==='-'||e.key==='_'){aZoom(gZoom()-ZS);e.preventDefault();}else if(e.key==='0'){aZoom(ZD);e.preventDefault();}});
+try{const sz=parseFloat(localStorage.getItem('raya-zoom'));aZoom(isNaN(sz)?ZD:sz,false);}catch(e){aZoom(ZD,false);}
+const PZ=1.4,pBtn=document.getElementById('present-toggle');
+pBtn.onclick=()=>{const c=root.getAttribute('data-presentation');if(c==='on'){root.removeAttribute('data-presentation');pBtn.classList.remove('active');pBtn.textContent='▣ Apresentação';aZoom(zB||ZD);if(document.fullscreenElement)document.exitFullscreen();}else{zB=gZoom();root.setAttribute('data-presentation','on');pBtn.classList.add('active');pBtn.textContent='▣ Sair Apres.';aZoom(PZ,false);if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});}};
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&root.getAttribute('data-presentation')==='on'){root.removeAttribute('data-presentation');pBtn.classList.remove('active');pBtn.textContent='▣ Apresentação';aZoom(zB||ZD);}});
+
+/* ===== DADOS ===== */
+const PBI=[{"plano":"Viva de Previdência e Pecúlio","grupo":"Viva de Previdência e Pecúlio","n":30333,"tipo":{"Ativo":22995,"Aguardando Pensão":7177,"Em Benefício":161},"contrib":{"basica":2628221,"patroc":0,"copart":59859,"total":2688079},"benef":{"reais":145158,"titular":145158},"saldo":{"Port.EAPC Prog Part":0,"Port.EAPC Prog Patr":0,"Port.EFPC Prog Part":0,"Port.EFPC Prog Patr":0,"Port.EAPC Reg Part":0,"Port.EAPC Reg Patr":0,"Port.EFPC Reg Part":0,"Port.EFPC Reg Patr":0,"Saldo Participante":2517904879,"Saldo Patrocinadora":0,"Saldo Remanescente":5333430,"total":2523238310},"saldo_principal":2523238310,"saldo_portab":0},
+{"plano":"Viva Empresarial","grupo":"Patrocinados","n":1819,"tipo":{"Ativo":1467,"BPD":154,"Aguardando Opção":120,"Autopatrocinado":68,"Em Benefício":7,"Aguardando Pensão":3},"contrib":{"basica":1173242,"patroc":1169761,"copart":0,"total":2343003},"benef":{"reais":20400,"titular":20400},"saldo":{"Port.EAPC Prog Part":81460,"Port.EAPC Prog Patr":0,"Port.EFPC Prog Part":229429,"Port.EFPC Prog Patr":0,"Port.EAPC Reg Part":118513,"Port.EAPC Reg Patr":0,"Port.EFPC Reg Part":0,"Port.EFPC Reg Patr":0,"Saldo Participante":78232799,"Saldo Patrocinadora":73597194,"Saldo Remanescente":2140048,"total":154399443},"saldo_principal":153970041,"saldo_portab":429401},
+{"plano":"Viva Federativo","grupo":"Patrocinados","n":1009,"tipo":{"Ativo":986,"Aguardando Opção":18,"BPD":5},"contrib":{"basica":239837,"patroc":231239,"copart":0,"total":471076},"benef":{"reais":0,"titular":0},"saldo":{"Port.EAPC Prog Part":0,"Port.EAPC Prog Patr":0,"Port.EFPC Prog Part":0,"Port.EFPC Prog Patr":0,"Port.EAPC Reg Part":0,"Port.EAPC Reg Patr":0,"Port.EFPC Reg Part":47358,"Port.EFPC Reg Patr":24370,"Saldo Participante":6088472,"Saldo Patrocinadora":6049786,"Saldo Remanescente":0,"total":12209987},"saldo_principal":12138258,"saldo_portab":71729},
+{"plano":"ANAPARprev","grupo":"Instituídos","n":4167,"tipo":{"Ativo":2818,"Em Benefício":615,"Aguardando Opção":387,"BPD":216,"Aguardando Pensão":130,"Autopatrocinado":1},"contrib":{"basica":361434,"patroc":187546,"copart":0,"total":548980},"benef":{"reais":3439252,"titular":3439252},"saldo":{"Port.EAPC Prog Part":731793,"Port.EAPC Prog Patr":0,"Port.EFPC Prog Part":64257242,"Port.EFPC Prog Patr":1529229,"Port.EAPC Reg Part":222807,"Port.EAPC Reg Patr":0,"Port.EFPC Reg Part":27797019,"Port.EFPC Reg Patr":3086782,"Saldo Participante":180400842,"Saldo Patrocinadora":4616011,"Saldo Remanescente":391981526,"total":674623251},"saldo_principal":576998379,"saldo_portab":97624872},
+{"plano":"Viva Futuro","grupo":"Instituídos","n":2198,"tipo":{"Ativo":1614,"BPD":394,"Aguardando Pensão":106,"Em Benefício":65,"Aguardando Opção":19},"contrib":{"basica":281001,"patroc":0,"copart":0,"total":281001},"benef":{"reais":427381,"titular":427381},"saldo":{"Port.EAPC Prog Part":1575707,"Port.EAPC Prog Patr":0,"Port.EFPC Prog Part":6837987,"Port.EFPC Prog Patr":1041722,"Port.EAPC Reg Part":3670481,"Port.EAPC Reg Patr":0,"Port.EFPC Reg Part":2698903,"Port.EFPC Reg Patr":648347,"Saldo Participante":36192422,"Saldo Patrocinadora":1690068,"Saldo Remanescente":27404008,"total":81759645},"saldo_principal":65286499,"saldo_portab":16473146},
+{"plano":"IBAprev","grupo":"Instituídos","n":290,"tipo":{"Ativo":230,"Aguardando Opção":43,"Em Benefício":15,"Autopatrocinado":1,"BPD":1},"contrib":{"basica":57535,"patroc":0,"copart":0,"total":57535},"benef":{"reais":87868,"titular":87868},"saldo":{"Port.EAPC Prog Part":392358,"Port.EAPC Prog Patr":0,"Port.EFPC Prog Part":4363782,"Port.EFPC Prog Patr":152054,"Port.EAPC Reg Part":0,"Port.EAPC Reg Patr":0,"Port.EFPC Reg Part":742946,"Port.EFPC Reg Patr":0,"Saldo Participante":18877532,"Saldo Patrocinadora":152054,"Saldo Remanescente":6137077,"total":30817802},"saldo_principal":25166663,"saldo_portab":5651139},
+{"plano":"ASSORELprev","grupo":"Instituídos","n":189,"tipo":{"BPD":161,"Aguardando Opção":13,"Ativo":11,"Aguardando Pensão":2,"Em Benefício":2},"contrib":{"basica":2883,"patroc":0,"copart":0,"total":2883},"benef":{"reais":2028,"titular":2028},"saldo":{"Port.EAPC Prog Part":0,"Port.EAPC Prog Patr":0,"Port.EFPC Prog Part":0,"Port.EFPC Prog Patr":0,"Port.EAPC Reg Part":0,"Port.EAPC Reg Patr":0,"Port.EFPC Reg Part":0,"Port.EFPC Reg Patr":0,"Saldo Participante":1370422,"Saldo Patrocinadora":0,"Saldo Remanescente":483901,"total":1854323},"saldo_principal":1854323,"saldo_portab":0}];
+const GROUPS=['Viva de Previdência e Pecúlio','Patrocinados','Instituídos'];
+const SHORT={'Viva de Previdência e Pecúlio':'Viva de Previdência e Pecúlio','Viva Empresarial':'Viva Empresarial','Viva Federativo':'Viva Federativo','ANAPARprev':'ANAPARprev','Viva Futuro':'Viva Futuro','IBAprev':'IBAprev','ASSORELprev':'ASSORELprev'};
+const C={teal:'#1D9492',copper:'#BE620F',copperMid:'#B0742A',navy:'#20353A',slate:'#364F53',gold:'#B59875',rust:'#993715'};
+const fmtN=v=>v.toLocaleString('pt-BR');
+const fmtR=v=>'R$ '+Math.round(v).toLocaleString('pt-BR');
+const fmtMi=v=>'R$ '+(v/1e6).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' mi';
+const sum=(a,f)=>a.reduce((s,x)=>s+f(x),0);
+const rowsFor=p=>p==='Todos'?PBI:PBI.filter(x=>x.plano===p);
+const CH={};
+function bar(id,labels,datasets,stacked,unitMi){
+  const ctx=document.getElementById(id);if(!ctx)return;if(CH[id])CH[id].destroy();
+  const ac=root.getAttribute('data-theme')==='dark'?'#B8BDB9':'#364F53';
+  CH[id]=new Chart(ctx,{type:'bar',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:ac,font:{family:'DM Sans',size:12}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+(unitMi?fmtMi(c.parsed.y):fmtR(c.parsed.y))}}},
+    scales:{x:{stacked:!!stacked,ticks:{color:ac,font:{family:'DM Sans'}},grid:{display:false}},
+            y:{stacked:!!stacked,ticks:{color:ac,callback:v=>unitMi?(v/1e6).toFixed(0)+' mi':(v/1e6).toFixed(1)+' mi'},grid:{color:'rgba(0,0,0,.06)'}}}}});
+}
+function kpis(el,arr){document.getElementById(el).innerHTML=arr.map(k=>`<div class="kpi-card ${k.c||'teal'}"><div class="kpi-label">${k.l}</div><div class="kpi-value">${k.v}</div><div class="kpi-sub">${k.s||''}</div></div>`).join('');}
+function filterRow(el,tab){const ps=['Todos',...PBI.map(p=>p.plano)];document.getElementById(el).innerHTML='<span class="filter-label">Filtrar por plano</span>'+ps.map((p,i)=>`<button class="filter-btn${i===0?' active':''}" data-tab="${tab}" data-plano="${p}">${p==='Todos'?'Todos':SHORT[p]}</button>`).join('');}
+
+/* ===== detalhamento por grupo / por tipo (Contrib, Benef, Saldo) ===== */
+function tpScope(s){return s==='Todos'?TPAGG.total:(GROUPS.includes(s)?TPAGG.groups[s]:TPAGG.units[s]);}
+function consTable(cols){ // cols: [{h,fn,mi}] ; agrupado por grupo, com subtotais + total
+  let h='<div class="table-wrap"><table class="pbi"><thead><tr><th>Plano</th>'+cols.map(c=>`<th>${c.h}</th>`).join('')+'</tr></thead><tbody>';
+  const tot=cols.map(()=>0);
+  GROUPS.forEach(g=>{const ps=PBI.filter(p=>p.grupo===g);
+    h+=`<tr class="grp"><td>${g}</td>${cols.map(()=>'<td></td>').join('')}</tr>`;const st=cols.map(()=>0);
+    ps.forEach(p=>{h+=`<tr><td>${SHORT[p.plano]}</td>`+cols.map((c,i)=>{const v=c.fn(p);st[i]+=v;tot[i]+=v;return `<td>${c.mi?fmtMi(v):fmtR(v)}</td>`;}).join('')+'</tr>';});
+    h+=`<tr class="subtot"><td>Subtotal · ${g}</td>${cols.map((c,i)=>`<td>${c.mi?fmtMi(st[i]):fmtR(st[i])}</td>`).join('')}</tr>`;});
+  h+=`<tr class="tot"><td>TOTAL</td>${cols.map((c,i)=>`<td>${c.mi?fmtMi(tot[i]):fmtR(tot[i])}</td>`).join('')}</tr></tbody></table></div>`;return h;}
+function tipoTable(s,cols,inc){ // por tipo de participante, a partir de TPAGG; inc = predicado opcional
+  const tp=tpScope(s);if(!tp)return '';
+  let h='<div class="table-wrap"><table class="pbi"><thead><tr><th>Tipo de participante</th>'+cols.map(c=>`<th>${c.h}</th>`).join('')+'</tr></thead><tbody>';
+  const tot=cols.map(()=>0);
+  TIPOS.filter(t=>tp[t]&&(inc?inc(tp[t]):tp[t].n>0)).forEach(t=>{h+=`<tr><td>${t}</td>`+cols.map((c,i)=>{const v=c.fn(tp[t]);tot[i]+=v;return `<td>${c.fmt(v)}</td>`;}).join('')+'</tr>';});
+  h+=`<tr class="tot"><td>TOTAL</td>${cols.map((c,i)=>`<td>${c.fmt(tot[i])}</td>`).join('')}</tr></tbody></table></div>`;return h;}
+function salAliqBlock(s){const ps=rowsVG(s);let rows='';
+  ps.forEach(p=>{const x=PLANX[p.plano];
+    rows+=`<tr><td>${SHORT[p.plano]}</td><td>${x.salN>0?fmtR(x.salMed):'—'}</td><td>${x.aliqP>0?x.aliqP.toFixed(2).replace('.',',')+'%':'—'}</td><td>${x.aliqL>0?x.aliqL.toFixed(2).replace('.',',')+'%':'—'}</td></tr>`;});
+  let h='<h2 class="subhead" style="font-size:calc(20px*var(--scale))">Salário e alíquota (relação contribuição × folha)</h2>';
+  h+='<div class="table-wrap"><table class="pbi"><thead><tr><th>Plano</th><th>Salário médio</th><th>Alíquota participante (média)</th><th>Alíquota patronal (média)</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  h+='<div class="note"><strong>Leitura da alíquota.</strong> Apenas os planos patrocinados têm percentual de folha definido — <strong>Viva Empresarial ~7,5% participante / 7,7% patronal</strong> e <strong>Viva Federativo ~7,1% / 7,2%</strong> (contrapartida próxima de 1:1). Os planos instituídos e o Pecúlio não têm percentual fixo sobre salário (aporte por valor/regra própria), por isso aparecem como "—". Salário médio calculado sobre os registros com salário informado na base.</div>';
+  return h;}
+
+/* render por aba */
+function renderContrib(p){const rs=rowsVG(p);const P=sum(rs,x=>x.contrib.basica),Q=sum(rs,x=>x.contrib.patroc),R=sum(rs,x=>x.contrib.copart);
+  kpis('kpi-contrib',[{l:'Total / mês',v:fmtR(P+Q+R),c:'teal',s:p==='Todos'?'7 planos':p},{l:'Participante',v:fmtR(P),c:'copper'},{l:'Patrocinadora',v:fmtR(Q),c:'slate'},{l:'Co-participante',v:fmtR(R),c:'navy'}]);
+  document.getElementById('title-contrib').textContent=p==='Todos'?'Contribuição por plano (R$/mês) — empilhado por origem':'Contribuição — '+p;
+  bar('chart-contrib',rs.map(x=>SHORT[x.plano]),[
+    {label:'Participante',data:rs.map(x=>x.contrib.basica),backgroundColor:C.teal},
+    {label:'Patrocinadora',data:rs.map(x=>x.contrib.patroc),backgroundColor:C.copper},
+    {label:'Co-participante',data:rs.map(x=>x.contrib.copart),backgroundColor:C.gold}],true,false);
+  document.getElementById('contrib-detail').innerHTML=
+    '<h2 class="subhead" style="font-size:calc(20px*var(--scale))">Consolidação por grupo</h2>'+consTable([
+      {h:'Participante',fn:x=>x.contrib.basica},{h:'Patrocinadora',fn:x=>x.contrib.patroc},{h:'Co-part.',fn:x=>x.contrib.copart},{h:'Total/mês',fn:x=>x.contrib.total}])+
+    '<h2 class="subhead" style="font-size:calc(20px*var(--scale))">Por tipo de participante'+(p==='Todos'?' (consolidado)':' — '+p)+'</h2>'+tipoTable(p,[
+      {h:'Participantes',fn:t=>t.n,fmt:fmtN},{h:'Contribuição/mês',fn:t=>t.contrib,fmt:fmtR}])+
+    salAliqBlock(p);}
+function renderBenef(p){const rs=rowsVG(p);const S=sum(rs,x=>x.benef.reais),T=sum(rs,x=>x.benef.titular);
+  kpis('kpi-benef',[{l:'Benefício',v:fmtR(S),c:'teal',s:p==='Todos'?'7 planos':p},{l:'Parcela do titular',v:fmtR(T),c:'copper',s:'mesmo total, distribuição distinta'}]);
+  document.getElementById('title-benef').textContent=p==='Todos'?'Benefícios por plano (R$/mês)':'Benefícios — '+p;
+  bar('chart-benef',rs.map(x=>SHORT[x.plano]),[
+    {label:'Valor do benefício',data:rs.map(x=>x.benef.reais),backgroundColor:C.teal},
+    {label:'Parcela do titular',data:rs.map(x=>x.benef.titular),backgroundColor:C.copper}],false,false);
+  const bt=benByScope(p);const tn=Object.values(bt).reduce((a,x)=>a+x[0],0),tv=Object.values(bt).reduce((a,x)=>a+x[1],0);
+  let byType=Object.keys(bt).length?'<div class="table-wrap"><table class="pbi"><thead><tr><th>Tipo de benefício</th><th>Beneficiários</th><th>Valor/mês</th></tr></thead><tbody>'+
+    BENCAT.filter(c=>bt[c]).map(c=>`<tr><td>${c}</td><td>${fmtN(bt[c][0])}</td><td>${fmtR(bt[c][1])}</td></tr>`).join('')+
+    `<tr class="tot"><td>TOTAL</td><td>${fmtN(tn)}</td><td>${fmtR(tv)}</td></tr></tbody></table></div>`:'<div class="note">Sem benefícios de renda nesta seleção.</div>';
+  const dsc=p==='Todos'?BDIFF:(BDIFF[p]?{[p]:BDIFF[p]}:{});
+  let dn=Object.values(dsc).reduce((a,x)=>a+x.n,0);
+  let diffTab=dn?('<div class="table-wrap"><table class="pbi"><thead><tr><th>Plano</th><th>Registros com ValorBenefícioReais ≠ ValorBenefícioReais_Titular</th><th>Tipo de benefício</th></tr></thead><tbody>'+
+    Object.entries(dsc).map(([pl,o])=>`<tr><td>${SHORT[pl]}</td><td>${o.n}</td><td>${o.tipo}</td></tr>`).join('')+
+    `<tr class="tot"><td>TOTAL</td><td>${dn}</td><td>todos por morte</td></tr></tbody></table></div>`):'';
+  const pecBox=(p==='Viva de Previdência e Pecúlio')?'<div class="kpi-grid" style="margin-bottom:6px"><div class="kpi-card copper"><div class="kpi-label">BEV pago em 2025</div><div class="kpi-value">R$ 110,3 mi</div><div class="kpi-sub">Benefício Especial em Vida · parcela única</div></div><div class="kpi-card rust"><div class="kpi-label">Pecúlio por Morte 2025</div><div class="kpi-value">R$ 25,6 mi</div><div class="kpi-sub">pago aos beneficiários no óbito</div></div><div class="kpi-card slate"><div class="kpi-label">Pec. Proporcional em Vida 2025</div><div class="kpi-value">R$ 6,1 mi</div><div class="kpi-sub">benefício pago em vida</div></div></div><div class="note" style="border-left-color:var(--raya-copper)">Pagamentos legados do Pecúlio em 2025 (balancete dez/2025), <strong>em parcela única</strong> — não constam na tabela de benefícios de renda acima.</div>':'';
+  document.getElementById('benef-detail').innerHTML=pecBox+
+    '<h2 class="subhead" style="font-size:calc(20px*var(--scale))">Por tipo de benefício'+(p==='Todos'?' (consolidado)':' — '+p)+'</h2>'+byType+
+    '<h2 class="subhead" style="font-size:calc(20px*var(--scale))">Por tipo de participante (em benefício)</h2>'+tipoTable(p,[
+      {h:'Participantes',fn:t=>t.n,fmt:fmtN},{h:'Em benefício / mês',fn:t=>t.benef,fmt:fmtR}],t=>t.benef>0)+
+    '<div class="note">Mostrados apenas os tipos de participante que efetivamente recebem benefício. <strong>Não foi possível identificar, somente com a base de participantes, o que representam os cadastrados como "Aguardando Pensão"</strong> — não há tipo de benefício marcado para esse grupo (a confirmar com a Fundação).</div>'+
+    '<h2 class="subhead" style="font-size:calc(20px*var(--scale))">Valor do benefício × parcela do titular</h2>'+
+    '<div class="note"><strong>Quando os dois valores diferem.</strong> O valor do benefício e a parcela do titular só divergem em benefícios por <strong>morte</strong>: uma considera o valor pago ao titular e a outra a parcela do beneficiário/co-participante — por isso consideramos as duas. São <strong>'+dn+' participantes</strong> nessa situação'+(p==='Todos'?' no total':' nesta seleção')+'. Os totais por plano coincidem; a diferença é registro a registro.</div>'+diffTab;}
+function renderSaldo(p){const rs=rowsFor(p);const pa=sum(rs,x=>x.saldo['Saldo Participante']),pt=sum(rs,x=>x.saldo['Saldo Patrocinadora']),rm=sum(rs,x=>x.saldo['Saldo Remanescente']),po=sum(rs,x=>x.saldo_portab);
+  kpis('kpi-saldo',[{l:'Saldo total',v:fmtMi(pa+pt+rm),c:'teal',s:p==='Todos'?'Part+Patroc+Reman':p},{l:'Participante',v:fmtMi(pa),c:'copper'},{l:'Patrocinadora',v:fmtMi(pt),c:'slate'},{l:'Remanescente',v:fmtMi(rm),c:'navy'},{l:'Portabilidade (memo)',v:fmtMi(po),c:'gold',s:'não somado ao total'}]);
+  document.getElementById('title-saldo').textContent=p==='Todos'?'Saldo por plano (R$ mi) — empilhado':'Saldo — '+p;
+  bar('chart-saldo',rs.map(x=>SHORT[x.plano]),[
+    {label:'Participante',data:rs.map(x=>x.saldo['Saldo Participante']),backgroundColor:C.teal},
+    {label:'Patrocinadora',data:rs.map(x=>x.saldo['Saldo Patrocinadora']),backgroundColor:C.copper},
+    {label:'Remanescente',data:rs.map(x=>x.saldo['Saldo Remanescente']),backgroundColor:C.slate}],true,true);
+  const showPec=(p==='Todos'||p==='Viva de Previdência e Pecúlio');
+  const showAna=(p==='Todos'||p==='ANAPARprev');
+  let fundos='';
+  if(showPec)fundos+='<div class="note" style="border-left-color:var(--raya-copper)"><strong>Fundos e provisões do Pecúlio (balancete dez/2025).</strong> Além do saldo de contas, o plano mantém fundos específicos do desenho legado (BD): <strong>BEV2 R$ 156,4 mi + BEV3 R$ 348,2 mi</strong>; <strong>Pecúlio por Morte (provisão) R$ 195,8 mi</strong>; reserva de contingência R$ 103,2 mi; reserva especial para revisão de plano R$ 134,0 mi; <strong>provisões matemáticas em BD R$ 771,0 mi</strong> (massa transitória). Esses valores são contábeis (balancete) e não compõem o "saldo de contas" da base de participantes.</div>';
+  if(showAna)fundos+='<div class="note" style="border-left-color:var(--raya-navy)"><strong>ANAPARprev — saldo majoritariamente "remanescente".</strong> Como o plano já tem massa relevante em benefício (origem Petros), a maior parte do saldo está na Conta Assistido (remanescente, R$ 392,0 mi). Mantém ainda a carteira de empréstimos "ex-Petros", fechada e em extinção (módulo Movimentação).</div>';
+  document.getElementById('saldo-detail').innerHTML=
+    '<h2 class="subhead" style="font-size:calc(20px*var(--scale))">Consolidação por grupo</h2>'+consTable([
+      {h:'Participante',fn:x=>x.saldo['Saldo Participante'],mi:true},{h:'Patrocinadora',fn:x=>x.saldo['Saldo Patrocinadora'],mi:true},
+      {h:'Remanescente',fn:x=>x.saldo['Saldo Remanescente'],mi:true},{h:'Saldo total',fn:x=>x.saldo_principal,mi:true},{h:'Portab. (memo)',fn:x=>x.saldo_portab,mi:true}])+
+    '<h2 class="subhead" style="font-size:calc(20px*var(--scale))">Por tipo de participante'+(p==='Todos'?' (consolidado)':' — '+p)+'</h2>'+tipoTable(p,[
+      {h:'Participantes',fn:t=>t.n,fmt:fmtN},{h:'Saldo',fn:t=>t.saldo,fmt:fmtMi}])+
+    '<h2 class="subhead" style="font-size:calc(20px*var(--scale))">Tipos de saldo e portabilidade</h2>'+
+    '<div class="note"><strong>Tipos de saldo.</strong> <strong>Participante</strong> = quem ainda acumula; <strong>Remanescente</strong> = Conta Assistido de quem já está em benefício; <strong>Patrocinadora</strong> = parcela aportada pela patrocinadora (planos patrocinados). As <strong>parcelas de portabilidade</strong> (recursos trazidos de outros planos: EAPC/EFPC, programado/regular, participante/patrocinadora) somam R$ 120,2 mi e aparecem como <em>memo</em>, não somadas ao saldo total — composição a confirmar com a Fundação.</div>'+fundos;}
+
+/* filtros */
+document.addEventListener('click',e=>{const b=e.target.closest('.filter-btn');if(!b)return;const tab=b.dataset.tab,pl=b.dataset.plano;
+  document.querySelectorAll(`.filter-btn[data-tab="${tab}"]`).forEach(x=>x.classList.remove('active'));b.classList.add('active');
+  if(tab==='contrib')renderContrib(pl);else if(tab==='benef')renderBenef(pl);else if(tab==='saldo')renderSaldo(pl);else if(tab==='vg')renderVG(pl);});
+
+/* tabela dinâmica */
+function buildPBI(){let h='<table class="pbi"><thead><tr><th>Plano</th><th>Participantes</th><th>Contribuição / mês</th><th>Benefícios / mês</th><th>Saldo total</th></tr></thead><tbody>';let gt={n:0,c:0,b:0,s:0};
+  GROUPS.forEach(g=>{const ps=PBI.filter(p=>p.grupo===g);h+=`<tr class="grp"><td>${g}</td><td></td><td></td><td></td><td></td></tr>`;let st={n:0,c:0,b:0,s:0};
+    ps.forEach(p=>{const i=PBI.indexOf(p);st.n+=p.n;st.c+=p.contrib.total;st.b+=p.benef.reais;st.s+=p.saldo_principal;
+      h+=`<tr><td>${p.plano}</td><td class="drill" data-i="${i}" data-m="tipo">${fmtN(p.n)}</td><td class="drill" data-i="${i}" data-m="contrib">${fmtR(p.contrib.total)}</td><td class="drill" data-i="${i}" data-m="benef">${fmtR(p.benef.reais)}</td><td class="drill" data-i="${i}" data-m="saldo">${fmtMi(p.saldo_principal)}</td></tr><tr class="det" id="det-${i}" style="display:none"><td colspan="5"><div class="det-inner" id="detc-${i}"></div></td></tr>`;});
+    h+=`<tr class="subtot"><td>Subtotal · ${g}</td><td>${fmtN(st.n)}</td><td>${fmtR(st.c)}</td><td>${fmtR(st.b)}</td><td>${fmtMi(st.s)}</td></tr>`;gt.n+=st.n;gt.c+=st.c;gt.b+=st.b;gt.s+=st.s;});
+  h+=`<tr class="tot"><td>TOTAL · 7 planos</td><td>${fmtN(gt.n)}</td><td>${fmtR(gt.c)}</td><td>${fmtR(gt.b)}</td><td>${fmtMi(gt.s)}</td></tr></tbody></table>`;document.getElementById('pbi-wrap').innerHTML=h;}
+function detHTML(p,m){if(m==='tipo'){const r=Object.entries(p.tipo).map(([k,v])=>`<div class="det-row"><span>${k}</span><span>${fmtN(v)}</span></div>`).join('');return `<div class="det-title">${p.plano} · Participantes por tipo</div><div class="det-grid">${r}<div class="det-row sub"><span>Total</span><span>${fmtN(p.n)}</span></div></div>`;}
+  if(m==='contrib'){const c=p.contrib;return `<div class="det-title">${p.plano} · Contribuição / mês</div><div class="det-grid"><div class="det-row"><span>Básica do participante</span><span>${fmtR(c.basica)}</span></div><div class="det-row"><span>Da patrocinadora</span><span>${fmtR(c.patroc)}</span></div><div class="det-row"><span>Co-participante</span><span>${fmtR(c.copart)}</span></div><div class="det-row sub"><span>Total</span><span>${fmtR(c.total)}</span></div></div>`;}
+  if(m==='benef'){const b=p.benef;return `<div class="det-title">${p.plano} · Benefícios / mês</div><div class="det-grid"><div class="det-row"><span>Valor do benefício</span><span>${fmtR(b.reais)}</span></div><div class="det-row"><span>Parcela do titular</span><span>${fmtR(b.titular)}</span></div></div>`;}
+  if(m==='saldo'){const s=p.saldo;const r=Object.entries(s).filter(([k])=>k!=='total').map(([k,v])=>`<div class="det-row"><span>${k}</span><span>${fmtR(v)}</span></div>`).join('');return `<div class="det-title">${p.plano} · Saldo (composição)</div><div class="det-grid">${r}<div class="det-row sub"><span>Saldo principal (Participante + Patrocinadora + Remanescente)</span><span>${fmtR(p.saldo_principal)}</span></div><div class="det-row sub"><span>Saldo de portabilidade</span><span>${fmtR(p.saldo_portab)}</span></div><div class="det-row sub"><span>Total com portabilidade</span><span>${fmtR(s.total)}</span></div></div>`;}}
+document.addEventListener('click',e=>{const td=e.target.closest('td.drill');if(!td)return;const i=td.dataset.i,m=td.dataset.m,det=document.getElementById('det-'+i),cont=document.getElementById('detc-'+i);if(det.style.display!=='none'&&det.dataset.m===m){det.style.display='none';return;}cont.innerHTML=detHTML(PBI[i],m);det.dataset.m=m;det.style.display='table-row';});
+
+/* ===== Visão Geral — filtro Todos/grupo/plano + ficha + premissas ===== */
+const PREM={
+ 'Viva de Previdência e Pecúlio':{tipo:'Contribuição Definida (CD)',grupo:'Viva de Previdência e Pecúlio',vinc:'Instituído (sem patrocinadora)',regime:'Capitalização individual',taxa:'3,72% a.a. (taxa real de juros)',tabua:'AT-2000 M&F',part:'Maior plano da Fundação. Carrega massa transitória legada do "Participante Fundador" (até 13/02/2018): Pecúlio por Morte, Pecúlio Proporcional em Vida e BEV — pagos em parcela única. O grande grupo "Aguardando Pensão" cessou contribuição e mantém saldo. Mais detalhes na análise do Pecúlio.'},
+ 'Viva Empresarial':{tipo:'Contribuição Definida (CD)',grupo:'Patrocinados',vinc:'Patrocinado · matching ~1:1',regime:'Capitalização individual',taxa:'4,11% a.a.',tabua:'AT-2000 M&F',part:'Plano patrocinado, com contrapartida da patrocinadora próxima de 1:1. População mais jovem (idade média ~41) e salários mais altos.'},
+ 'Viva Federativo':{tipo:'Contribuição Definida (CD)',grupo:'Patrocinados',vinc:'Patrocinado',regime:'Capitalização individual',taxa:'— (não aplicável)',tabua:'— (não aplicável)',part:'Plano jovem (idade média ~37) e ainda sem massa em benefício de prestação continuada; por isso o parecer não aplica taxa de juros/tábua.'},
+ 'ANAPARprev':{tipo:'Contribuição Definida (CD)',grupo:'Instituídos',vinc:'Instituído',regime:'Capitalização individual',taxa:'3,85% a.a.',tabua:'Experiência Petros 2013',part:'Plano com origem na Petros. A Braskem (Copene/Braskem) fez <strong>retirada de patrocínio</strong> de seu plano na <strong>Petros</strong> (entidade multipatrocinada) e a massa migrou para a <strong>Viva</strong> (também multipatrocinada), que assumiu a gestão em <strong>maio/2020</strong>, com Fundo Administrativo próprio para esse grupo. Carrega ainda uma <strong>carteira de empréstimos "ex-Petros"</strong>, fechada para novas concessões e em extinção. Já tem massa relevante em benefício (saldo majoritariamente "remanescente"). Detalhes no módulo Movimentação.'},
+ 'Viva Futuro':{tipo:'Contribuição Definida (CD)',grupo:'Instituídos',vinc:'Instituído',regime:'Capitalização individual',taxa:'4,11% a.a.',tabua:'AT-2000 M&F',part:'Plano em crescimento acelerado (PL estimado mai/26 ~R$ 141,9 mi).'},
+ 'IBAprev':{tipo:'Contribuição Definida (CD)',grupo:'Instituídos',vinc:'Instituído',regime:'Capitalização individual',taxa:'4,11% a.a.',tabua:'AT-2000 M&F',part:'Plano pequeno (290 participantes), população relativamente jovem (idade média ~41).'},
+ 'ASSORELprev':{tipo:'Contribuição Definida (CD)',grupo:'Instituídos',vinc:'Instituído',regime:'Capitalização individual',taxa:'4,11% a.a.',tabua:'AT-2000 suavizada 10%, por sexo',part:'Plano em maturação/encerramento: 161 BPD vs 11 ativos (~85% diferidos).'}
+};
+const TIPOS=['Ativo','Aguardando Pensão','Em Benefício','BPD','Aguardando Opção','Autopatrocinado'];
+const TPAGG={"units": {"Viva de Previdência e Pecúlio": {"Ativo": {"n": 22995, "contrib": 2687724, "saldo": 2088303488, "benef": 0}, "Aguardando Pensão": {"n": 7177, "contrib": 324, "saldo": 434269420, "benef": 3544}, "Em Benefício": {"n": 161, "contrib": 31, "saldo": 665402, "benef": 141614}, "BPD": {"n": 0, "contrib": 0, "saldo": 0, "benef": 0}, "Aguardando Opção": {"n": 0, "contrib": 0, "saldo": 0, "benef": 0}, "Autopatrocinado": {"n": 0, "contrib": 0, "saldo": 0, "benef": 0}}, "Viva Empresarial": {"Ativo": {"n": 1467, "contrib": 2341583, "saldo": 125819251, "benef": 0}, "Aguardando Pensão": {"n": 3, "contrib": 0, "saldo": 97518, "benef": 0}, "Em Benefício": {"n": 7, "contrib": 0, "saldo": 2140048, "benef": 20400}, "BPD": {"n": 154, "contrib": 0, "saldo": 16968910, "benef": 0}, "Aguardando Opção": {"n": 120, "contrib": 1420, "saldo": 2364733, "benef": 0}, "Autopatrocinado": {"n": 68, "contrib": 0, "saldo": 6579580, "benef": 0}}, "Viva Federativo": {"Ativo": {"n": 986, "contrib": 471076, "saldo": 11988084, "benef": 0}, "Aguardando Pensão": {"n": 0, "contrib": 0, "saldo": 0, "benef": 0}, "Em Benefício": {"n": 0, "contrib": 0, "saldo": 0, "benef": 0}, "BPD": {"n": 5, "contrib": 0, "saldo": 64579, "benef": 0}, "Aguardando Opção": {"n": 18, "contrib": 0, "saldo": 85595, "benef": 0}, "Autopatrocinado": {"n": 0, "contrib": 0, "saldo": 0, "benef": 0}}, "ANAPARprev": {"Ativo": {"n": 2818, "contrib": 547023, "saldo": 175040669, "benef": 0}, "Aguardando Pensão": {"n": 130, "contrib": 214, "saldo": 14732173, "benef": 0}, "Em Benefício": {"n": 615, "contrib": 0, "saldo": 381571593, "benef": 3439252}, "BPD": {"n": 216, "contrib": 353, "saldo": 2492001, "benef": 0}, "Aguardando Opção": {"n": 387, "contrib": 1390, "saldo": 3156793, "benef": 0}, "Autopatrocinado": {"n": 1, "contrib": 0, "saldo": 5149, "benef": 0}}, "Viva Futuro": {"Ativo": {"n": 1614, "contrib": 280236, "saldo": 36638193, "benef": 0}, "Aguardando Pensão": {"n": 106, "contrib": 282, "saldo": 123916, "benef": 0}, "Em Benefício": {"n": 65, "contrib": 226, "saldo": 27329533, "benef": 427381}, "BPD": {"n": 394, "contrib": 0, "saldo": 994624, "benef": 0}, "Aguardando Opção": {"n": 19, "contrib": 257, "saldo": 200234, "benef": 0}, "Autopatrocinado": {"n": 0, "contrib": 0, "saldo": 0, "benef": 0}}, "IBAprev": {"Ativo": {"n": 230, "contrib": 56160, "saldo": 18353154, "benef": 0}, "Aguardando Pensão": {"n": 0, "contrib": 0, "saldo": 0, "benef": 0}, "Em Benefício": {"n": 15, "contrib": 0, "saldo": 6137077, "benef": 87868}, "BPD": {"n": 1, "contrib": 0, "saldo": 33440, "benef": 0}, "Aguardando Opção": {"n": 43, "contrib": 359, "saldo": 523985, "benef": 0}, "Autopatrocinado": {"n": 1, "contrib": 1016, "saldo": 119006, "benef": 0}}, "ASSORELprev": {"Ativo": {"n": 11, "contrib": 2883, "saldo": 854925, "benef": 0}, "Aguardando Pensão": {"n": 2, "contrib": 0, "saldo": 1938, "benef": 0}, "Em Benefício": {"n": 2, "contrib": 0, "saldo": 483901, "benef": 2028}, "BPD": {"n": 161, "contrib": 0, "saldo": 481865, "benef": 0}, "Aguardando Opção": {"n": 13, "contrib": 0, "saldo": 31695, "benef": 0}, "Autopatrocinado": {"n": 0, "contrib": 0, "saldo": 0, "benef": 0}}}, "groups": {"Viva de Previdência e Pecúlio": {"Ativo": {"n": 22995, "contrib": 2687724, "saldo": 2088303488, "benef": 0}, "Aguardando Pensão": {"n": 7177, "contrib": 324, "saldo": 434269420, "benef": 3544}, "Em Benefício": {"n": 161, "contrib": 31, "saldo": 665402, "benef": 141614}, "BPD": {"n": 0, "contrib": 0, "saldo": 0, "benef": 0}, "Aguardando Opção": {"n": 0, "contrib": 0, "saldo": 0, "benef": 0}, "Autopatrocinado": {"n": 0, "contrib": 0, "saldo": 0, "benef": 0}}, "Patrocinados": {"Ativo": {"n": 2453, "contrib": 2812659, "saldo": 137807335, "benef": 0}, "Aguardando Pensão": {"n": 3, "contrib": 0, "saldo": 97518, "benef": 0}, "Em Benefício": {"n": 7, "contrib": 0, "saldo": 2140048, "benef": 20400}, "BPD": {"n": 159, "contrib": 0, "saldo": 17033489, "benef": 0}, "Aguardando Opção": {"n": 138, "contrib": 1420, "saldo": 2450329, "benef": 0}, "Autopatrocinado": {"n": 68, "contrib": 0, "saldo": 6579580, "benef": 0}}, "Instituídos": {"Ativo": {"n": 4673, "contrib": 886301, "saldo": 230886940, "benef": 0}, "Aguardando Pensão": {"n": 238, "contrib": 497, "saldo": 14858027, "benef": 0}, "Em Benefício": {"n": 697, "contrib": 226, "saldo": 415522104, "benef": 3956530}, "BPD": {"n": 772, "contrib": 353, "saldo": 4001931, "benef": 0}, "Aguardando Opção": {"n": 462, "contrib": 2006, "saldo": 3912706, "benef": 0}, "Autopatrocinado": {"n": 2, "contrib": 1016, "saldo": 124156, "benef": 0}}}, "total": {"Ativo": {"n": 30121, "contrib": 6386684, "saldo": 2456997764, "benef": 0}, "Aguardando Pensão": {"n": 7418, "contrib": 821, "saldo": 449224964, "benef": 3544}, "Em Benefício": {"n": 865, "contrib": 257, "saldo": 418327554, "benef": 4118544}, "BPD": {"n": 931, "contrib": 353, "saldo": 21035420, "benef": 0}, "Aguardando Opção": {"n": 600, "contrib": 3426, "saldo": 6363035, "benef": 0}, "Autopatrocinado": {"n": 70, "contrib": 1016, "saldo": 6703736, "benef": 0}}};
+const BENTIPO={"ANAPARprev": {"Aposentadoria Programada": [440, 2789709.27], "Pensão por Morte": [167, 626582.66], "Invalidez": [7, 22960.25]}, "Viva Empresarial": {"Aposentadoria Programada": [7, 20400.47]}, "ASSORELprev": {"Pensão por Morte": [1, 1648.17], "Aposentadoria Programada": [1, 379.92]}, "IBAprev": {"Aposentadoria Programada": [15, 87868.39]}, "Viva Futuro": {"Pensão por Morte": [4, 24053.67], "Aposentadoria Programada": [61, 403327.25]}, "Viva Federativo": {}, "Viva de Previdência e Pecúlio": {"Aposentadoria Programada": [153, 134278.2], "Pensão por Morte": [9, 10879.81]}};
+const PLANX={"ANAPARprev": {"salMed": 0, "salN": 0, "aliqP": 0, "aliqL": 0}, "Viva Empresarial": {"salMed": 9070.85, "salN": 1619, "aliqP": 7.54, "aliqL": 7.67}, "ASSORELprev": {"salMed": 0, "salN": 0, "aliqP": 0, "aliqL": 0}, "IBAprev": {"salMed": 0, "salN": 0, "aliqP": 0, "aliqL": 0}, "Viva Futuro": {"salMed": 0, "salN": 0, "aliqP": 0, "aliqL": 0}, "Viva Federativo": {"salMed": 2971.65, "salN": 584, "aliqP": 7.1, "aliqL": 7.2}, "Viva de Previdência e Pecúlio": {"salMed": 2679.25, "salN": 22967, "aliqP": 0, "aliqL": 0}};
+const BDIFF={"ANAPARprev": {"n": 23, "tipo": "Morte"}, "Viva Futuro": {"n": 3, "tipo": "Morte"}, "Viva de Previdência e Pecúlio": {"n": 2, "tipo": "Morte Assistido"}};
+const BENCAT=['Aposentadoria Programada','Pensão por Morte','Invalidez'];
+const BENCOLOR={'Aposentadoria Programada':'teal','Pensão por Morte':'copper','Invalidez':'slate','Outros':'gold'};
+function benByScope(s){const rs=rowsVG(s);const o={};rs.forEach(p=>{const b=BENTIPO[p.plano]||{};Object.entries(b).forEach(([k,a])=>{const t=o[k]||[0,0];o[k]=[t[0]+a[0],t[1]+a[1]];});});return o;}
+function rowsVG(s){if(s==='Todos')return PBI;if(GROUPS.includes(s))return PBI.filter(p=>p.grupo===s);return PBI.filter(p=>p.plano===s);}
+function grpCard(g,cls){const ps=PBI.filter(p=>p.grupo===g);const n=sum(ps,p=>p.n),sa=sum(ps,p=>p.saldo_principal),cb=sum(ps,p=>p.contrib.basica),cq=sum(ps,p=>p.contrib.patroc);
+  const names=ps.map(p=>SHORT[p.plano]).join(' · ');
+  const desc=g==='Viva de Previdência e Pecúlio'?'instituído · sem patrocinadora':(g==='Patrocinados'?'com patrocinadora · matching ~1:1':'instituídos · sem aporte patronal');
+  return `<div class="group-card ${cls}"><div class="gc-head"><div class="gc-name">${g}</div><div class="gc-tag">${desc} · ${fmtN(n)} part.<br>${names}</div></div>
+    <div class="gc-body"><div class="gc-row"><span class="gc-k">Saldo</span><span class="gc-v">${fmtMi(sa)}</span></div>
+    <div class="gc-row"><span class="gc-k">Contrib. participante/mês</span><span class="gc-v">${fmtR(cb)}${cq>0?`<small>+ patronal ${fmtR(cq)}</small>`:'<small>sem aporte patronal</small>'}</span></div></div></div>`;}
+function renderVG(s){
+  const rs=rowsVG(s);
+  const n=sum(rs,p=>p.n),ativos=sum(rs,p=>p.tipo['Ativo']||0),saldo=sum(rs,p=>p.saldo_principal),cb=sum(rs,p=>p.contrib.basica),cq=sum(rs,p=>p.contrib.patroc),cr=sum(rs,p=>p.contrib.copart);
+  const pa=sum(rs,p=>p.saldo['Saldo Participante']),pt=sum(rs,p=>p.saldo['Saldo Patrocinadora']),rm=sum(rs,p=>p.saldo['Saldo Remanescente']);
+  // linha de grupos no topo (Todos = 3 grupos; grupo = aquele grupo)
+  const gr=document.getElementById('vg-grprow');const CLS={'Viva de Previdência e Pecúlio':'','Patrocinados':'copper','Instituídos':'navy'};
+  if(s==='Todos'){gr.style.display='';gr.innerHTML='<div class="compo-head">Grupos de análise</div><div class="group-grid">'+GROUPS.map(g=>grpCard(g,CLS[g])).join('')+'</div>';}
+  else if(GROUPS.includes(s)){gr.style.display='';gr.innerHTML='<div class="compo-head">Grupo de análise</div><div class="group-grid" style="grid-template-columns:1fr">'+grpCard(s,CLS[s])+'</div>';}
+  else gr.style.display='none';
+  // 1ª linha — participantes + saldos
+  const kp=[{l:'Participantes',v:fmtN(n),c:'navy',s:fmtN(ativos)+' ativos'},{l:'Saldo total',v:fmtMi(saldo),c:'teal',s:'Part+Patroc+Reman'},{l:'Participante',v:fmtMi(pa),c:'copper'},{l:'Remanescente',v:fmtMi(rm),c:'slate',s:'Conta Assistido (em benefício)'}];
+  if(pt>0)kp.push({l:'Patrocinadora',v:fmtMi(pt),c:'gold'});
+  kpis('vg-kpis',kp);
+  // 2ª linha — contribuições
+  const k2=[{l:'Contribuição total/mês',v:fmtR(cb+cq+cr),c:'teal'},{l:'Participante',v:fmtR(cb),c:'copper'}];
+  if(cq>0)k2.push({l:'Patrocinadora',v:fmtR(cq),c:'slate'});
+  if(cr>0)k2.push({l:'Co-participante',v:fmtR(cr),c:'navy'});
+  kpis('vg-kpis2',k2);
+  // 3ª linha — benefícios por tipo (col O/S)
+  const bt=benByScope(s);const totB=Object.values(bt).reduce((a,x)=>a+x[1],0);
+  let k3=BENCAT.filter(c=>bt[c]).map(c=>({l:c,v:fmtR(bt[c][1]),c:BENCOLOR[c],s:fmtN(bt[c][0])+' benefícios'}));
+  if(Object.keys(bt).length===0)k3=[{l:'Sem benefícios de renda',v:'—',c:'slate',s:'nenhum assistido em renda nesta seleção'}];
+  else k3.unshift({l:'Total benefícios/mês',v:fmtR(totB),c:'navy',s:'valor do benefício de renda'});
+  kpis('vg-kpis3',k3);
+  // nota BEV (esclarecimento sobre contribuições)
+  document.getElementById('vg-bevnote').innerHTML='<div class="note" style="border-left-color:var(--raya-copper)"><strong>BEV e Pecúlio por Morte não entram na distribuição de benefícios de renda acima.</strong> O <strong>BEV — Benefício Especial em Vida</strong> pagou <strong>R$ 110,3 mi no exercício 2025</strong> (segundo balancete dez/2025), com fundos remanescentes BEV2 R$ 156,4 mi + BEV3 R$ 348,2 mi. No mesmo exercício, Pecúlio por Morte pagou R$ 25,6 mi e Pecúlio Proporcional em Vida R$ 6,1 mi. Esses fluxos do Pecúlio são detalhados no módulo Movimentação.</div>';
+  // tabela de características dos planos (só consolidado)
+  const ptab=document.getElementById('vg-plantab');
+  if(s==='Todos'){
+    const INI={'ANAPARprev':2008,'Viva Empresarial':2005,'ASSORELprev':2007,'IBAprev':2004,'Viva Futuro':2019,'Viva de Previdência e Pecúlio':1990,'Viva Federativo':2022};
+    const order=['ANAPARprev','Viva Empresarial','ASSORELprev','IBAprev','Viva Futuro','Viva de Previdência e Pecúlio','Viva Federativo'];
+    let tot=0;let body=order.map(pl=>{const p=PBI.find(x=>x.plano===pl);const at=p.tipo['Ativo']||0;tot+=at;return `<tr><td>${SHORT[pl]}</td><td style="text-align:center">CD</td><td>${INI[pl]}</td><td>${fmtN(at)}</td></tr>`;}).join('');
+    ptab.innerHTML='<h2 class="subhead" style="font-size:calc(22px*var(--scale))">Visão geral dos planos</h2>'+
+      '<p class="src-note" style="margin-bottom:10px">Os 7 planos operam no regime de Contribuição Definida (CD), inclusive o Viva de Previdência e Pecúlio (cadastrado na PREVIC como CD), que mantém uma submassa legada em regime BD.</p>'+
+      '<div class="table-wrap" style="margin-bottom:18px"><table class="pbi"><thead><tr><th>Plano</th><th style="text-align:center">Tipo</th><th style="text-align:left">Início</th><th>Ativos</th></tr></thead><tbody>'+body+
+      `<tr class="tot"><td>Total</td><td></td><td></td><td>${fmtN(tot)}</td></tr></tbody></table></div>`;
+    ptab.style.display='';
+  } else ptab.style.display='none';
+  const tc={};rs.forEach(p=>Object.entries(p.tipo).forEach(([k,v])=>tc[k]=(tc[k]||0)+v));
+  const te=Object.entries(tc).sort((a,b)=>b[1]-a[1]);
+  const ac=root.getAttribute('data-theme')==='dark'?'#B8BDB9':'#364F53';
+  if(CH['vg-tipo'])CH['vg-tipo'].destroy();
+  CH['vg-tipo']=new Chart(document.getElementById('vg-tipo'),{type:'bar',data:{labels:te.map(x=>x[0]),datasets:[{data:te.map(x=>x[1]),backgroundColor:'#134E58'}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtN(c.parsed.x)+' participantes'}}},scales:{x:{ticks:{color:ac},grid:{color:'rgba(0,0,0,.06)'}},y:{ticks:{color:ac},grid:{display:false}}}}});
+  const fic=document.getElementById('vg-ficha');
+  if(PREM[s]){const p=PREM[s];fic.innerHTML=`<div class="note" style="border-left-color:var(--raya-petrol);"><strong>Ficha do plano — ${s}</strong><div style="margin-top:6px;line-height:1.7"><strong>Tipo:</strong> ${p.tipo} &nbsp;·&nbsp; <strong>Grupo:</strong> ${p.grupo} &nbsp;·&nbsp; ${p.vinc}<br><strong>Regime:</strong> ${p.regime} &nbsp;·&nbsp; <strong>Taxa real de juros:</strong> ${p.taxa} &nbsp;·&nbsp; <strong>Tábua:</strong> ${p.tabua}<br><strong>Particularidades:</strong> ${p.part}</div></div>`;fic.style.display='';}
+  else fic.style.display='none';
+  const tp=(s==='Todos'?TPAGG.total:(GROUPS.includes(s)?TPAGG.groups[s]:TPAGG.units[s]));
+  const tt=TIPOS.filter(t=>tp[t].n>0);const T={n:0,c:0,sa:0,b:0};
+  let body=tt.map(t=>{T.n+=tp[t].n;T.c+=tp[t].contrib;T.sa+=tp[t].saldo;T.b+=tp[t].benef;return `<tr><td>${t}</td><td>${fmtN(tp[t].n)}</td><td>${fmtR(tp[t].contrib)}</td><td>${fmtMi(tp[t].saldo)}</td><td>${fmtR(tp[t].benef)}</td></tr>`;}).join('');
+  body+=`<tr class="tot"><td>TOTAL</td><td>${fmtN(T.n)}</td><td>${fmtR(T.c)}</td><td>${fmtMi(T.sa)}</td><td>${fmtR(T.b)}</td></tr>`;
+  document.getElementById('vg-tiptab').innerHTML=body;
+  const pec=document.getElementById('vg-peculio');
+  if(s==='Viva de Previdência e Pecúlio'){pec.style.display='';pec.innerHTML=`
+    <h2 class="subhead" style="font-size:calc(22px*var(--scale))">Benefícios e fundos do Pecúlio</h2>
+    <div class="note" style="border-left-color:var(--raya-teal)"><strong>Plano instituído.</strong> O Viva de Previdência e Pecúlio é um <strong>plano instituído</strong> (sem patrocinadora, sem percentual de folha), cadastrado na PREVIC como <strong>Contribuição Definida (CD)</strong>.</div>
+    <div class="note" style="border-left-color:var(--raya-petrol)"><strong>Massa transitória (Benefício Definido).</strong> Cumpre destacar que o Plano possui uma massa transitória relevante com direito aos benefícios anteriores de <strong>Pecúlio por Morte</strong>, <strong>Pecúlio por Morte de Cônjuge ou Companheiro</strong>, <strong>Pecúlio por AIDS</strong>, <strong>Pecúlio Proporcional em Vida (PPV)</strong>, <strong>Adiantamento Financeiro por Aposentadoria (AFA)</strong> e <strong>Benefício Especial em Vida (BEV)</strong>, que estão caracterizados como <strong>Benefício Definido — BD</strong>. (Plano hoje desenhado como CD, com massa legada do "Participante Fundador", inscrito até 13/02/2018.)</div>
+    <div class="note" style="border-left-color:var(--raya-slate)"><strong>Composição do grupo "Aguardando Pensão" (7.177), conforme a Fundação:</strong> <strong>260</strong> são assistidos (com Saldo Remanescente) e <strong>6.917</strong> são casos em que, por óbito, há Pecúlio por Morte ou Resgate de Herdeiros a pagar. São assistidos de <em>duration</em> muito curta; o fluxo de saída do grupo foi de ~R$ 2,5 mi em maio.</div>
+    <div class="kpi-grid">
+      <div class="kpi-card teal"><div class="kpi-label">BEV — em fundos</div><div class="kpi-value">R$ 504,5 mi</div><div class="kpi-sub">BEV2 156,4 + BEV3 348,2 · pago no ano R$ 110,3 mi</div></div>
+      <div class="kpi-card navy"><div class="kpi-label">Saldo em reserva (BEV1)</div><div class="kpi-value">R$ 520,6 mi</div><div class="kpi-sub">parcela de participantes em reserva</div></div>
+      <div class="kpi-card copper"><div class="kpi-label">Pecúlio por Morte</div><div class="kpi-value">R$ 195,8 mi</div><div class="kpi-sub">provisão · pago no ano R$ 25,6 mi</div></div>
+      <div class="kpi-card slate"><div class="kpi-label">Pecúlio Proporcional em Vida</div><div class="kpi-value">R$ 6,1 mi</div><div class="kpi-sub">pago no ano · benefício em vida</div></div>
+    </div>
+    <div class="note" style="border-left-color:var(--raya-copper)"><strong>Como funcionam os benefícios legados do Pecúlio.</strong> O <strong>BEV (Benefício Especial em Vida)</strong> distribui resultado/superávit aos participantes fundadores, pago em vida e em parcela única — é o maior componente (fundos de R$ 504,5 mi). O <strong>Pecúlio Proporcional em Vida (PPV)</strong> também é pago em vida, em parcela única. O <strong>Pecúlio por Morte (PPM)</strong> é pago aos beneficiários no óbito (formato de seguro de vida). Valores do balancete dez/2025.</div>`;}
+  else pec.style.display='none';
+  document.getElementById('vg-grupos').style.display=(s==='Todos')?'':'none';
+}
+function redrawAll(){const a=q=>document.querySelector(`.filter-btn[data-tab="${q}"].active`);renderVG(a('vg')?.dataset.plano||'Todos');renderContrib(a('contrib')?.dataset.plano||'Todos');renderBenef(a('benef')?.dataset.plano||'Todos');renderSaldo(a('saldo')?.dataset.plano||'Todos');}
+/* init */
+document.getElementById('vg-fgrupo').innerHTML='<span class="filter-label">Por grupo</span>'+['Todos',...GROUPS].map((g,i)=>`<button class="filter-btn${i===0?' active':''}" data-tab="vg" data-plano="${g}">${g}</button>`).join('');
+document.getElementById('vg-fplano').innerHTML='<span class="filter-label">Por plano</span>'+PBI.map(p=>`<button class="filter-btn" data-tab="vg" data-plano="${p.plano}">${SHORT[p.plano]}</button>`).join('');
+function filterGP(elG,elP,tab){document.getElementById(elG).innerHTML='<span class="filter-label">Por grupo</span>'+['Todos',...GROUPS].map((g,i)=>`<button class="filter-btn${i===0?' active':''}" data-tab="${tab}" data-plano="${g}">${g}</button>`).join('');document.getElementById(elP).innerHTML='<span class="filter-label">Por plano</span>'+PBI.map(p=>`<button class="filter-btn" data-tab="${tab}" data-plano="${p.plano}">${SHORT[p.plano]}</button>`).join('');}
+filterGP('fgrupo-contrib','fplano-contrib','contrib');filterGP('fgrupo-benef','fplano-benef','benef');filterRow('filter-saldo','saldo');
+renderVG('Todos');renderContrib('Todos');renderBenef('Todos');renderSaldo('Todos');
+</script>
+</body>
+</html>

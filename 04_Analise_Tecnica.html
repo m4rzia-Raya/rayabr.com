@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raya Advisory — Fundação Viva · Análise Técnica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --raya-dark:#122028; --raya-navy:#20353A; --raya-slate:#364F53;
+  --raya-teal:#1D9492; --raya-teal-light:#07C0BD; --raya-copper:#BE620F;
+  --raya-copper-mid:#B0742A; --raya-rust:#993715; --raya-deep-rust:#651F0B;
+  --raya-gold:#B59875; --raya-cream:#F0EEE6; --raya-petrol:#134E58;
+  --font-display:'Cormorant Garamond',Georgia,serif; --font-body:'DM Sans',system-ui,sans-serif;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.18); --shadow-md:0 4px 16px rgba(0,0,0,.22);
+  --radius-sm:6px; --radius-md:10px; --radius-lg:14px;
+  --fs-base:16px; --fs-sm:14px; --fs-xs:12px; --fs-eyebrow:12px; --fs-title:40px; --scale:1;
+}
+:root[data-theme="dark"]{--bg:var(--raya-dark);--bg-elev:var(--raya-navy);--bg-card:#1A2C32;--bg-card-2:#243A40;--text:var(--raya-cream);--text-2:#B8BDB9;--text-3:#8A938F;--border:rgba(29,148,146,.22);--border-soft:rgba(255,255,255,.06);}
+:root[data-theme="light"]{--bg:#FAF8F2;--bg-elev:#F1EEE6;--bg-card:#FFFFFF;--bg-card-2:#FFFFFF;--text:#122028;--text-2:#364F53;--text-3:#6B7B7E;--border:rgba(18,32,40,.12);--border-soft:rgba(18,32,40,.06);}
+:root[data-presentation="on"]{--scale:1.18;--fs-base:19px;--fs-sm:17px;--fs-xs:14px;--fs-eyebrow:14px;--fs-title:52px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:var(--fs-base);line-height:1.65;-webkit-font-smoothing:antialiased;zoom:var(--zoom,1);}
+.header{background:var(--raya-petrol);border-bottom:1px solid rgba(255,255,255,.12);position:sticky;top:0;z-index:100;box-shadow:var(--shadow-md);}
+.header-inner{max-width:1180px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.header-logo svg{height:44px;width:auto;display:block;}
+.header-meta{text-align:right;}
+.header-title{font-family:var(--font-display);font-size:calc(20px*var(--scale));color:#fff;font-weight:500;letter-spacing:.02em;}
+.header-date{font-size:var(--fs-xs);color:var(--raya-teal-light);letter-spacing:.2em;text-transform:uppercase;margin-top:2px;}
+.header-controls{display:flex;gap:8px;}
+.ctrl-btn{background:transparent;border:1px solid rgba(255,255,255,.28);color:rgba(255,255,255,.88);padding:8px 14px;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:var(--fs-xs);font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.ctrl-btn:hover{border-color:#fff;color:#fff;background:rgba(255,255,255,.10);}
+.zoom-group{display:flex;align-items:center;border:1px solid rgba(255,255,255,.28);border-radius:var(--radius-sm);overflow:hidden;}
+.zoom-btn{background:transparent;border:none;color:rgba(255,255,255,.88);width:34px;height:34px;font-size:16px;font-weight:600;cursor:pointer;}
+.zoom-btn:hover{background:rgba(255,255,255,.15);color:#fff;}
+.zoom-indicator{font-size:12px;font-weight:600;color:rgba(255,255,255,.88);min-width:48px;text-align:center;cursor:pointer;padding:0 4px;}
+.main{max-width:1180px;margin:0 auto;padding:32px;}
+.eyebrow{font-size:var(--fs-eyebrow);font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--raya-teal);margin-bottom:8px;}
+.sec-title{font-family:var(--font-display);font-size:var(--fs-title);font-weight:500;color:var(--text);line-height:1.1;margin-bottom:10px;}
+.src-note{font-size:var(--fs-xs);color:var(--text-3);font-style:italic;margin-bottom:8px;line-height:1.6;}
+.intro{background:var(--bg-card);border:1px solid var(--border);border-left:5px solid var(--raya-gold);border-radius:var(--radius-md);padding:16px 20px;margin:18px 0 28px;font-size:var(--fs-sm);color:var(--text-2);line-height:1.65;}
+.intro strong{color:var(--text);}
+.sec{margin:30px 0;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;background:var(--bg-card);box-shadow:var(--shadow-sm);}
+.sec-head{background:var(--raya-petrol);color:#fff;padding:14px 22px;display:flex;align-items:baseline;gap:14px;}
+.sec-num{font-family:var(--font-display);font-size:calc(26px*var(--scale));font-weight:500;color:var(--raya-teal-light);line-height:1;}
+.sec-h{font-family:var(--font-display);font-size:calc(24px*var(--scale));font-weight:500;color:#fff;line-height:1.1;}
+.sec-body{padding:18px 24px 22px;}
+.sub{font-size:var(--fs-xs);font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--raya-copper);margin:16px 0 8px;}
+.sub:first-child{margin-top:2px;}
+ul.find{list-style:none;margin:0 0 4px;padding:0;}
+ul.find li{position:relative;padding:7px 0 7px 26px;border-bottom:1px solid var(--border-soft);font-size:var(--fs-sm);color:var(--text-2);line-height:1.6;}
+ul.find li:last-child{border-bottom:none;}
+ul.find li::before{content:'';position:absolute;left:6px;top:15px;width:7px;height:7px;border-radius:2px;background:var(--raya-teal);transform:rotate(45deg);}
+ul.find li strong{color:var(--text);}
+.tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--raya-petrol);background:rgba(19,78,88,.10);border-radius:999px;padding:2px 10px;margin-left:6px;vertical-align:middle;}
+.xref{font-size:var(--fs-xs);color:var(--text-3);font-style:italic;margin-top:10px;}
+.xref a{color:var(--raya-teal);text-decoration:none;}
+.footer{background:var(--bg-elev);border-top:1px solid var(--border);margin-top:48px;padding:24px 32px;}
+.footer-inner{max-width:1180px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+.footer-brand{font-family:var(--font-display);font-size:calc(18px*var(--scale));color:var(--text-2);}
+.footer-disc{font-size:var(--fs-xs);color:var(--text-3);max-width:760px;line-height:1.6;}
+@media(max-width:900px){.header-inner,.main{padding-left:16px;padding-right:16px;}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-logo" aria-label="Raya Advisory">
+      <svg viewBox="0 0 220 56" width="220" height="56" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#1D9492"/><stop offset="100%" stop-color="#07C0BD"/></linearGradient></defs>
+        <text x="0" y="32" font-family="'Cormorant Garamond',Georgia,serif" font-size="34" font-weight="500" letter-spacing="6" fill="url(#rg)">RAYA</text>
+        <line x1="0" y1="40" x2="120" y2="40" stroke="#B59875" stroke-width="1" opacity="0.6"/>
+        <text x="0" y="52" font-family="'DM Sans',system-ui,sans-serif" font-size="8" letter-spacing="3" fill="#B59875" opacity="0.9">A D V I S O R Y</text>
+      </svg>
+    </div>
+    <div class="header-meta">
+      <div class="header-title">Fundação Viva de Previdência · Análise Técnica</div>
+      <div class="header-date">Conclusões preliminares</div>
+    </div>
+    <div class="header-controls">
+      <a class="ctrl-btn" href="PORTAL_Viva_Viabilidade_Perfis.html" style="text-decoration:none;">← Portal</a>
+      <div class="zoom-group"><button class="zoom-btn" id="zoom-out">A−</button><span class="zoom-indicator" id="zoom-val">100%</span><button class="zoom-btn" id="zoom-in">A+</button></div>
+      <button class="ctrl-btn" id="theme-toggle"><span id="theme-icon">☾</span> <span id="theme-label">Escuro</span></button>
+      <button class="ctrl-btn" id="present-toggle">▣ Apresentação</button>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="eyebrow">04 · Análise Técnica</div>
+  <h1 class="sec-title">Leitura técnica dos planos — conclusões preliminares</h1>
+  <p class="src-note">Síntese da discussão técnica sobre contribuições, perfil demográfico, saldos e movimentação, com base nos módulos Visão Geral, Estatística da População e Movimentação.</p>
+  <div class="intro"><strong>Nota.</strong> Estas são <strong>conclusões preliminares</strong>, ainda em construção, organizadas para leitura. Servem para orientar a discussão sobre a viabilidade de perfis de investimento e serão refinadas conforme avançarmos na validação dos dados com a Fundação.</div>
+
+  <section class="sec">
+    <div class="sec-head"><div class="sec-num">1</div><div class="sec-h">Fluxo de contribuição mensal</div></div>
+    <div class="sec-body">
+      <ul class="find">
+        <li>O fluxo de contribuição dos <strong>participantes ativos ainda é elevado</strong> e é a <strong>principal entrada de recursos</strong> dos planos da Viva.</li>
+        <li>Mesmo o <strong>Viva de Previdência e Pecúlio</strong> — plano bastante maduro e de idade avançada — mantém um <strong>volume alto de contribuições</strong>, o que indica que o plano é efetivamente valorizado pelos participantes.</li>
+        <li>Esse ponto é relevante ao avaliar a oferta de perfis para esse plano, ainda que o grosso do saldo não seja destinado a renda programada — e que <strong>não seja possível, com os dados atuais, separar/identificar exatamente o saldo destinado à renda programada</strong>.</li>
+        <li>Nos demais planos também há um <strong>percentual importante de contribuição</strong> (Viva Empresarial, Viva Federativo e Viva Futuro). Proporcionalmente ao seu tamanho, o <strong>Viva Futuro é o que mais cresce</strong>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div class="sec-num">2</div><div class="sec-h">Estatística da população — perfil demográfico</div></div>
+    <div class="sec-body">
+      <div class="sub">Quem são os participantes</div>
+      <ul class="find">
+        <li>A grande maioria vem do <strong>Viva de Previdência e Pecúlio</strong> e também do <strong>ANAPARprev</strong>; <strong>idade média bem avançada</strong> e população <strong>majoritariamente feminina</strong>.</li>
+        <li>O perfil de sexo, porém, <strong>varia muito entre os planos</strong> — com destaque para ASSORELprev e ANAPARprev; no caso do ASSORELprev, faz sentido pela característica do plano. Nos demais, a distribuição é mais equilibrada.</li>
+      </ul>
+      <div class="sub">Distribuição por tipo de participante</div>
+      <ul class="find">
+        <li>Majoritariamente <strong>ativos, apesar da idade avançada</strong> — reflexo principalmente do tipo de benefício pago no Viva Pecúlio e, em parte, da migração do ANAPARprev.</li>
+        <li>Quando se retiram esses dois planos, observam-se <strong>populações mais jovens</strong> nos demais.</li>
+        <li>A contribuição elevada está associada principalmente ao <strong>benefício por morte</strong>, com um contingente relevante ainda <strong>aguardando receber</strong>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div class="sec-num">3</div><div class="sec-h">Saldo médio e tipo de participante</div></div>
+    <div class="sec-body">
+      <ul class="find">
+        <li>O <strong>saldo remanescente</strong> é o principal componente; os saldos médios — da ordem de <strong>R$ 450 mil</strong> — não são desprezíveis para quem de fato recebe benefício.</li>
+        <li>No Viva Pecúlio, o saldo remanescente considera <strong>somente quem recebe renda programada</strong> — o pecúlio por morte entra uma única vez no plano.</li>
+        <li>Por tipo de participante, todas as populações têm idade média mais avançada, com <strong>saldos médios não desprezíveis</strong>, em especial nos <strong>autopatrocinados</strong>; o BPD é mais irrelevante.</li>
+        <li><strong>Destaque:</strong> as contribuições mensais são bem baixas — a percepção de valor está mais ligada a <strong>benefícios acessórios</strong> (pecúlio por morte) do que à renda. Há um <strong>desafio relevante de transformar esse tipo de plano em algo que faça sentido</strong>, sobretudo para os ativos.</li>
+        <li>Ainda assim, a contribuição média do ativo equivale a cerca de <strong>5% do salário</strong> — não tão irrelevante. O salário médio dessa população é baixo e a maior parte é <strong>coberta pelo INSS</strong>, o que reforça o caráter de benefício acessório.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div class="sec-num">4</div><div class="sec-h">Saldo e contribuição por faixa etária</div></div>
+    <div class="sec-body">
+      <ul class="find">
+        <li>O <strong>saldo médio cresce com a idade</strong>, como esperado. A contribuição média acaba reduzindo (valores financeiros), e a partir de <strong>55–60 anos</strong> boa parte da população para de contribuir.</li>
+        <li>A análise por grupos de idade mostra <strong>contribuição mais elevada nas idades mais jovens</strong>, reforçando que a queda após os 60 está ligada ao <strong>momento de vida</strong> — e não à ausência de benefício agregado.</li>
+        <li>A contribuição média fica <strong>sempre acima de 3% do salário</strong>, o que é bastante relevante.</li>
+        <li><strong>Ressalva importante:</strong> nos planos instituídos, o salário informado serve apenas para apuração do benefício — o participante não precisa declarar o salário correto. Como as contribuições são baixas, a maioria provavelmente declara salários baixos, o que faz o <strong>salário médio aparecer abaixo do esperado</strong>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div class="sec-num">5</div><div class="sec-h">Perfis dos participantes — dispersões</div></div>
+    <div class="sec-body">
+      <ul class="find">
+        <li>A relação <strong>idade × saldo</strong> está mais ligada ao <strong>tipo de plano</strong> do que a um comportamento da população.</li>
+        <li><strong>Viva Pecúlio:</strong> saldos maiores, mas também idades mais avançadas.</li>
+        <li><strong>ANAPARprev:</strong> saldos elevados — provável fruto da migração para a Viva (carregaram saldos altos) —, ainda que seja o plano com <strong>maior volume de resgates</strong> (total e parcial); histórico distinto dos demais.</li>
+        <li><strong>Patrocinados:</strong> grande dispersão de salários e saldos, com uma massa de <strong>salários elevados (acima de R$ 20 mil)</strong> e contribuições relevantes. É a população que <strong>mais enxerga valor agregado</strong>; mesmo planos recentes já têm contribuições significativas — o que reforça que <strong>melhorar a estrutura de investimentos deve tornar os planos mais atrativos</strong>.</li>
+        <li><strong>Idade × contribuição</strong> e <strong>contribuição × salário</strong> seguem linhas de tendência bem definidas, com percentuais de contribuição variando conforme esperado.</li>
+        <li><strong>Salário × saldo:</strong> há dispersão (salários altos com saldos baixos), mas a maioria com salário acima de <strong>R$ 10 mil</strong> — faixa de maior percepção do benefício — apresenta saldos maiores, como esperado. Esse comportamento <strong>não é avaliável nos instituídos</strong> (sem formação de salário).</li>
+        <li><strong>Tempo de adesão × idade</strong> e <strong>idade × saldo:</strong> heterogeneidade muito maior. Exceto o ANAPARprev (de histórico mais tradicional), os demais têm <strong>saldos baixos independentemente da idade</strong> — é onde há <strong>mais espaço para melhorar a captação</strong>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div class="sec-num">6</div><div class="sec-h">Fluxos de movimentação</div></div>
+    <div class="sec-body">
+      <ul class="find">
+        <li>O <strong>volume é elevado apenas nos planos onde isso é esperado</strong>.</li>
+        <li>Há uma <strong>movimentação muito atípica no Viva Empresarial</strong>, consistente com o observado na matriz de saúde financeira (alto volume de resgates de contribuições).</li>
+      </ul>
+      <p class="xref">Detalhamento completo do fluxo (saídas, entradas, portabilidades e matriz por plano) no módulo <a href="02_Movimentacao.html">Movimentação</a>. <em>Esta seção será complementada conforme o fechamento da análise de movimentação.</em></p>
+    </div>
+  </section>
+
+  <p class="xref" style="margin-top:24px">Fontes de apoio: módulos <a href="RAYA_analise_VIVA_v3.html">Visão Geral</a>, <a href="03_Estatistica_Populacao.html">Estatística da População</a> e <a href="02_Movimentacao.html">Movimentação</a>, base de participantes (fev/2026), balancetes (dez/2025) e pareceres atuariais (2025).</p>
+</main>
+
+<footer class="footer"><div class="footer-inner">
+  <div class="footer-brand">Raya Advisory · Fundação Viva de Previdência · Análise Técnica</div>
+  <div class="footer-disc">Conclusões preliminares, de caráter técnico e exploratório, sujeitas a refinamento. Não constituem recomendação de investimento. Documento em validação.</div>
+</div></footer>
+
+<script>
+const root=document.documentElement,tBtn=document.getElementById('theme-toggle'),tIc=document.getElementById('theme-icon'),tLb=document.getElementById('theme-label');
+function applyTheme(t){root.setAttribute('data-theme',t);if(t==='dark'){tIc.textContent='☀';tLb.textContent='Claro';}else{tIc.textContent='☾';tLb.textContent='Escuro';}try{localStorage.setItem('raya-theme',t);}catch(e){}}
+tBtn.addEventListener('click',()=>applyTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+try{const s=localStorage.getItem('raya-theme');if(s)root.setAttribute('data-theme',s);}catch(e){}
+const ZMIN=.8,ZMAX=2,ZS=.1,ZD=1;let zB=ZD;const zv=document.getElementById('zoom-val'),zi=document.getElementById('zoom-in'),zo=document.getElementById('zoom-out');
+function aZoom(z,save=true){z=Math.round(z*10)/10;z=Math.max(ZMIN,Math.min(ZMAX,z));document.body.style.zoom=z;zv.textContent=Math.round(z*100)+'%';if(save){try{localStorage.setItem('raya-zoom',z);}catch(e){}}return z;}
+function gZoom(){const v=parseFloat(document.body.style.zoom||ZD);return isNaN(v)?ZD:v;}
+zi.onclick=()=>aZoom(gZoom()+ZS);zo.onclick=()=>aZoom(gZoom()-ZS);zv.onclick=()=>aZoom(ZD);
+try{const sz=parseFloat(localStorage.getItem('raya-zoom'));aZoom(isNaN(sz)?ZD:sz,false);}catch(e){aZoom(ZD,false);}
+const PZ=1.4,pBtn=document.getElementById('present-toggle');
+pBtn.onclick=()=>{const c=root.getAttribute('data-presentation');if(c==='on'){root.removeAttribute('data-presentation');pBtn.textContent='▣ Apresentação';aZoom(zB||ZD);if(document.fullscreenElement)document.exitFullscreen();}else{zB=gZoom();root.setAttribute('data-presentation','on');pBtn.textContent='▣ Sair Apres.';aZoom(PZ,false);if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});}};
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&root.getAttribute('data-presentation')==='on'){root.removeAttribute('data-presentation');pBtn.textContent='▣ Apresentação';aZoom(zB||ZD);}});
+</script>
+</body>
+</html>

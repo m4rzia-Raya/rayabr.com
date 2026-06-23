@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raya Advisory — Fundação Viva · Movimentação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --raya-dark:#122028; --raya-navy:#20353A; --raya-slate:#364F53;
+  --raya-teal:#1D9492; --raya-teal-light:#07C0BD; --raya-copper:#BE620F;
+  --raya-copper-mid:#B0742A; --raya-rust:#993715; --raya-deep-rust:#651F0B;
+  --raya-gold:#B59875; --raya-cream:#F0EEE6; --raya-petrol:#134E58;
+  --font-display:'Cormorant Garamond',Georgia,serif; --font-body:'DM Sans',system-ui,sans-serif;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.18); --shadow-md:0 4px 16px rgba(0,0,0,.22);
+  --radius-sm:6px; --radius-md:10px; --radius-lg:14px;
+  --fs-base:16px; --fs-sm:14px; --fs-xs:12px; --fs-eyebrow:12px; --fs-kpi-value:28px; --fs-title:40px; --scale:1;
+}
+:root[data-theme="dark"]{--bg:var(--raya-dark);--bg-elev:var(--raya-navy);--bg-card:#1A2C32;--bg-card-2:#243A40;--text:var(--raya-cream);--text-2:#B8BDB9;--text-3:#8A938F;--border:rgba(29,148,146,.22);--border-soft:rgba(255,255,255,.06);}
+:root[data-theme="light"]{--bg:#FAF8F2;--bg-elev:#F1EEE6;--bg-card:#FFFFFF;--bg-card-2:#FFFFFF;--text:#122028;--text-2:#364F53;--text-3:#6B7B7E;--border:rgba(18,32,40,.12);--border-soft:rgba(18,32,40,.06);}
+:root[data-presentation="on"]{--scale:1.18;--fs-base:19px;--fs-sm:17px;--fs-xs:14px;--fs-eyebrow:14px;--fs-kpi-value:36px;--fs-title:52px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:var(--fs-base);line-height:1.65;-webkit-font-smoothing:antialiased;zoom:var(--zoom,1);}
+.header{background:var(--raya-petrol);border-bottom:1px solid rgba(255,255,255,.12);position:sticky;top:0;z-index:100;box-shadow:var(--shadow-md);}
+.header-inner{max-width:1400px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.header-logo svg{height:44px;width:auto;display:block;}
+.header-meta{text-align:right;}
+.header-title{font-family:var(--font-display);font-size:calc(20px*var(--scale));color:#fff;font-weight:500;letter-spacing:.02em;}
+.header-date{font-size:var(--fs-xs);color:var(--raya-teal-light);letter-spacing:.2em;text-transform:uppercase;margin-top:2px;}
+.header-controls{display:flex;gap:8px;}
+.ctrl-btn{background:transparent;border:1px solid rgba(255,255,255,.28);color:rgba(255,255,255,.88);padding:8px 14px;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:var(--fs-xs);font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.ctrl-btn:hover{border-color:#fff;color:#fff;background:rgba(255,255,255,.10);}
+.zoom-group{display:flex;align-items:center;border:1px solid rgba(255,255,255,.28);border-radius:var(--radius-sm);overflow:hidden;}
+.zoom-btn{background:transparent;border:none;color:rgba(255,255,255,.88);width:34px;height:34px;font-size:16px;font-weight:600;cursor:pointer;}
+.zoom-btn:hover{background:rgba(255,255,255,.15);color:#fff;}
+.zoom-indicator{font-size:12px;font-weight:600;color:rgba(255,255,255,.88);min-width:48px;text-align:center;cursor:pointer;padding:0 4px;}
+.main{max-width:1400px;margin:0 auto;padding:32px;}
+.eyebrow{font-size:var(--fs-eyebrow);font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--raya-teal);margin-bottom:8px;}
+.sec-title{font-family:var(--font-display);font-size:var(--fs-title);font-weight:500;color:var(--text);line-height:1.1;margin-bottom:8px;}
+.src-note{font-size:var(--fs-xs);color:var(--text-3);font-style:italic;margin-bottom:18px;line-height:1.6;}
+.lead{font-size:var(--fs-sm);color:var(--text-2);line-height:1.6;margin:6px 0 18px;max-width:1000px;}
+.lead strong{color:var(--text);}
+.subhead{font-family:var(--font-display);font-size:calc(24px*var(--scale));font-weight:500;color:var(--text);margin:34px 0 6px;}
+.block-label{font-size:var(--fs-xs);font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3);margin:18px 0 8px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:8px;}
+.kpi-card{background:var(--raya-teal);color:#fff;border-radius:var(--radius-md);padding:16px 18px 14px;box-shadow:var(--shadow-sm);}
+.kpi-card.teal{background:var(--raya-teal);}.kpi-card.rust{background:var(--raya-rust);}.kpi-card.copper{background:var(--raya-copper);}
+.kpi-card.navy{background:var(--raya-dark);}.kpi-card.slate{background:var(--raya-slate);}.kpi-card.deep{background:var(--raya-deep-rust);}.kpi-card.gold{background:var(--raya-copper-mid);}
+.kpi-label{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.82);margin-bottom:8px;}
+.kpi-value{font-family:var(--font-display);font-size:var(--fs-kpi-value);font-weight:500;color:#fff;line-height:1;font-variant-numeric:tabular-nums;}
+.kpi-sub{font-size:11px;color:rgba(255,255,255,.78);margin-top:8px;line-height:1.4;}
+.note{background:var(--bg-card);border:1px solid var(--border);border-left:5px solid var(--raya-teal);border-radius:var(--radius-md);padding:14px 18px;margin:16px 0;font-size:var(--fs-sm);color:var(--text-2);line-height:1.65;}
+.note strong{color:var(--text);}
+.table-wrap{background:var(--bg-card-2);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);margin-bottom:10px;overflow-x:auto;}
+.pbi{width:100%;border-collapse:collapse;font-size:var(--fs-sm);}
+.pbi thead th{background:var(--raya-petrol);color:#fff;padding:12px 16px;font-size:var(--fs-xs);font-weight:600;letter-spacing:.08em;text-transform:uppercase;text-align:right;white-space:nowrap;}
+.pbi thead th:first-child{text-align:left;}
+.pbi tbody td{padding:10px 16px;border-bottom:1px solid var(--border-soft);text-align:right;font-variant-numeric:tabular-nums;color:var(--text-2);white-space:nowrap;}
+.pbi tbody td:first-child{text-align:left;color:var(--text);font-weight:500;}
+.pbi tr.grp td{background:rgba(19,78,88,.10);color:var(--raya-petrol);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:var(--fs-xs);}
+.pbi tr.subtot td{background:rgba(19,78,88,.045);font-weight:600;color:var(--text);}
+.pbi tr.tot td{background:var(--raya-petrol);color:#fff;font-weight:700;}
+.pbi tr.memo td{background:var(--bg-elev);color:var(--text-2);font-style:italic;}
+.neg{color:var(--raya-rust);font-weight:600;}
+.pos{color:var(--raya-teal);font-weight:600;}
+.chart-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:18px 20px;box-shadow:var(--shadow-sm);margin-top:8px;}
+.chart-card-title{font-family:var(--font-display);font-size:calc(20px*var(--scale));color:var(--text);font-weight:500;margin-bottom:2px;}
+.chart-card-sub{font-size:var(--fs-xs);color:var(--text-3);margin-bottom:12px;}
+.chart-wrap{position:relative;height:380px;}
+.footer{background:var(--bg-elev);border-top:1px solid var(--border);margin-top:48px;padding:24px 32px;}
+.footer-inner{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+.footer-brand{font-family:var(--font-display);font-size:calc(18px*var(--scale));color:var(--text-2);}
+.footer-disc{font-size:var(--fs-xs);color:var(--text-3);max-width:760px;line-height:1.6;}
+@media(max-width:900px){.header-inner,.main{padding-left:16px;padding-right:16px;}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-logo" aria-label="Raya Advisory">
+      <svg viewBox="0 0 220 56" width="220" height="56" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#1D9492"/><stop offset="100%" stop-color="#07C0BD"/></linearGradient></defs>
+        <text x="0" y="32" font-family="'Cormorant Garamond',Georgia,serif" font-size="34" font-weight="500" letter-spacing="6" fill="url(#rg)">RAYA</text>
+        <line x1="0" y1="40" x2="120" y2="40" stroke="#B59875" stroke-width="1" opacity="0.6"/>
+        <text x="0" y="52" font-family="'DM Sans',system-ui,sans-serif" font-size="8" letter-spacing="3" fill="#B59875" opacity="0.9">A D V I S O R Y</text>
+      </svg>
+    </div>
+    <div class="header-meta">
+      <div class="header-title">Fundação Viva de Previdência · Movimentação</div>
+      <div class="header-date">Fluxo jan/2022 – mar/2026</div>
+    </div>
+    <div class="header-controls">
+      <a class="ctrl-btn" href="PORTAL_Viva_Viabilidade_Perfis.html" style="text-decoration:none;">← Portal</a>
+      <a class="ctrl-btn" href="RAYA_analise_VIVA_v3.html" style="text-decoration:none;">← Visão Geral</a>
+      <div class="zoom-group"><button class="zoom-btn" id="zoom-out">A−</button><span class="zoom-indicator" id="zoom-val">100%</span><button class="zoom-btn" id="zoom-in">A+</button></div>
+      <button class="ctrl-btn" id="theme-toggle"><span id="theme-icon">☾</span> <span id="theme-label">Escuro</span></button>
+      <button class="ctrl-btn" id="present-toggle">▣ Apresentação</button>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="eyebrow">02 · Movimentação</div>
+  <h1 class="sec-title">Fluxo de entradas e saídas</h1>
+  <p class="lead">O <strong>patrimônio total</strong> da Fundação é de <strong>R$ 3,36 bi</strong> (saldo de contas em fev/2026; PL contábil dez/2025 = R$ 3,30 bi). Esta página detalha o <strong>fluxo</strong> do período: saídas (portabilidades e resgates, acumuladas jan/2022–mar/2026), entradas por portabilidade, e os fluxos mensais e anuais de contribuições e benefícios. Conceito distinto das contribuições mensais da posição.</p>
+
+  <h2 class="subhead" style="font-size:calc(22px*var(--scale))">Fluxo acumulado do período (jan/2022 – mar/2026)</h2>
+  <div class="block-label">Saídas acumuladas — portabilidades e resgates</div>
+  <div class="kpi-grid">
+    <div class="kpi-card slate"><div class="kpi-label">Portabilidades (saída)</div><div class="kpi-value">R$ 20,7 mi</div><div class="kpi-sub">139 operações</div></div>
+    <div class="kpi-card rust"><div class="kpi-label">Resgate</div><div class="kpi-value">R$ 92,7 mi</div><div class="kpi-sub">2.161 registros</div></div>
+    <div class="kpi-card rust"><div class="kpi-label">Resgate parcial</div><div class="kpi-value">R$ 102,7 mi</div><div class="kpi-sub">1.048 registros</div></div>
+    <div class="kpi-card rust"><div class="kpi-label">Resgate de contribuições</div><div class="kpi-value">R$ 64,9 mi</div><div class="kpi-sub">1.417 registros</div></div>
+    <div class="kpi-card deep"><div class="kpi-label">Total de saídas</div><div class="kpi-value">R$ 281,0 mi</div><div class="kpi-sub">portabilidades + resgates</div></div>
+  </div>
+  <div class="block-label">Entradas e saldos líquidos (acumulado)</div>
+  <div class="kpi-grid">
+    <div class="kpi-card teal"><div class="kpi-label">Portabilidade de entrada</div><div class="kpi-value">R$ 75,8 mi</div><div class="kpi-sub">330 operações</div></div>
+    <div class="kpi-card navy"><div class="kpi-label">Saldo líquido portabilidade</div><div class="kpi-value">+ R$ 55,1 mi</div><div class="kpi-sub">entrada 75,8 − saída 20,7</div></div>
+    <div class="kpi-card slate"><div class="kpi-label">Saldo líquido movimentação</div><div class="kpi-value">− R$ 205,2 mi</div><div class="kpi-sub">entradas − saídas no período</div></div>
+    <div class="kpi-card copper"><div class="kpi-label">Taxa de reposição financeira</div><div class="kpi-value">27,0%</div><div class="kpi-sub">entra R$ 1,00 para cada R$ 3,71 que saem</div></div>
+  </div>
+  <div class="note">Este bloco é apenas o fluxo <strong>acumulado de jan/2022 a mar/2026</strong> (portabilidades e resgates). O <strong>fluxo atual</strong> — contribuições e benefícios mensais e os pagamentos anuais do Pecúlio — está logo após a matriz, em base própria, para não misturar períodos.</div>
+
+  <h2 class="subhead">Saúde financeira por plano — matriz consolidada</h2>
+  <p class="src-note">Patrimônio = ativo total do balancete de cada plano (dez/2025). Saídas e entradas = portabilidades + resgates do período. Saldo líquido = entradas − saídas. Organizada pelos 3 grupos, com subtotais e total. A carteira de empréstimos está em tabela separada, abaixo.</p>
+  <div class="table-wrap"><table class="pbi" id="matriz"><thead><tr><th>Plano</th><th>Participantes</th><th>Patrimônio</th><th>Saídas</th><th>Entradas</th><th>Saldo líquido</th></tr></thead><tbody id="matriz-body"></tbody></table></div>
+  <p class="src-note">* Viva de Previdência e Pecúlio — demais pagamentos: BEV (R$ 110,3 mi) + Pecúlio por Morte (R$ 25,6 mi) pagos em 2025, em parcela única. Linha de memória, em base anual — não somada ao total do período acima.</p>
+  <div class="note" style="border-left-color:var(--raya-copper)"><strong>Observação.</strong> O <strong>Viva Empresarial</strong> apresentou um volume atípico de <strong>resgates de contribuições</strong> no período, o que explica seu saldo líquido negativo elevado. Os demais planos — especialmente <strong>Viva de Previdência e Pecúlio e ANAPARprev</strong> — estão em linha com o esperado para suas características (massas maduras, em pagamento de benefícios e portabilidades de saída).</div>
+
+  <h2 class="subhead">Fluxo atual — mensal e anual</h2>
+  <div class="block-label">Fluxo mensal (base fev/2026)</div>
+  <div class="kpi-grid">
+    <div class="kpi-card gold"><div class="kpi-label">Contribuições recebidas</div><div class="kpi-value">~ R$ 6,39 mi</div><div class="kpi-sub">/mês · estimativa pela base · ver nota</div></div>
+    <div class="kpi-card teal"><div class="kpi-label">Benefícios de renda pagos</div><div class="kpi-value">R$ 4,12 mi</div><div class="kpi-sub">/mês · aposentadoria, pensão e invalidez</div></div>
+    <div class="kpi-card navy"><div class="kpi-label">Saldo líquido mensal</div><div class="kpi-value">+ R$ 2,3 mi</div><div class="kpi-sub">/mês · contribuições − benefícios de renda</div></div>
+  </div>
+  <div class="block-label">Pagamentos anuais do Pecúlio (2025)</div>
+  <div class="kpi-grid">
+    <div class="kpi-card copper"><div class="kpi-label">BEV pago (2025)</div><div class="kpi-value">R$ 110,3 mi</div><div class="kpi-sub">Benefício Especial em Vida · parcela única</div></div>
+    <div class="kpi-card copper"><div class="kpi-label">Pecúlio por Morte (2025)</div><div class="kpi-value">R$ 25,6 mi</div><div class="kpi-sub">pago aos beneficiários no óbito</div></div>
+    <div class="kpi-card slate"><div class="kpi-label">Pec. Proporcional em Vida (2025)</div><div class="kpi-value">R$ 6,1 mi</div><div class="kpi-sub">benefício pago em vida</div></div>
+  </div>
+  <div class="note" style="border-left-color:var(--raya-gold)"><strong>Contribuições — valor estimado.</strong> Os R$ 6,39 mi/mês vêm da base de participantes (snapshot de fev/2026); não temos a série histórica de contribuições. <strong>Se a Viva confirmar, sugerimos uma aba própria da planilha só com a série de contribuições (2022–2025)</strong>, para obter um acumulado real comparável às saídas do bloco acima. As duas análises têm bases distintas e não devem ser somadas entre si: o bloco anterior é <strong>acumulado (2022–2026)</strong>; este é <strong>mensal e anual (fluxo atual)</strong>.</div>
+
+  <h2 class="subhead">Saldo líquido por plano — entradas × saídas</h2>
+  <p class="src-note">Entradas: portabilidades recebidas (jan/23–mar/26). Saídas: portabilidades + resgates (jan/22–mar/26). Único plano com saldo líquido positivo: Viva Futuro (+R$ 16,4 mi).</p>
+  <div class="chart-card"><div class="chart-wrap"><canvas id="chart-saldo"></canvas></div></div>
+
+  <h2 class="subhead">Carteira de empréstimos consignados</h2>
+  <p class="src-note">Tabela separada da matriz (RE Nº 042/2026 · posição mar/2026). Apenas os planos com carteira própria.</p>
+  <div class="table-wrap">
+    <table class="pbi">
+      <thead><tr><th>Plano</th><th>Saldo da carteira</th><th>Inadimplência</th><th>Observação</th></tr></thead>
+      <tbody>
+        <tr><td>Viva Empresarial</td><td>R$ 1,9 mi</td><td>1,62%</td><td>carteira ativa</td></tr>
+        <tr><td>ANAPARprev</td><td>R$ 0,81 mi</td><td>3,70%</td><td>inclui carteira "ex-Petros" (R$ 564 mil · 36 contratos · em extinção)</td></tr>
+        <tr><td>Viva de Previdência e Pecúlio</td><td>R$ 0,05 mi</td><td>0,00%</td><td>carteira ativa</td></tr>
+        <tr class="tot"><td>Total</td><td>R$ 2,73 mi</td><td>—</td><td>226 contratos · mar/2026</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="subhead">Movimentos atípicos — leitura cuidadosa</h2>
+  <div class="note" style="border-left-color:var(--raya-navy)"><strong>ANAPARprev — origem Petros / retirada de patrocínio Braskem.</strong> O elevado volume de saídas (R$ 178,5 mi) reflete a natureza do plano: a Viva assumiu sua gestão em <strong>maio/2020</strong>, vinda da Petros, incorporando uma submassa da <strong>retirada de patrocínio da Braskem</strong> (Copene/Braskem) e uma carteira de empréstimos "ex-Petros" hoje fechada e em extinção. A inadimplência de 3,70% concentra-se nessa carteira herdada — é uma massa madura, em pagamento de benefícios e portabilidades de saída.</div>
+  <div class="note" style="border-left-color:var(--raya-copper)"><strong>Viva de Previdência e Pecúlio — saídas de Benefícios × BEV.</strong> O plano paga benefícios legados a uma massa transitória de 7.177 assistidos. No exercício 2025: <strong>BEV R$ 110,3 mi</strong> (parcela única, distribuição irregular), <strong>Pecúlio por Morte R$ 25,6 mi</strong> e <strong>Pecúlio Proporcional em Vida R$ 6,1 mi</strong>. Em base mensal, o fluxo de saída do grupo foi de ~R$ 2,5 mi em maio. No Pecúlio, parte das contribuições é de natureza contábil (fundo de reserva para reversão das contribuições, do superávit).</div>
+</main>
+
+<footer class="footer"><div class="footer-inner">
+  <div class="footer-brand">Raya Advisory · Fundação Viva de Previdência · Movimentação</div>
+  <div class="footer-disc">Material informativo, elaborado com base em relatórios de fluxo e balancetes da Fundação Viva. Não constitui recomendação de investimento. Documento em validação.</div>
+</div></footer>
+
+<script>
+const root=document.documentElement,tBtn=document.getElementById('theme-toggle'),tIc=document.getElementById('theme-icon'),tLb=document.getElementById('theme-label');
+function ac(){return root.getAttribute('data-theme')==='dark'?'#B8BDB9':'#364F53';}
+function gc(){return root.getAttribute('data-theme')==='dark'?'rgba(255,255,255,.08)':'rgba(0,0,0,.06)';}
+const fmtMi=v=>(v<0?'− ':'')+'R$ '+Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' mi';
+const fmtN=v=>v.toLocaleString('pt-BR');
+// Matriz: [plano, grupo, participantes, PL, saidas, entradas] (R$ mi)
+const MAT=[
+ ['Viva de Previdência e Pecúlio','Pecúlio',30333,2413.3,6.0,0.0],
+ ['Viva Empresarial','Patrocinados',1819,153.1,69.8,1.1],
+ ['Viva Federativo','Patrocinados',1009,13.3,0.095,0.039],
+ ['ANAPARprev','Instituídos',4167,595.3,178.5,37.6],
+ ['Viva Futuro','Instituídos',2198,93.0,19.2,35.6],
+ ['IBAprev','Instituídos',290,25.6,7.4,1.5],
+ ['ASSORELprev','Instituídos',189,1.9,0.028,0.0]
+];
+const GROUPS=['Pecúlio','Patrocinados','Instituídos'];
+const GLABEL={'Pecúlio':'Viva de Previdência e Pecúlio (instituído)','Patrocinados':'Patrocinados','Instituídos':'Instituídos'};
+function liq(r){return r[5]-r[4];}
+function cell(v,neg){const cls=v>=0?'pos':'neg';return `<td class="${cls}">${(v>=0?'+ ':'− ')}R$ ${Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})} mi</td>`;}
+function buildMatriz(){
+  let h='';const T=[0,0,0,0];
+  GROUPS.forEach(g=>{const rs=MAT.filter(r=>r[1]===g);
+    h+=`<tr class="grp"><td>${GLABEL[g]}</td><td></td><td></td><td></td><td></td><td></td></tr>`;
+    const S=[0,0,0,0];
+    rs.forEach(r=>{S[0]+=r[2];S[1]+=r[3];S[2]+=r[4];S[3]+=r[5];
+      h+=`<tr><td>${r[0]}</td><td>${fmtN(r[2])}</td><td>${fmtMi(r[3])}</td><td>${fmtMi(r[4])}</td><td>${fmtMi(r[5])}</td>${cell(liq(r))}</tr>`;});
+    h+=`<tr class="subtot"><td>Subtotal · ${g}</td><td>${fmtN(S[0])}</td><td>${fmtMi(S[1])}</td><td>${fmtMi(S[2])}</td><td>${fmtMi(S[3])}</td>${cell(S[3]-S[2])}</tr>`;
+    T[0]+=S[0];T[1]+=S[1];T[2]+=S[2];T[3]+=S[3];});
+  h+=`<tr class="tot"><td>TOTAL · 7 planos</td><td>${fmtN(T[0])}</td><td>${fmtMi(T[1])}</td><td>${fmtMi(T[2])}</td><td>${fmtMi(T[3])}</td><td>${(T[3]-T[2]>=0?'+ ':'− ')}R$ ${Math.abs(T[3]-T[2]).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})} mi</td></tr>`;
+  h+=`<tr class="memo"><td>Viva de Previdência e Pecúlio * — demais pagamentos (BEV + Pecúlio por Morte, 2025)</td><td>—</td><td>—</td><td>R$ 135,9 mi</td><td>—</td><td>—</td></tr>`;
+  document.getElementById('matriz-body').innerHTML=h;
+}
+let CH=null;
+function drawChart(){
+  const order=[...MAT].sort((a,b)=>liq(b)-liq(a));
+  const labels=order.map(r=>r[0]);
+  const ent=order.map(r=>r[5]);
+  const sai=order.map(r=>-r[4]);
+  const net=order.map(r=>liq(r));
+  const el=document.getElementById('chart-saldo');if(CH)CH.destroy();
+  CH=new Chart(el,{data:{labels,datasets:[
+    {type:'bar',label:'Entradas (R$ mi)',data:ent,backgroundColor:'#1D9492',stack:'f'},
+    {type:'bar',label:'Saídas (R$ mi)',data:sai,backgroundColor:'#993715',stack:'f'},
+    {type:'line',label:'Saldo líquido',data:net,borderColor:'#651F0B',borderWidth:2,pointRadius:3,pointBackgroundColor:'#651F0B',fill:false,tension:.1}
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:ac(),font:{family:'DM Sans',size:12}}},tooltip:{callbacks:{label:c=>c.dataset.label+': R$ '+c.parsed.y.toFixed(1)+' mi'}}},
+    scales:{x:{ticks:{color:ac(),font:{size:11}},grid:{display:false}},y:{ticks:{color:ac(),callback:v=>'R$ '+v+' mi'},grid:{color:gc()}}}}});
+}
+function redraw(){buildMatriz();drawChart();}
+
+function applyTheme(t){root.setAttribute('data-theme',t);if(t==='dark'){tIc.textContent='☀';tLb.textContent='Claro';}else{tIc.textContent='☾';tLb.textContent='Escuro';}try{localStorage.setItem('raya-theme',t);}catch(e){}drawChart();}
+tBtn.addEventListener('click',()=>applyTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+try{const s=localStorage.getItem('raya-theme');if(s)root.setAttribute('data-theme',s);}catch(e){}
+const ZMIN=.8,ZMAX=2,ZS=.1,ZD=1;let zB=ZD;const zv=document.getElementById('zoom-val'),zi=document.getElementById('zoom-in'),zo=document.getElementById('zoom-out');
+function aZoom(z,save=true){z=Math.round(z*10)/10;z=Math.max(ZMIN,Math.min(ZMAX,z));document.body.style.zoom=z;zv.textContent=Math.round(z*100)+'%';if(save){try{localStorage.setItem('raya-zoom',z);}catch(e){}}return z;}
+function gZoom(){const v=parseFloat(document.body.style.zoom||ZD);return isNaN(v)?ZD:v;}
+zi.onclick=()=>aZoom(gZoom()+ZS);zo.onclick=()=>aZoom(gZoom()-ZS);zv.onclick=()=>aZoom(ZD);
+try{const sz=parseFloat(localStorage.getItem('raya-zoom'));aZoom(isNaN(sz)?ZD:sz,false);}catch(e){aZoom(ZD,false);}
+const PZ=1.4,pBtn=document.getElementById('present-toggle');
+pBtn.onclick=()=>{const c=root.getAttribute('data-presentation');if(c==='on'){root.removeAttribute('data-presentation');pBtn.textContent='▣ Apresentação';aZoom(zB||ZD);if(document.fullscreenElement)document.exitFullscreen();}else{zB=gZoom();root.setAttribute('data-presentation','on');pBtn.textContent='▣ Sair Apres.';aZoom(PZ,false);if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});}};
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&root.getAttribute('data-presentation')==='on'){root.removeAttribute('data-presentation');pBtn.textContent='▣ Apresentação';aZoom(zB||ZD);}});
+redraw();
+</script>
+</body>
+</html>
