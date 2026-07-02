@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raya Advisory — Cronograma Projeto Ciclo de Vida · Viva · v9</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#E6E4DB; --bg-soft:#EDEAE0; --bg-card:#F2EFE5; --bg-card2:#FFFFFF;
+  --ink:#122028; --ink-2:#20353A; --ink-3:#7A5A2F;
+  --accent:#1D9492; --teal:#1D9492; --copper:#B06120; --copper-soft:#B0742A;
+  --rust:#993715; --deep-rust:#651F0B; --gold:#7A5A2F; --slate:#364F53;
+  --line:rgba(18,32,40,.12); --line-strong:rgba(18,32,40,.22);
+  --shadow-sm:0 1px 4px rgba(18,32,40,.08); --shadow-md:0 4px 16px rgba(18,32,40,.10);
+  --r-sm:6px; --r-md:10px; --r-lg:14px;
+  --zoom:1;
+  /* frente colors */
+  --f1:#07C0BD; --f2:#1E9492; --f3:#B59875; --f4:#B06120; --f5:#993715; --fnav:#122028;
+}
+:root[data-theme="dark"] {
+  --bg:#122028; --bg-soft:#1A2C32; --bg-card:#20353A; --bg-card2:#28424A;
+  --ink:#F5F2E8; --ink-2:#E6E4DB; --ink-3:#B59875;
+  --accent:#07C0BD; --teal:#1E9492; --copper:#B06120; --copper-soft:#B0742A;
+  --rust:#993715; --gold:#B59875; --slate:#364F53;
+  --line:rgba(230,228,219,.10); --line-strong:rgba(230,228,219,.20);
+  --f1:#07C0BD; --f2:#1E9492; --f3:#B59875; --f4:#B06120; --f5:#993715; --fnav:#E6E4DB;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Syne',system-ui,sans-serif;
+  background:var(--bg); color:var(--ink);
+  font-size:14px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  transition:background .25s,color .25s;
+  zoom:var(--zoom);
+}
+
+/* ── HEADER ── */
+.hdr{
+  background:var(--bg-card2);
+  border-bottom:1px solid var(--line-strong);
+  position:sticky;top:0;z-index:100;
+  box-shadow:var(--shadow-sm);
+}
+.hdr-inner{
+  max-width:1280px;margin:0 auto;
+  padding:12px 28px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.hdr-left{display:flex;align-items:center;gap:18px;}
+.hdr-div{width:1px;height:32px;background:var(--line-strong);}
+.hdr-title{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:-.2px;}
+.hdr-sub{font-size:10px;font-weight:500;color:var(--ink-3);letter-spacing:.6px;text-transform:uppercase;margin-top:2px;}
+.ctrls{display:flex;align-items:center;gap:6px;}
+.btn{
+  background:var(--bg-soft);border:1px solid var(--line-strong);
+  color:var(--ink-2);border-radius:var(--r-sm);
+  padding:5px 11px;font-family:'Syne',sans-serif;font-size:11px;font-weight:600;
+  cursor:pointer;transition:background .12s,color .12s;letter-spacing:.2px;
+}
+.btn:hover{background:var(--bg-card);color:var(--ink);}
+.btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+/* ── MAIN ── */
+.main{max-width:1280px;margin:0 auto;padding:28px;}
+
+/* ── HERO ── */
+.hero{
+  background:var(--bg-card2);
+  border:1px solid var(--line-strong);
+  border-left:4px solid var(--accent);
+  border-radius:var(--r-lg);
+  padding:20px 24px;margin-bottom:24px;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  box-shadow:var(--shadow-sm);
+}
+.hero h1{font-size:20px;font-weight:800;color:var(--ink);letter-spacing:-.3px;}
+.hero p{font-size:11px;font-weight:500;color:var(--ink-3);margin-top:4px;letter-spacing:.3px;}
+.kpis{display:flex;gap:12px;flex-shrink:0;}
+.kpi{
+  background:var(--bg-card);border:1px solid var(--line-strong);
+  border-radius:var(--r-md);padding:10px 16px;text-align:center;min-width:90px;
+}
+.kpi-val{font-size:22px;font-weight:800;color:var(--accent);}
+.kpi-lbl{font-size:10px;font-weight:600;color:var(--ink-3);margin-top:2px;letter-spacing:.3px;}
+
+/* ── SECTION LABEL ── */
+.sec-lbl{
+  font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;
+  color:var(--copper);margin:24px 0 12px;
+}
+
+/* ── MARCOS STRIP ── */
+.marcos{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;}
+.mc{
+  flex:1;min-width:150px;
+  background:var(--bg-card2);border:1px solid var(--line-strong);
+  border-radius:var(--r-md);padding:12px 14px;
+  box-shadow:var(--shadow-sm);
+}
+.mc-date{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px;}
+.mc-ico{font-size:16px;margin-bottom:4px;}
+.mc-title{font-size:13px;font-weight:700;color:var(--ink);}
+.mc-sub{font-size:10px;font-weight:500;color:var(--ink-3);margin-top:2px;}
+.mc.hoje{border-left:3px solid var(--f1);}
+.mc.gt   {border-left:3px solid var(--f2);}
+.mc.sint {border-left:3px solid var(--f4);}
+.mc.cons {border-left:3px solid var(--f5);}
+
+/* ── GANTT ── */
+.gantt-wrap{overflow-x:auto;}
+.gantt{
+  width:100%;border-collapse:collapse;font-size:11.5px;
+  background:var(--bg-card2);border:1px solid var(--line-strong);
+  border-radius:var(--r-lg);overflow:hidden;
+  box-shadow:var(--shadow-sm);
+}
+/* col headers */
+.gantt thead tr.col-hdr th{
+  background:var(--ink);color:#E6E4DB;
+  font-weight:700;font-size:10px;letter-spacing:.4px;
+  padding:9px 6px;text-align:center;border-bottom:none;white-space:nowrap;
+}
+.gantt thead tr.col-hdr th.act-th{text-align:left;padding-left:16px;min-width:210px;}
+.gantt thead tr.col-hdr th.fc{background:rgba(176,97,32,.45);color:#F0EEE6;}
+
+/* marcos row */
+.gantt thead tr.mrk-row td{
+  background:var(--bg-soft);text-align:center;
+  padding:5px 4px;font-size:13px;
+  border-bottom:1px solid var(--line-strong);
+}
+.gantt thead tr.mrk-row td.act-th-data{
+  font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+  color:var(--ink-3);text-align:left;padding-left:16px;
+}
+.gantt thead tr.mrk-row td.fc{background:rgba(176,97,32,.10);}
+
+/* section rows */
+.gantt tbody tr.sr td{
+  padding:9px 16px 3px;
+  font-size:9px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
+  color:var(--copper);background:rgba(176,97,32,.05);
+  border-top:1px solid var(--line-strong);border-bottom:none;
+}
+.gantt tbody tr.sr td span{font-size:9px;font-weight:500;color:var(--ink-3);letter-spacing:.3px;text-transform:none;margin-left:8px;}
+
+/* activity rows */
+.gantt tbody tr.ar{border-bottom:1px solid var(--line);transition:background .1s;}
+.gantt tbody tr.ar:hover{background:rgba(18,32,40,.03);}
+.gantt tbody tr.ar td{padding:5px 6px;vertical-align:middle;}
+.gantt tbody tr.ar td.rl{padding-left:20px;color:var(--ink-2);font-size:11px;font-weight:500;}
+.gantt tbody tr.ar td.cell{text-align:center;}
+.gantt tbody tr.ar td.fc{
+  background:repeating-linear-gradient(
+    45deg,rgba(176,97,32,.09),rgba(176,97,32,.09) 3px,
+    transparent 3px,transparent 8px
+  );
+}
+
+/* badges */
+.bd{display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:5px;vertical-align:middle;}
+.bd-done{background:rgba(7,192,189,.12);color:#1D9492;}
+.bd-hoje{background:rgba(176,97,32,.12);color:var(--copper);}
+.bd-nao {background:rgba(18,32,40,.06);color:var(--ink-3);}
+
+/* bars */
+.bar{display:block;height:12px;border-radius:3px;width:86%;margin:0 auto;}
+.b1{background:var(--f1);} .b2{background:var(--f2);} .b3{background:var(--f3);}
+.b4{background:var(--f4);} .b5{background:var(--f5);} .bnav{background:var(--fnav);}
+.lite{opacity:.3;}
+
+/* ── LEGEND ── */
+.legend{
+  display:flex;flex-wrap:wrap;gap:8px 18px;
+  margin-top:16px;padding:14px 18px;
+  background:var(--bg-card2);border:1px solid var(--line-strong);
+  border-radius:var(--r-md);font-size:10px;font-weight:500;color:var(--ink-3);
+}
+.li{display:flex;align-items:center;gap:5px;}
+.ld{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.lf{width:10px;height:10px;border-radius:2px;flex-shrink:0;
+  background:repeating-linear-gradient(45deg,rgba(176,97,32,.3),rgba(176,97,32,.3) 3px,transparent 3px,transparent 8px);
+  border:1px dashed var(--copper-soft);}
+
+/* ── NOTES ── */
+.notes{
+  margin-top:16px;padding:14px 18px;
+  background:var(--bg-card2);
+  border-left:3px solid var(--copper);
+  border-radius:0 var(--r-md) var(--r-md) 0;
+  font-size:11px;font-weight:500;color:var(--ink-2);line-height:1.7;
+  box-shadow:var(--shadow-sm);
+}
+.notes strong{color:var(--copper);font-weight:700;}
+
+/* ── FOOTER ── */
+.footer{
+  max-width:1280px;margin:40px auto 0;padding:16px 28px;
+  border-top:1px solid var(--line-strong);
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:10px;font-weight:500;color:var(--ink-3);letter-spacing:.3px;
+}
+
+/* ── LOGO SVG adapts to theme ── */
+[data-theme="light"] .logo-raya{fill:url(#lg-light);}
+[data-theme="dark"]  .logo-raya{fill:url(#lg-dark);}
+
+@media(max-width:760px){
+  .hdr-inner{padding:10px 14px;flex-wrap:wrap;}
+  .main{padding:14px;}
+  .hero{flex-direction:column;}
+  .kpis{flex-wrap:wrap;}
+  .marcos{flex-direction:column;}
+  .footer{flex-direction:column;gap:6px;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-inner">
+    <div class="hdr-left">
+      <!-- LOGO -->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 56" width="100" height="26">
+        <defs>
+          <linearGradient id="lg-light" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#1D9492"/><stop offset="100%" stop-color="#07C0BD"/></linearGradient>
+          <linearGradient id="lg-dark"  x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#1D9492"/><stop offset="100%" stop-color="#07C0BD"/></linearGradient>
+        </defs>
+        <text x="0" y="32" font-family="'Syne',system-ui,sans-serif" font-size="32" font-weight="800" letter-spacing="5" class="logo-raya" fill="url(#lg-light)">RAYA</text>
+        <line x1="0" y1="40" x2="115" y2="40" stroke="#B59875" stroke-width="1" opacity="0.6"/>
+        <text x="0" y="52" font-family="'Syne',system-ui,sans-serif" font-size="8" font-weight="600" letter-spacing="3" fill="#B59875" opacity="0.9">A D V I S O R Y</text>
+      </svg>
+      <div class="hdr-div"></div>
+      <div>
+        <div class="hdr-title">Cronograma · Projeto Ciclo de Vida</div>
+        <div class="hdr-sub">Contrato Viva Nº 0434 · Versão 9 · 25/06/2026</div>
+      </div>
+    </div>
+    <div class="ctrls">
+      <button class="btn" onclick="changeZoom(-0.1)">A−</button>
+      <button class="btn" id="zoom-btn" onclick="changeZoom(0)">100%</button>
+      <button class="btn" onclick="changeZoom(0.1)">A+</button>
+      <button class="btn" id="theme-btn" onclick="toggleTheme()">🌙 Escuro</button>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div>
+      <h1>Projeto Ciclo de Vida — Viva Previdência</h1>
+      <p>FUNDAÇÃO VIVA DE PREVIDÊNCIA · EQUIPE RAYA ADVISORY · USO INTERNO · CONFIDENCIAL</p>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-val">7</div><div class="kpi-lbl">semanas</div></div>
+      <div class="kpi"><div class="kpi-val">5</div><div class="kpi-lbl">frentes</div></div>
+      <div class="kpi"><div class="kpi-val">06/08</div><div class="kpi-lbl">prazo final</div></div>
+    </div>
+  </div>
+
+  <!-- MARCOS -->
+  <div class="sec-lbl">Marcos do projeto</div>
+  <div class="marcos">
+    <div class="mc hoje">
+      <div class="mc-date">22/06/2026 · S1</div>
+      <div class="mc-ico">🔷</div>
+      <div class="mc-title">Reunião 2 de alinhamento</div>
+      <div class="mc-sub">Simulador de benefícios</div>
+    </div>
+    <div class="mc gt">
+      <div class="mc-date">~27/07/2026 · S6</div>
+      <div class="mc-ico">🔷</div>
+      <div class="mc-title">Reunião GT — Validação</div>
+      <div class="mc-sub">Modelos + Investimentos + Governança</div>
+    </div>
+    <div class="mc sint">
+      <div class="mc-date">~03/08/2026 · S7</div>
+      <div class="mc-ico">🔶</div>
+      <div class="mc-title">Sessão Integrada</div>
+      <div class="mc-sub">Multiequipes Viva · Convergência final</div>
+    </div>
+    <div class="mc cons">
+      <div class="mc-date">06/08/2026 · S8</div>
+      <div class="mc-ico">⬥</div>
+      <div class="mc-title">Apresentação ao Conselho</div>
+      <div class="mc-sub">Entrega final do projeto</div>
+    </div>
+  </div>
+
+  <!-- GANTT -->
+  <div class="sec-lbl">Gantt — 5 frentes paralelas</div>
+  <div class="gantt-wrap">
+  <table class="gantt">
+    <thead>
+      <tr class="col-hdr">
+        <th class="act-th">Atividade</th>
+        <th>S1<br><span style="font-weight:400;font-size:9px">22/06</span></th>
+        <th>S2<br><span style="font-weight:400;font-size:9px">29/06</span></th>
+        <th>S3<br><span style="font-weight:400;font-size:9px">06/07</span></th>
+        <th>S4<br><span style="font-weight:400;font-size:9px">13/07</span></th>
+        <th class="fc">S5*<br><span style="font-weight:400;font-size:9px">20/07</span></th>
+        <th>S6 🔷<br><span style="font-weight:400;font-size:9px">27/07</span></th>
+        <th>S7 🔶<br><span style="font-weight:400;font-size:9px">03/08</span></th>
+        <th>S8 ⬥<br><span style="font-weight:400;font-size:9px">10/08</span></th>
+      </tr>
+      <tr class="mrk-row">
+        <td class="act-th-data">Marcos</td>
+        <td>🔷</td>
+        <td></td><td></td><td></td>
+        <td class="fc" style="font-size:9px;font-weight:700;color:#B06120;">S5*</td>
+        <td>🔷</td>
+        <td>🔶</td>
+        <td>⬥</td>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- F1 -->
+      <tr class="sr"><td colspan="9">F1 — Análise Comportamental e Estatística da População</td></tr>
+      <tr class="ar">
+        <td class="rl">Análise estatística da população <span class="bd bd-done">✓ concluído</span></td>
+        <td class="cell"><span class="bar b1"></span></td>
+        <td class="cell"></td><td class="cell"></td><td class="cell"></td>
+        <td class="cell fc"></td>
+        <td class="cell"></td><td class="cell"></td><td class="cell"></td>
+      </tr>
+      <tr class="ar">
+        <td class="rl">Revisão final para Conselho</td>
+        <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+        <td class="cell fc"></td>
+        <td class="cell"></td>
+        <td class="cell"><span class="bar b1"></span></td>
+        <td class="cell"></td>
+      </tr>
+
+      <!-- F2 -->
+      <tr class="sr"><td colspan="9">F2 — Desenho e Modelos de Perfis</td></tr>
+      <tr class="ar">
+        <td class="rl">Discussão de perfis + Alessandra Cardoso <span class="bd bd-done">✓ concluído</span></td>
+        <td class="cell"><span class="bar b2"></span></td>
+        <td class="cell"></td><td class="cell"></td><td class="cell"></td>
+        <td class="cell fc"></td>
+        <td class="cell"></td><td class="cell"></td><td class="cell"></td>
+      </tr>
+      <tr class="ar">
+        <td class="rl">Simulador de benefícios <span class="bd bd-hoje">hoje</span></td>
+        <td class="cell"><span class="bar b2"></span></td>
+        <td class="cell"><span class="bar b2 lite"></span></td>
+        <td class="cell"></td><td class="cell"></td>
+        <td class="cell fc"></td>
+        <td class="cell"></td><td class="cell"></td><td class="cell"></td>
+      </tr>
+      <tr class="ar">
+        <td class="rl">Matriz decisória dos modelos</td>
+        <td class="cell"></td>
+        <td class="cell"><span class="bar b2 lite"></span></td>
+        <td class="cell"><span class="bar b2 lite"></span></td>
+        <td class="cell"><span class="bar b2 lite"></span></td>
+        <td class="cell fc"></td>
+        <td class="cell"><span class="bar b2"></span></td>
+        <td class="cell"></td><td class="cell"></td>
+      </tr>
+      <tr class="ar">
+        <td class="rl">Versão final dos modelos de perfis</td>
+        <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+        <td class="cell fc"></td>
+        <td class="cell"><span class="bar b2 lite"></span></td>
+        <td class="cell"><span class="bar b2"></span></td>
+        <td class="cell"></td>
+      </tr>
+
+      <!-- F3 -->
+      <tr class="sr"><td colspan="9">F3 — Investimentos <span>time técnico Raya e Viva ausentes na S5*</span></td></tr>
+      <tr class="ar">
+        <td class="rl">Validação TBR + cenários <span class="bd bd-hoje">hoje</span></td>
+        <td class="cell"><span class="bar b3"></span></td>
+        <td class="cell"></td><td class="cell"></td><td class="cell"></td>
+        <td class="cell fc"></td>
+        <td class="cell"></td><td class="cell"></td><td class="cell"></td>
+      </tr>
+      <tr class="ar">
+        <td class="rl">Atualização de cenários macro</td>
+        <td class="cell"></td>
+        <td class="cell"><span class="bar b3"></span></td>
+        <td class="cell"></td><td class="cell"></td>
+        <td class="cell fc"></td>
+        <td class="cell"></td><td class="cell"></td><td class="cell"></td>
+      </tr>
+      <tr class="ar">
+        <td class="rl">Modelagem de carteiras por perfil</td>
+        <td class="cell"></td>
+        <td class="cell"><span class="bar b3 lite"></span></td>
+        <td class="cell"><span class="bar b3 lite"></span></td>
+        <td class="cell"><span class="bar b3 lite"></span></td>
+        <td class="cell fc"></td>
+        <td class="cell"><span class="bar b3"></span></td>
+        <td class="cell"></td><td class="cell"></td>
+      </tr>
+      <tr class="ar">
+        <td class="rl">Simulação e construção de portfólio</td>
+        <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+        <td class="cell fc"></td>
+        <td class="cell"><span class="bar b3 lite"></span></td>
+        <td class="cell"><span class="bar b3"></span></td>
+        <td class="cell"></td>
+      </tr>
+      <tr class="ar">
+        <td class="rl">Revisão Políticas de Investimentos</td>
+        <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+        <td class="cell fc"></td>
+        <td class="cell"></td>
+        <td class="cell"><span class="bar b3 lite"></span></td>
+        <td class="cell"><span class="bar b3"></span></td>
+      </tr>
+
+      <!-- F4 -->
+      <tr class="sr"><td colspan="9">F4 — Governança e Operacional <span>equipe segue durante S5*</span></td></tr>
+      <tr class="ar">
+        <td class="rl">Entrevistas internas Viva <span class="bd bd-nao">não iniciado</span></td>
+        <td class="cell"><span class="bar b4 lite"></span></td>
+        <td class="cell"><span class="bar b4 lite"></span></td>
+        <td class="cell"><span class="bar b4 lite"></span></td>
+        <td class="cell"><span class="bar b4 lite"></span></td>
+        <td class="cell fc"><span class="bar b4 lite"></span></td>
+        <td class="cell"></td><td class="cell"></td><td class="cell"></td>
+      </tr>
+      <tr class="ar">
+        <td class="rl">Mapeamento de fluxos operacionais</td>
+        <td class="cell"></td><td class="cell"></td>
+        <td class="cell"><span class="bar b4 lite"></span></td>
+        <td class="cell"><span class="bar b4 lite"></span></td>
+        <td class="cell fc"><span class="bar b4 lite"></span></td>
+        <td class="cell"><span class="bar b4"></span></td>
+        <td class="cell"></td><td class="cell"></td>
+      </tr>
+      <tr class="ar">
+        <td class="rl">Relatório de recomendações de governança</td>
+        <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+        <td class="cell fc"><span class="bar b4 lite"></span></td>
+        <td class="cell"><span class="bar b4 lite"></span></td>
+        <td class="cell"><span class="bar b4"></span></td>
+        <td class="cell"></td>
+      </tr>
+
+      <!-- F5 -->
+      <tr class="sr"><td colspan="9">F5 — Comunicação e Educação Financeira <span>equipe segue durante S5*</span></td></tr>
+      <tr class="ar">
+        <td class="rl">Plano de comunicação por modelo <span class="bd bd-nao">não iniciado</span></td>
+        <td class="cell"></td>
+        <td class="cell"><span class="bar b5 lite"></span></td>
+        <td class="cell"><span class="bar b5 lite"></span></td>
+        <td class="cell"><span class="bar b5 lite"></span></td>
+        <td class="cell fc"><span class="bar b5 lite"></span></td>
+        <td class="cell"><span class="bar b5"></span></td>
+        <td class="cell"></td><td class="cell"></td>
+      </tr>
+      <tr class="ar">
+        <td class="rl">Proposta API — Análise do Perfil do Investidor</td>
+        <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+        <td class="cell fc"><span class="bar b5 lite"></span></td>
+        <td class="cell"><span class="bar b5 lite"></span></td>
+        <td class="cell"><span class="bar b5"></span></td>
+        <td class="cell"></td>
+      </tr>
+
+      <!-- ENTREGA -->
+      <tr class="sr"><td colspan="9">Integração e Entrega Final</td></tr>
+      <tr class="ar">
+        <td class="rl">Convergência interna pré-Conselho</td>
+        <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+        <td class="cell fc"></td>
+        <td class="cell"></td>
+        <td class="cell"><span class="bar bnav"></span></td>
+        <td class="cell"></td>
+      </tr>
+      <tr class="ar">
+        <td class="rl" style="font-weight:700;color:var(--ink);">Apresentação ao Conselho</td>
+        <td class="cell"></td><td class="cell"></td><td class="cell"></td><td class="cell"></td>
+        <td class="cell fc"></td>
+        <td class="cell"></td><td class="cell"></td>
+        <td class="cell"><span class="bar bnav"></span></td>
+      </tr>
+
+    </tbody>
+  </table>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="li"><div class="ld" style="background:var(--f1)"></div>F1 — Análise populacional</div>
+    <div class="li"><div class="ld" style="background:var(--f2)"></div>F2 — Modelos de perfis</div>
+    <div class="li"><div class="ld" style="background:var(--f3)"></div>F3 — Investimentos</div>
+    <div class="li"><div class="ld" style="background:var(--f4)"></div>F4 — Governança</div>
+    <div class="li"><div class="ld" style="background:var(--f5)"></div>F5 — Comunicação</div>
+    <div class="li"><div class="ld" style="background:var(--ink);"></div>Entrega final</div>
+    <div class="li"><div class="lf"></div>S5* (20–24/07) — time técnico de investimentos ausente · sem reuniões</div>
+    <div class="li" style="color:var(--ink-2)">Barras claras = desenvolvimento &nbsp;·&nbsp; Barras sólidas = entrega</div>
+  </div>
+
+  <!-- NOTES -->
+  <div class="notes">
+    <strong>Premissas v9 · 25/06/2026</strong><br>
+    S5* (20–24/07) — Time técnico de investimentos Raya e Viva ausentes; sem reuniões nesta semana. F4 Governança e F5 Comunicação seguem com a equipe normalmente. ·
+    Semanas começam sempre na segunda-feira: S1=22/06, S2=29/06, S3=06/07, S4=13/07, S5*=20/07, S6=27/07, S7=03/08, S8=10/08. ·
+    Apresentação ao Conselho em 06/08 (S8). ·
+    Modelagem de carteiras (F3) inicia em 29/06 com Naty / Marzia. ·
+    Reunião GT de validação: ~27/07 (S6). · Sessão Integrada: ~03/08 (S7).
+  </div>
+
+</main>
+
+<div class="footer">
+  <div>RAYA Advisory · Contrato VIVA Nº 0434 · Projeto Ciclo de Vida · Documento interno — uso restrito à equipe</div>
+  <div>v9 · 25/06/2026</div>
+</div>
+
+<script>
+let zoom = 1;
+function changeZoom(delta) {
+  if (delta === 0) zoom = 1;
+  else zoom = Math.min(1.8, Math.max(0.6, zoom + delta));
+  document.documentElement.style.setProperty('--zoom', zoom);
+  document.getElementById('zoom-btn').textContent = Math.round(zoom*100)+'%';
+}
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('theme-btn').textContent = isDark ? '🌙 Escuro' : '☀ Claro';
+  // update logo fill
+  document.querySelectorAll('.logo-raya').forEach(el => {
+    el.setAttribute('fill', isDark ? 'url(#lg-light)' : 'url(#lg-dark)');
+  });
+}
+document.addEventListener('keydown', e => {
+  if (e.key === '+' || e.key === '=') changeZoom(0.1);
+  if (e.key === '-') changeZoom(-0.1);
+  if (e.key === '0') changeZoom(0);
+});
+</script>
+</body>
+</html>
