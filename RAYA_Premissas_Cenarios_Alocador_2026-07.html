@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raya Advisory — Premissas de Cenário · Alocador Multiperíodo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --raya-dark:#122028; --raya-navy:#20353A; --raya-slate:#364F53;
+  --raya-teal:#1D9492; --raya-teal-light:#07C0BD; --raya-copper:#BE620F;
+  --raya-copper-mid:#B0742A; --raya-rust:#993715; --raya-deep-rust:#651F0B;
+  --raya-gold:#B59875; --raya-cream:#F0EEE6;
+  --font-display:'Cormorant Garamond',Georgia,serif;
+  --font-body:'DM Sans',system-ui,sans-serif;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.18); --shadow-md:0 4px 16px rgba(0,0,0,.22); --shadow-lg:0 8px 32px rgba(0,0,0,.28);
+  --radius-sm:6px; --radius-md:10px; --radius-lg:14px;
+  /* TIPOGRAFIA — mínimo 14px em todo o documento */
+  --fs-base:17px; --fs-sm:15px; --fs-xs:14px; --fs-eyebrow:14px;
+  --fs-kpi-value:38px; --fs-title:42px; --scale:1;
+}
+:root[data-theme="dark"]{
+  --bg:var(--raya-dark); --bg-elev:var(--raya-navy); --bg-card:#1A2C32; --bg-card-2:#243A40;
+  --text:var(--raya-cream); --text-2:#C9CEC9; --text-3:#959E9A;
+  --border:rgba(29,148,146,.22); --border-soft:rgba(255,255,255,.06);
+  --kpi-up:#07C0BD; --kpi-down:#E05555; --kpi-neutral:#E5E1D5;
+}
+:root[data-theme="light"]{
+  --bg:#E6E4DB; --bg-elev:#EDEAE0; --bg-card:#F2EFE5; --bg-card-2:#FFFFFF;
+  --text:#122028; --text-2:#364F53; --text-3:#5F6F72;
+  --border:rgba(18,32,40,.12); --border-soft:rgba(18,32,40,.06);
+  --kpi-up:#1D9492; --kpi-down:#993715; --kpi-neutral:#122028;
+}
+:root[data-presentation="on"]{
+  --scale:1.18; --fs-base:20px; --fs-sm:18px; --fs-xs:15px; --fs-eyebrow:15px;
+  --fs-kpi-value:48px; --fs-title:54px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--font-body); background:var(--bg); color:var(--text);
+  font-size:var(--fs-base); line-height:1.65; -webkit-font-smoothing:antialiased;
+  transition:background .3s,color .3s; zoom:var(--zoom,1);
+}
+.header{background:var(--bg-elev); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; box-shadow:var(--shadow-sm);}
+.header-inner{max-width:1400px; margin:0 auto; padding:14px 32px; display:flex; align-items:center; justify-content:space-between; gap:16px;}
+.header-logo svg{height:46px; width:auto; display:block;}
+.header-meta{text-align:right;}
+.header-title{font-family:var(--font-display); font-size:calc(22px*var(--scale)); color:var(--text); font-weight:500; letter-spacing:.02em;}
+.header-date{font-size:var(--fs-xs); color:var(--raya-teal-light); letter-spacing:.2em; text-transform:uppercase; margin-top:2px;}
+.header-controls{display:flex; gap:8px;}
+.ctrl-btn{background:transparent; border:1px solid var(--border); color:var(--text-2); padding:8px 14px; border-radius:var(--radius-sm); font-family:var(--font-body); font-size:var(--fs-xs); font-weight:500; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:6px;}
+.ctrl-btn:hover{border-color:var(--raya-teal); color:var(--text);}
+.ctrl-btn.active{background:var(--raya-teal); border-color:var(--raya-teal); color:#fff;}
+.zoom-group{display:flex; align-items:center; border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden;}
+.zoom-btn{background:transparent; border:none; color:var(--text-2); width:34px; height:34px; font-size:16px; font-weight:600; cursor:pointer;}
+.zoom-btn:hover{background:var(--raya-teal); color:#fff;}
+.zoom-btn.minus{border-right:1px solid var(--border);} .zoom-btn.plus{border-left:1px solid var(--border);}
+.zoom-indicator{font-size:14px; font-weight:600; color:var(--text-2); min-width:48px; text-align:center; cursor:pointer; padding:0 4px;}
+.nav{background:var(--bg-elev); border-bottom:1px solid var(--border);}
+.nav-inner{max-width:1400px; margin:0 auto; padding:0 32px; display:flex; overflow-x:auto; scrollbar-width:thin;}
+.nav-btn{background:none; border:none; color:var(--text-3); font-family:var(--font-body); font-size:var(--fs-xs); font-weight:600; letter-spacing:.12em; text-transform:uppercase; padding:16px 20px; cursor:pointer; border-bottom:2px solid transparent; transition:all .2s; white-space:nowrap;}
+.nav-btn:hover{color:var(--text);}
+.nav-btn.active{color:var(--raya-teal-light); border-bottom-color:var(--raya-teal-light);}
+.main{max-width:1400px; margin:0 auto; padding:32px;}
+.section{display:none;} .section.active{display:block; animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+.eyebrow{font-size:var(--fs-eyebrow); font-weight:600; letter-spacing:.22em; text-transform:uppercase; color:var(--raya-teal-light); margin-bottom:8px;}
+.sec-title{font-family:var(--font-display); font-size:var(--fs-title); font-weight:500; color:var(--text); line-height:1.1; margin-bottom:10px;}
+.sec-desc{font-size:var(--fs-sm); color:var(--text-2); max-width:820px; margin-bottom:26px; line-height:1.8;}
+.divider{height:1px; background:linear-gradient(to right,var(--raya-gold),transparent); margin-bottom:28px; opacity:.4;}
+.subhead{font-family:var(--font-display); font-size:calc(28px*var(--scale)); font-weight:500; color:var(--text); margin:34px 0 14px;}
+.body-p{font-size:var(--fs-base); color:var(--text-2); line-height:1.8; max-width:900px; margin-bottom:16px;}
+.body-p strong{color:var(--text); font-weight:600;}
+.alert-banner{border-radius:var(--radius-lg); padding:18px 24px; margin-bottom:28px; display:flex; align-items:flex-start; gap:14px; box-shadow:var(--shadow-md); color:#fff;}
+.alert-banner.teal{background:linear-gradient(135deg,var(--raya-teal),#126D6C);}
+.alert-banner.copper{background:linear-gradient(135deg,var(--raya-copper),var(--raya-copper-mid));}
+.alert-banner.navy{background:linear-gradient(135deg,var(--raya-navy),var(--raya-slate));}
+.alert-banner.rust{background:linear-gradient(135deg,var(--raya-rust),var(--raya-deep-rust));}
+.alert-icon{font-size:24px; line-height:1;}
+.alert-text{font-size:var(--fs-sm); line-height:1.65;}
+.alert-text strong{display:block; font-size:calc(var(--fs-sm) + 3px); margin-bottom:4px; font-weight:600;}
+.kpi-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px; margin-bottom:32px;}
+.kpi-card{background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px 22px 18px; position:relative; overflow:hidden; transition:transform .2s,border-color .2s;}
+.kpi-card:hover{transform:translateY(-2px); border-color:var(--raya-teal);}
+.kpi-card::before{content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--raya-teal);}
+.kpi-card.up::before{background:var(--kpi-up);} .kpi-card.down::before{background:var(--kpi-down);}
+.kpi-card.amber::before{background:var(--raya-copper-mid);} .kpi-card.gold::before{background:var(--raya-gold);}
+.kpi-card.navy::before{background:var(--raya-slate);} .kpi-card.rust::before{background:var(--raya-rust);}
+.kpi-label{font-size:var(--fs-xs); font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--text-3); margin-bottom:10px;}
+.kpi-value{font-family:var(--font-display); font-size:var(--fs-kpi-value); font-weight:500; color:var(--text); line-height:1; font-variant-numeric:tabular-nums;}
+.kpi-value.up{color:var(--kpi-up);} .kpi-value.down{color:var(--kpi-down);}
+.kpi-sub{font-size:var(--fs-xs); color:var(--text-3); margin-top:8px; line-height:1.5;}
+.kpi-badge{display:inline-flex; align-items:center; gap:4px; font-size:var(--fs-xs); font-weight:600; padding:3px 10px; border-radius:999px; margin-top:8px;}
+.kpi-badge.up{background:rgba(7,192,189,.15); color:var(--kpi-up);}
+.kpi-badge.down{background:rgba(224,85,85,.15); color:var(--kpi-down);}
+.kpi-badge.neutral{background:rgba(181,152,117,.15); color:var(--raya-gold);}
+.political-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:18px; margin-bottom:28px;}
+.political-card{background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:20px 22px; border-top:3px solid var(--raya-teal);}
+.political-card.p2{border-top-color:var(--raya-copper-mid);} .political-card.p3{border-top-color:var(--raya-gold);}
+.political-card.rust{border-top-color:var(--raya-rust);}
+.political-title{font-family:var(--font-display); font-size:calc(24px*var(--scale)); font-weight:500; color:var(--text); margin-bottom:10px;}
+.tag{display:inline-block; font-size:var(--fs-xs); font-weight:600; letter-spacing:.1em; text-transform:uppercase; padding:4px 10px; border-radius:999px; margin-right:6px; margin-bottom:6px;}
+.tag.rust{background:rgba(153,55,21,.20); color:#E68A6A;}
+.tag.teal{background:rgba(7,192,189,.18); color:var(--raya-teal-light);}
+.tag.amber{background:rgba(176,116,42,.20); color:var(--raya-copper-mid);}
+.tag.navy{background:rgba(54,79,83,.5); color:var(--text-2);}
+.bullet-list{list-style:none; margin-top:12px;}
+.bullet-list li{font-size:var(--fs-sm); color:var(--text-2); line-height:1.65; padding:8px 0 8px 18px; position:relative; border-bottom:1px solid var(--border-soft);}
+.bullet-list li:last-child{border-bottom:none;}
+.bullet-list li::before{content:'—'; position:absolute; left:0; color:var(--raya-gold); font-weight:700;}
+.formula-box{background:linear-gradient(135deg,rgba(29,148,146,.12),rgba(7,192,189,.05)); border:1px solid var(--raya-teal); border-left:5px solid var(--raya-teal-light); border-radius:var(--radius-md); padding:24px 28px; margin:20px 0 28px; text-align:center;}
+.formula-eq{font-family:var(--font-display); font-size:calc(32px*var(--scale)); color:var(--text); font-weight:500; letter-spacing:.01em;}
+.formula-cap{font-size:var(--fs-sm); color:var(--text-2); margin-top:12px; line-height:1.6;}
+.reading-card{background:var(--bg-card); border:1px solid var(--border); border-left:4px solid var(--raya-teal-light); border-radius:var(--radius-md); padding:18px 22px; margin-bottom:18px;}
+.reading-card.rv{border-left-color:var(--raya-copper-mid);} .reading-card.cambio{border-left-color:var(--raya-gold);}
+.reading-card.rust{border-left-color:var(--raya-rust);}
+.reading-title{font-family:var(--font-display); font-size:calc(22px*var(--scale)); font-weight:500; color:var(--text); margin-bottom:8px;}
+.reading-body{font-size:var(--fs-sm); color:var(--text-2); line-height:1.75;}
+.reading-body strong{color:var(--text);}
+.table-wrap{background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden; margin-bottom:32px; box-shadow:var(--shadow-md);}
+.asset-table{width:100%; border-collapse:collapse; font-size:var(--fs-sm);}
+.asset-table thead{background:var(--bg-card-2);}
+.asset-table thead th{padding:14px 16px; font-size:var(--fs-xs); font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--text-2); text-align:left; border-bottom:1px solid var(--border);}
+.asset-table thead th:not(:first-child){text-align:right;}
+.asset-table tbody tr{border-bottom:1px solid var(--border-soft);}
+.asset-table tbody tr:last-child{border-bottom:none;}
+.asset-table tbody tr:hover{background:rgba(29,148,146,.04);}
+.asset-table td{padding:13px 16px; color:var(--text-2); vertical-align:middle;}
+.asset-table td:not(:first-child){text-align:right; font-variant-numeric:tabular-nums;}
+.asset-name{font-weight:600; color:var(--text);}
+.num-pos{color:var(--kpi-up); font-weight:600;} .num-neg{color:var(--kpi-down); font-weight:600;}
+.timeline{position:relative; padding-left:32px; margin-bottom:28px;}
+.timeline::before{content:''; position:absolute; left:11px; top:8px; bottom:8px; width:2px; background:linear-gradient(to bottom,var(--raya-teal),var(--raya-gold),transparent); opacity:.4;}
+.tl-item{position:relative; margin-bottom:22px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:16px 20px;}
+.tl-item::before{content:''; position:absolute; left:-28px; top:18px; width:12px; height:12px; border-radius:50%; background:var(--raya-teal-light); border:3px solid var(--bg); box-shadow:0 0 0 1px var(--raya-teal);}
+.tl-item.rupture::before{background:var(--raya-rust); box-shadow:0 0 0 1px var(--raya-deep-rust);}
+.tl-date{font-size:var(--fs-xs); font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--raya-teal-light); margin-bottom:6px;}
+.tl-item.rupture .tl-date{color:#E68A6A;}
+.tl-title{font-family:var(--font-display); font-size:calc(21px*var(--scale)); font-weight:500; color:var(--text); margin-bottom:8px;}
+.tl-body{font-size:var(--fs-sm); color:var(--text-2); line-height:1.7;}
+.note{font-size:var(--fs-xs); color:var(--text-3); line-height:1.6; margin-top:8px; font-style:italic;}
+.pill-scenario{display:inline-block; font-size:var(--fs-xs); font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:5px 14px; border-radius:999px; margin-bottom:14px;}
+.ps-base{background:rgba(7,192,189,.18); color:var(--raya-teal-light);}
+.ps-otim{background:rgba(29,148,146,.20); color:var(--raya-teal);}
+.ps-pess{background:rgba(176,116,42,.22); color:var(--raya-copper-mid);}
+.ps-stress{background:rgba(153,55,21,.22); color:#E68A6A;}
+.footer{background:var(--bg-elev); border-top:1px solid var(--border); margin-top:48px; padding:24px 32px;}
+.footer-inner{max-width:1400px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;}
+.footer-brand{font-family:var(--font-display); font-size:calc(18px*var(--scale)); color:var(--text-2);}
+.footer-disc{font-size:var(--fs-xs); color:var(--text-3); max-width:700px; line-height:1.6;}
+@media (max-width:900px){ .kpi-grid{grid-template-columns:1fr 1fr;} .political-grid{grid-template-columns:1fr;} .header-inner,.nav-inner,.main{padding-left:16px; padding-right:16px;} }
+@media (max-width:600px){ .kpi-grid{grid-template-columns:1fr;} :root{--fs-title:30px; --fs-kpi-value:30px;} }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-logo" aria-label="Raya Advisory">
+      <svg viewBox="0 0 220 56" width="220" height="56" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="rayaGradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#1D9492"/><stop offset="100%" stop-color="#07C0BD"/></linearGradient></defs>
+        <text x="0" y="32" font-family="'Cormorant Garamond',Georgia,serif" font-size="34" font-weight="500" letter-spacing="6" fill="url(#rayaGradient)">RAYA</text>
+        <line x1="0" y1="40" x2="120" y2="40" stroke="#B59875" stroke-width="1" opacity="0.6"/>
+        <text x="0" y="52" font-family="'DM Sans',system-ui,sans-serif" font-size="8" letter-spacing="3" fill="#B59875" opacity="0.9">A D V I S O R Y</text>
+      </svg>
+    </div>
+    <div class="header-meta">
+      <div class="header-title">Premissas de Cenário — Alocador Multiperíodo</div>
+      <div class="header-date">Julho 2026 · Documento de metodologia</div>
+    </div>
+    <div class="header-controls">
+      <div class="zoom-group" title="Ajustar zoom (+, −, 0)">
+        <button class="zoom-btn minus" id="zoom-out" aria-label="Diminuir zoom">A−</button>
+        <span class="zoom-indicator" id="zoom-val" title="Clique para resetar (100%)">100%</span>
+        <button class="zoom-btn plus" id="zoom-in" aria-label="Aumentar zoom">A+</button>
+      </div>
+      <button class="ctrl-btn" id="theme-toggle" title="Alternar tema"><span id="theme-icon">☀</span> <span id="theme-label">Claro</span></button>
+      <button class="ctrl-btn" id="present-toggle" title="Modo Apresentação">▣ Apresentação</button>
+    </div>
+  </div>
+</header>
+
+<nav class="nav">
+  <div class="nav-inner" id="tabs">
+    <button class="nav-btn active" onclick="showTab('t1',this)">1 · Visão Geral</button>
+    <button class="nav-btn" onclick="showTab('t9',this)">2 · Nossos Cenários</button>
+    <button class="nav-btn" onclick="showTab('t8',this)">3 · Onde Estamos Hoje</button>
+    <button class="nav-btn" onclick="showTab('t10',this)">4 · Dados Macro Brasil</button>
+    <button class="nav-btn" onclick="showTab('t13',this)">5 · Curvas de Juros</button>
+    <button class="nav-btn" onclick="showTab('t14',this)">6 · Renda Fixa</button>
+    <button class="nav-btn" onclick="showTab('t15',this)">7 · Renda Variável</button>
+    <button class="nav-btn" onclick="showTab('t16',this)">8 · Não-Core</button>
+    <button class="nav-btn" onclick="showTab('t17',this)">9 · Cenário Global</button>
+    <button class="nav-btn" onclick="showTab('t2',this)">10 · O Tripé &amp; o Regime</button>
+    <button class="nav-btn" onclick="showTab('t3',this)">11 · A Regra de Fisher</button>
+    <button class="nav-btn" onclick="showTab('t4',this)">12 · Os Cinco Cenários</button>
+    <button class="nav-btn" onclick="showTab('t11',this)">13 · Básico</button>
+    <button class="nav-btn" onclick="showTab('t12',this)">14 · Otimista</button>
+    <button class="nav-btn" onclick="showTab('t5',this)">15 · Pessimista</button>
+    <button class="nav-btn" onclick="showTab('t6',this)">16 · Dominância Fiscal</button>
+    <button class="nav-btn" onclick="showTab('t7',this)">17 · Fontes &amp; Notas</button>
+  </div>
+</nav>
+
+<main class="main" id="content">
+
+<!-- ================= T1 · VISÃO GERAL ================= -->
+<section class="section active" id="t1">
+  <div class="eyebrow">Modelo de Macroalocação</div>
+  <div class="sec-title">Do uniperíodo ao multiperíodo</div>
+  <div class="sec-desc">O Alocador projeta os retornos esperados de cerca de 28 classes de ativos em <strong>cinco cenários macroeconômicos</strong>, ao longo de uma trajetória trimestral que vai do quadro atual (m0) até o equilíbrio de longo prazo (LTCA, ~10 anos). Este documento registra as premissas: como cada cenário é construído, o arcabouço macro que os organiza e as referências históricas que os calibram.</div>
+  <div class="divider"></div>
+
+  <div class="alert-banner navy">
+    <div class="alert-icon">◆</div>
+    <div class="alert-text"><strong>A lógica em uma frase</strong>Cada cenário parte de âncoras trimestrais digitadas (o que a Raya define), o motor constrói os pontos intermediários por decaimento exponencial — o ajuste é concentrado nos primeiros meses, com meia-vida de 18 meses — e converte tudo em retorno esperado por classe de ativo. As premissas nominais — Selic, inflação, câmbio — são amarradas por regras econômicas (Fisher, PPP), não digitadas soltas.</div>
+  </div>
+
+  <div class="subhead">Como o modelo constrói um cenário</div>
+  <div class="political-grid">
+    <div class="political-card">
+      <div class="tag teal">Passo 1</div>
+      <div class="political-title">Âncoras</div>
+      <div class="reading-body">Pontos trimestrais digitados (m0, m3, … m30) e o ponto de longo prazo (LTCA / m120) para cada driver macro: Selic, inflação, câmbio, yields, spreads.</div>
+    </div>
+    <div class="political-card p2">
+      <div class="tag amber">Passo 2</div>
+      <div class="political-title">Interpolação</div>
+      <div class="reading-body">O motor preenche os trimestres em branco entre as âncoras — hoje de forma linear, evoluindo para decaimento suave até o LTCA. Nunca sobrescreve um valor digitado.</div>
+    </div>
+    <div class="political-card p3">
+      <div class="tag navy">Passo 3</div>
+      <div class="political-title">Retornos</div>
+      <div class="reading-body">Cada classe é precificada por building blocks (carrego − duration × Δyield; bolsa via P/E × earnings yield; offshore hedgeado). O retorno final é a média ponderada pelas probabilidades dos cenários.</div>
+    </div>
+  </div>
+
+  <div class="subhead">Abordagem metodológica</div>
+  <div class="reading-card">
+    <div class="reading-title">Uma cascata multiperíodo, discretizada em cenários</div>
+    <div class="reading-body">O modelo segue a linhagem dos sistemas de <strong>geração de cenários em cascata</strong> (CAP:Link / Towers Perrin-Tillinghast, Mulvey et al.) e do arcabouço macroeconômico do <strong>Banco Central do Brasil (modelo SAMBA)</strong>: os fatores fluem em cascata — juros → inflação → PIB → ações → câmbio — e a coerência entre as classes emerge dos <strong>drivers macroeconômicos compartilhados</strong>. Em vez de milhares de trajetórias estocásticas, o modelo trabalha com uma <strong>discretização em cinco cenários realistas e factíveis</strong>, preservando entre eles a relação econométrica. Os cenários macroeconômicos de referência têm por base a consultoria econômica <strong>BRCG</strong>.</div>
+  </div>
+  <div class="reading-card cambio">
+    <div class="reading-title">Equilíbrio de longo prazo × juro corrente</div>
+    <div class="reading-body">O modelo distingue o <strong>juro real de equilíbrio de longo prazo</strong> do <strong>juro real corrente</strong>. Hoje o juro real corrente (~8-9%) está acima do neutro porque a política monetária precisa ser <strong>restritiva</strong> para conduzir a inflação à meta; no longo prazo, o juro real converge ao equilíbrio. É por isso que o modelo projeta <strong>trajetórias trimestrais</strong> — que refletem a transição ao longo do tempo, e não a fotografia de um único instante.</div>
+  </div>
+
+  <div class="subhead">Os cinco cenários em um relance</div>
+  <div class="kpi-grid">
+    <div class="kpi-card up">
+      <div class="kpi-label">Básico</div>
+      <div class="kpi-value up">10,25%</div>
+      <div class="kpi-sub">Selic LTCA · r* 6,0% · inflação 4,0%</div>
+      <div class="kpi-badge up">Probabilidade 40%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Otimista</div>
+      <div class="kpi-value">8,25%</div>
+      <div class="kpi-sub">Selic LTCA · r* 5,0% · inflação 3,0%</div>
+      <div class="kpi-badge neutral">Probabilidade 20%*</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">Pessimista</div>
+      <div class="kpi-value">13,25%</div>
+      <div class="kpi-sub">Selic LTCA · r* 7,8% · inflação 5,0%</div>
+      <div class="kpi-badge neutral">Probabilidade 30%</div>
+    </div>
+    <div class="kpi-card rust">
+      <div class="kpi-label">Stress · Dominância Fiscal</div>
+      <div class="kpi-value down">45,25%</div>
+      <div class="kpi-sub">Selic LTCA (Fisher, r* 10%) · inflação 32% · no ano 5: Selic 20% × inflação 30% (real −7,7%)</div>
+      <div class="kpi-badge down">Probabilidade 10%*</div>
+    </div>
+    <div class="kpi-card navy">
+      <div class="kpi-label">Sensibilidade</div>
+      <div class="kpi-value">9,75%</div>
+      <div class="kpi-sub">Selic LTCA · r* 5,5% · inflação 4,0%</div>
+      <div class="kpi-badge neutral">Sensibilidade ao r* · peso 0%</div>
+    </div>
+  </div>
+  <div class="note">Básico (40%) e Pessimista (30%) refletem o ponto de partida entre os dois cenários — ver aba "Onde Estamos Hoje". Otimista (20%) e Stress (10%), marcados com *, são as migrações possíveis para cada lado. No Stress, a arbitragem do Comitê incide sobre a trajetória: o juro real de −7,7% ocorre no auge da ruptura (ano 5), não no equilíbrio, que volta a ser Fisher-consistente (r* de 10% × inflação de 32% ⟹ Selic de 45,25%, referência: Turquia atual).</div>
+</section>
+
+<!-- ================= T9 · NOSSOS CENÁRIOS ================= -->
+<section class="section" id="t9">
+  <div class="eyebrow">Nossos Cenários</div>
+  <div class="sec-title">Premissas e fundamentos</div>
+  <div class="sec-desc">Esta é a espinha dorsal do modelo: cada cenário é um <strong>estado do regime econômico</strong> — quantos pilares do tripé se sustentam — e desse estado caem, juntos e coerentes, o juro real de equilíbrio, a inflação e a Selic. Os valores abaixo são do <strong>equilíbrio de longo prazo (LTCA)</strong>; mas é a <strong>trajetória de construção</strong> — as rotas de hoje até o LTCA — que forma de fato os caminhos usados na precificação.</div>
+  <div class="divider"></div>
+
+  <div class="alert-banner navy">
+    <div class="alert-icon">◆</div>
+    <div class="alert-text"><strong>Como os parâmetros são definidos</strong>Usamos como referência os cenários macroeconômicos da consultoria econômica <strong>BRCG</strong> para inferir os parâmetros de r*, inflação, câmbio e Selic. A base das simulações são os <strong>regimes econômicos e a política fiscal e monetária</strong> que influenciam os parâmetros de cada cenário.</div>
+  </div>
+
+  <div class="subhead">Os três pilares do tripé × cada cenário</div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Pilar → parâmetro</th><th style="text-align:left;">Otimista</th><th style="text-align:left;">Básico</th><th style="text-align:left;">Pessimista</th><th style="text-align:left;">Stress</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="asset-name">Câmbio flutuante<br><span style="font-size:var(--fs-xs);color:var(--text-3);">→ PPP + prêmio cambial</span></td>
+          <td style="text-align:left;font-size:var(--fs-xs);">Âncora atrai fluxo; real forte; diferencial baixo</td>
+          <td style="text-align:left;font-size:var(--fs-xs);">Flutuante normal; segue PPP (~3pp/ano)</td>
+          <td style="text-align:left;font-size:var(--fs-xs);">Prêmio cambial sobe; depreciação acima do PPP</td>
+          <td style="text-align:left;font-size:var(--fs-xs);">Fuga de capital; câmbio dispara (PPP com inflação de 30-32%)</td>
+        </tr>
+        <tr>
+          <td class="asset-name">Metas de inflação<br><span style="font-size:var(--fs-xs);color:var(--text-3);">→ inflação eq. + credibilidade</span></td>
+          <td style="text-align:left;font-size:var(--fs-xs);">Meta crível; converge ao centro (3%); BC pragmático</td>
+          <td style="text-align:left;font-size:var(--fs-xs);">Perseguida, não batida; ancora ~4%</td>
+          <td style="text-align:left;font-size:var(--fs-xs);">Perde credibilidade; ~5%, meta implícita ~4,5%</td>
+          <td style="text-align:left;font-size:var(--fs-xs);">Regime rompe; desancora (30-32%); BC capturado</td>
+        </tr>
+        <tr>
+          <td class="asset-name">Responsabilidade fiscal<br><span style="font-size:var(--fs-xs);color:var(--text-3);">→ r* + prêmio de risco</span></td>
+          <td style="text-align:left;font-size:var(--fs-xs);">Consolidação; dívida cai; r* 5,0%</td>
+          <td style="text-align:left;font-size:var(--fs-xs);">Arcabouço no talo; dívida sobe devagar; r* 6,0%</td>
+          <td style="text-align:left;font-size:var(--fs-xs);">Âncora afrouxa; dívida acelera; r* 7,8%</td>
+          <td style="text-align:left;font-size:var(--fs-xs);">Dominância fiscal; juro real negativo no auge da ruptura; r* 10,0% no equilíbrio</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subhead">Premissas numéricas (LTCA) e probabilidades</div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Cenário</th><th>Juro real r*</th><th>Inflação eq.</th><th>Selic LTCA</th><th>Probabilidade</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">Otimista</td><td>5,0%</td><td>3,0%</td><td class="num-pos">8,25%</td><td>20%</td></tr>
+        <tr><td class="asset-name">Básico</td><td>6,0%</td><td>4,0%</td><td class="num-pos">10,25%</td><td>40%</td></tr>
+        <tr><td class="asset-name">Pessimista</td><td>7,8%</td><td>5,0%</td><td>13,25%</td><td>30%</td></tr>
+        <tr><td class="asset-name">Stress</td><td>10,0%<br><span style="font-size:var(--fs-xs);color:var(--text-3);">−7,7% no auge da ruptura (ano 5)</span></td><td>32%</td><td class="num-neg">45,25%</td><td>10%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">A Selic de longo prazo é <strong>premissa digitada</strong>; quando não informada, o modelo a infere pelo juro real e pela inflação de equilíbrio (Fisher: (1+r*)(1+π)−1, arredondada a 0,25pp). No <strong>Stress</strong>, a arbitragem do Comitê vale para a trajetória — na fase de ruptura as relações de equilíbrio deixam de valer, e o juro real chega a −7,7% no auge (ano 5: Selic 20% × inflação 30%). O equilíbrio de longo prazo, estacionário, volta a obedecer Fisher: r* de 10% contra inflação de 32% dá Selic de 45,25%, com referência na Turquia atual. Sensibilidade = Básico com r* de 5,5% (juro neutro de livro-texto), peso 0% — testa a sensibilidade ao juro real de equilíbrio, hoje o principal fator do modelo.</div>
+
+  <div class="subhead">Câmbio — a quarta premissa (trajetórias BRCG)</div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Cenário</th><th>2026</th><th>2027</th><th>2028</th><th>Longo prazo</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">Otimista</td><td>4,60</td><td>4,40</td><td class="num-pos">4,25</td><td rowspan="3" style="vertical-align:middle;text-align:center;font-size:var(--fs-xs);">evolui por PPP<br>(diferencial de inflação<br>Brasil − EUA + prêmio)</td></tr>
+        <tr><td class="asset-name">Básico</td><td>5,05</td><td>5,15</td><td>5,20</td></tr>
+        <tr><td class="asset-name">Pessimista</td><td>5,45</td><td>5,70</td><td class="num-neg">5,90</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="reading-card cambio">
+    <div class="reading-title">Do câmbio para a inflação — o canal de curto prazo</div>
+    <div class="reading-body">As três trajetórias de câmbio da <strong>consultoria BRCG</strong> são premissa dos cenários — e é delas que derivam os impactos de curto prazo na inflação. O repasse do câmbio ocorre pelos <strong>bens comercializáveis (tradables)</strong>, precificados na margem pelo câmbio; os <strong>preços administrados</strong> seguem regras contratuais e o ambiente regulatório de cada cenário. No Pessimista, a depreciação adicional pressiona a inflação corrente antes mesmo de qualquer mudança de regime; no Otimista, a apreciação ajuda a re-ancoragem. No Stress, o câmbio deixa de responder a fundamentos e passa a ser conduzido pela fuga de capital.</div>
+  </div>
+
+  <div class="subhead">Fundamentos de cada cenário</div>
+  <div class="political-grid">
+    <div class="political-card">
+      <div class="pill-scenario ps-otim">Otimista · 20%</div>
+      <div class="reading-body"><strong>Retomada de credibilidade.</strong> Governo e Banco Central mais pragmáticos: reformas avançam, a dívida estabiliza e a meta de 3% volta a ser crível. Juro real recua a 5% e a inflação ancora no centro. É o cenário de re-rating dos ativos brasileiros.</div>
+    </div>
+    <div class="political-card">
+      <div class="pill-scenario ps-base">Básico · 40%</div>
+      <div class="reading-body"><strong>Higher for longer.</strong> O país não estabiliza nem melhora seus fundamentos: já é uma piora estrutural, com juro alto por mais tempo. Por isso o r* sobe de 5,5% para <strong>6%</strong> — a inflação roda ~4% (acima do centro), a dívida sobe devagar e o arcabouço se sustenta no talo.</div>
+    </div>
+    <div class="political-card p2">
+      <div class="pill-scenario ps-pess">Pessimista · 30%</div>
+      <div class="reading-body"><strong>Neutro elevado que não recua.</strong> O juro real de equilíbrio estimado hoje (~<strong>7,8%</strong>) se mantém no longo prazo, em vez de normalizar. Inflação ~5% (âncora de metas menos crível), Banco Central ainda ortodoxo. Selic de equilíbrio de 13,25%.</div>
+    </div>
+    <div class="political-card rust">
+      <div class="pill-scenario ps-stress">Stress · 10%</div>
+      <div class="reading-body"><strong>Turquização.</strong> Rompem-se o regime pós-Real (1994) e as metas (1999). No meio do caminho, dominância fiscal: no ano 5, Selic de 20% contra inflação de 30% — <strong>juro real de −7,7% no auge da ruptura</strong> (referência: Brasil no COVID). No longo prazo, capitulação e ortodoxia forçada: Selic de 45,25% contra inflação de 32%, juro real de equilíbrio de 10% — como a Turquia de hoje. Câmbio em disparada. O pior caso ainda modelável.</div>
+    </div>
+  </div>
+
+  <div class="reading-card rv">
+    <div class="reading-title">Nota de racional — o juro real de equilíbrio (r*)</div>
+    <div class="reading-body"><strong>Básico a 6%:</strong> o Básico não é um cenário benigno — supõe que o país não melhora estruturalmente seus fundamentos. É um ambiente de juro neutro mais alto por mais tempo ("higher for longer"), coerente com a dívida em alta e o arcabouço fiscal no limite. <strong>Pessimista a 7,8%:</strong> a estimativa corrente do juro neutro se mantém no longo prazo, sem a normalização que o cenário-base supõe. Referências: modelo semiestrutural do Banco Central (SAMBA) e os períodos históricos. <strong>Stress a 10%:</strong> na dominância fiscal o risco soberano é precificado no próprio juro real de equilíbrio — é o que sustenta, no estado estacionário, uma Selic de 45,25% contra inflação de 32% (o padrão da Turquia depois da virada ortodoxa, com juro real de +4 a +9%).</div>
+  </div>
+
+  <div class="reading-card cambio">
+    <div class="reading-title">LTCA × trajetória — o que estes números representam</div>
+    <div class="reading-body">Os valores desta aba são o <strong>ponto de equilíbrio de longo prazo (LTCA, ~10 anos)</strong>. Mas o modelo é multiperíodo: o que efetivamente precifica os ativos é a <strong>rota trimestral</strong> de hoje até esse equilíbrio — como a Selic, a inflação e o câmbio transitam do m0 ao LTCA. As equações que constroem essas rotas (Fisher, PPP, curva de juros, regra de reação) são detalhadas nas abas seguintes; aqui ficam os destinos e o porquê deles.</div>
+  </div>
+</section>
+
+<!-- ================= T8 · ONDE ESTAMOS HOJE ================= -->
+<section class="section" id="t8">
+  <div class="eyebrow">Ponto de Partida</div>
+  <div class="sec-title">Onde estamos hoje — entre o Básico e o Pessimista</div>
+  <div class="sec-desc">O modelo não parte de um Básico limpo. Hoje o Brasil apresenta dois desvios estruturais do regime: a <strong>meta de inflação não é crível</strong> e a <strong>âncora fiscal só se sustenta no limite</strong>. Os números correntes colocam o país num ponto <strong>entre o Básico e o Pessimista</strong> — e é desse pressuposto que partimos, migrando para um lado ou outro conforme a evolução fiscal.</div>
+  <div class="divider"></div>
+
+  <div class="alert-banner copper">
+    <div class="alert-icon">⚑</div>
+    <div class="alert-text"><strong>Principal ponto de atenção do modelo</strong>A inflação fura o centro da meta há dois anos e a âncora fiscal é cumprida no talo. Partimos de um ponto entre o Básico e o Pessimista — por isso as probabilidades pesam esses dois cenários: <strong>Básico 40% · Pessimista 30%</strong>, com Otimista e Stress como as migrações possíveis para cada lado.</div>
+  </div>
+
+  <div class="reading-card cambio">
+    <div class="reading-title">O que o preço de mercado diz — a medida do "entre os dois"</div>
+    <div class="reading-body">A NTN-B longa (IMA-B 5+, duration de 9,32a) negocia a <strong>7,77% de juro real</strong>. No equilíbrio de longo prazo, o modelo entrega <strong>6,54%</strong> no Básico e <strong>8,40%</strong> no Pessimista. O yield negociado hoje está, portanto, a <strong>67% do caminho do Básico para o Pessimista</strong> — inclinado ao Pessimista, mas sem se confundir com ele. É a mesma leitura dos dois pilares abaixo, medida no preço em vez de no argumento.</div>
+  </div>
+
+  <div class="subhead">Os dois pilares do ponto de partida</div>
+  <div class="political-grid">
+    <div class="political-card p2">
+      <div class="tag amber">Pilar I</div>
+      <div class="political-title">Meta de inflação não crível</div>
+      <div class="reading-body">O Brasil mira <strong>3%</strong> enquanto EUA e Europa miram 2% (rodando 2,5-3,5%). A inflação brasileira roda estruturalmente <strong>~3,6pp acima da americana</strong> (média mensal 1999-2026; mediana 3,1pp). Um centro de 3% que não é cumprido há dois anos ancora expectativas mais perto de <strong>4-4,5%</strong> — ou seja, entre o Básico (4%) e o Pessimista (5%).</div>
+    </div>
+    <div class="political-card rust">
+      <div class="tag rust">Pilar II</div>
+      <div class="political-title">Âncora fiscal no limite</div>
+      <div class="reading-body">A meta do arcabouço foi <strong>formalmente cumprida</strong> em 2024 (déficit 0,09% do PIB) e 2025 (0,1%) — mas no talo e com exceções e antecipações que o mercado não credita. E a meta em si é um <strong>déficit primário ~zero</strong>, que não estabiliza a dívida/PIB, ainda em alta. Não é "descumpriu"; é "cumpriu sem ancorar a dívida".</div>
+    </div>
+  </div>
+
+  <div class="reading-card rust">
+    <div class="reading-title">O ponto central do cenário atual</div>
+    <div class="reading-body">O ponto central do cenário atual é a <strong>baixa probabilidade de a inflação atingir a meta no horizonte relevante da política monetária (~18 meses)</strong> — e é daí que derivam as premissas dos cenários. O histórico completo da inflação contra a meta, e do diferencial estrutural entre a inflação brasileira e a americana, está na aba <strong>Dados Macro Brasil</strong>.</div>
+  </div>
+
+  <div class="subhead">A meta de inflação nos últimos anos</div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Ano</th><th>IPCA</th><th>Centro</th><th>Teto</th><th style="text-align:left;">Situação</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">2024</td><td class="num-neg">4,83%</td><td>3,0%</td><td>4,5%</td><td style="text-align:left;font-size:var(--fs-xs);">Acima do teto — 8º estouro desde 1999</td></tr>
+        <tr><td class="asset-name">2025</td><td>4,26%</td><td>3,0%</td><td>4,5%</td><td style="text-align:left;font-size:var(--fs-xs);">Dentro da banda, mas acima do centro</td></tr>
+        <tr><td class="asset-name">2026 (em curso)</td><td class="num-neg">~5,0%</td><td>3,0%</td><td>4,5%</td><td style="text-align:left;font-size:var(--fs-xs);">Focus ~5,16% — correndo acima do teto</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Não estamos "nem perto do centro" há dois anos fechados, e 2026 corre acima do teto — coerente com um ponto de partida deslocado do Básico em direção ao Pessimista.</div>
+</section>
+
+<!-- ================= T10 · INFLAÇÃO & JUROS (HISTÓRICO) ================= -->
+<section class="section" id="t10">
+  <div class="eyebrow">Dados Macro Brasil · Contexto Histórico</div>
+  <div class="sec-title">Dados macro do Brasil</div>
+  <div class="sec-desc">O pano de fundo empírico dos cenários: o regime de metas de inflação (desde 1999) e a trajetória de longo prazo de Selic, inflação e juro real. É a história que as trajetórias trimestrais dos cenários procuram reproduzir — não uma fotografia de um único instante.</div>
+  <div class="divider"></div>
+
+  <div class="subhead">Inflação (IPCA) e a meta — desde 1999</div>
+  <div class="body-p">O regime de metas foi instituído em 1999. Na série mensal (acumulado 12 meses), a inflação oscilou em torno da meta com picos nos momentos de crise — <strong>17,2% em maio/2003</strong>, 10,7% em 2015-16 e 12,1% em 2022 — e convergências nos períodos de maior credibilidade, com a meta sendo reduzida ao longo do tempo, de 8% (1999) a 3% (atual).</div>
+  <div id="chart-ipca99" style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:20px 18px 12px; margin-bottom:12px;"></div>
+  <div style="display:flex; gap:22px; flex-wrap:wrap; margin-bottom:10px; font-size:var(--fs-sm); color:var(--text-2);">
+    <span><span style="display:inline-block;width:16px;height:3px;background:#993715;vertical-align:middle;margin-right:6px;"></span>IPCA (acum. 12 meses, mensal)</span>
+    <span><span style="display:inline-block;width:16px;border-top:2px dashed #07C0BD;vertical-align:middle;margin-right:6px;"></span>Centro da meta</span>
+  </div>
+  <div class="note">Fontes: IPCA/IBGE (série mensal, acumulado 12 meses; base Comdinheiro validada contra o histórico do modelo) e metas do CMN/Banco Central (centro; 2003-04 = metas ajustadas). Regime de metas instituído pelo Decreto 3.088, de junho de 1999.</div>
+
+  <div class="subhead">A inflação contra a meta — 27 anos em números</div>
+  <div class="kpi-grid">
+    <div class="kpi-card amber"><div class="kpi-label">Média desde 1999</div><div class="kpi-value">6,15%</div><div class="kpi-sub">série mensal, acum. 12m · mediana 5,78%</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">Média sem os picos</div><div class="kpi-value">≈5,8%</div><div class="kpi-sub">média aparada 10-20% (metodologia dos núcleos do BC); corte por 2σ dá o mesmo (5,77%)</div></div>
+    <div class="kpi-card rust"><div class="kpi-label">Meses acima do centro</div><div class="kpi-value down">76%</div><div class="kpi-sub">252 de 330 meses · acima do teto em 37%</div></div>
+    <div class="kpi-card rust"><div class="kpi-label">Episódio atual</div><div class="kpi-value down">36 meses</div><div class="kpi-sub">acima do centro sem interrupção (3º mais longo; recorde: 79 meses, set/2010-mar/2017). Desde nov/2020: 67 dos últimos 68 meses acima do centro</div></div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Métrica (como a meta é formalmente medida: ano fechado)</th><th>Valor</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">Média da inflação nos anos fechados (1999-2025)</td><td>6,23%</td></tr>
+        <tr><td class="asset-name">Desvio médio em relação ao centro da meta</td><td class="num-neg">+1,83 pp</td></tr>
+        <tr><td class="asset-name">Anos fechados acima do centro da meta</td><td class="num-neg">21 de 27 (78%)</td></tr>
+        <tr><td class="asset-name">Descumprimentos formais (fora da banda)</td><td>8 — sete acima do teto (2001, 2002, 2003, 2015, 2021, 2022, 2024) e um abaixo do piso (2017)</td></tr>
+        <tr><td class="asset-name">Episódios acima do centro (série mensal)</td><td>11 episódios · duração média de 23 meses · o mais longo, 79 meses</td></tr>
+        <tr><td class="asset-name">Episódios acima do teto (série mensal)</td><td>14 episódios · duração média de 9 meses · o mais longo, 35 meses</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="reading-card rust">
+    <div class="reading-title">O que esses números dizem</div>
+    <div class="reading-body">Mesmo expurgando os picos de crise, a inflação brasileira média dos últimos 27 anos roda em torno de <strong>5,8-5,9%</strong> — e o desvio típico em relação ao centro da meta é de <strong>quase +2 pontos</strong>. Estar acima do centro não é exceção: é o estado em que a economia passou <strong>três de cada quatro meses</strong> do regime de metas. É essa evidência que fundamenta duas escolhas do modelo: a inflação de equilíbrio do Básico em <strong>4%</strong> (acima do centro de 3%, que a história não valida) e a convergência ao centro reservada ao <strong>Otimista</strong>, o cenário de retomada de credibilidade.</div>
+  </div>
+
+  <div class="subhead">Inflação Brasil × EUA — o diferencial estrutural</div>
+  <div class="body-p">A distância histórica entre o IPCA e a inflação americana é a evidência empírica de que uma meta de 3% é otimista para o Brasil — e é, ao mesmo tempo, o motor do câmbio por paridade do poder de compra no modelo. As linhas tracejadas marcam a meta de cada período: no Brasil, o centro vigente em cada ano (de 8% em 1999 a 3% hoje); nos EUA, os 2% que o Federal Reserve formalizou em janeiro de 2012.</div>
+  <div id="chart-diff" style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:20px 18px 12px; margin-bottom:12px;"></div>
+  <div style="display:flex; gap:22px; flex-wrap:wrap; margin-bottom:10px; font-size:var(--fs-sm); color:var(--text-2);">
+    <span><span style="display:inline-block;width:16px;height:3px;background:#BE620F;vertical-align:middle;margin-right:6px;"></span>IPCA (Brasil)</span>
+    <span><span style="display:inline-block;width:16px;height:3px;background:#07C0BD;vertical-align:middle;margin-right:6px;"></span>CPI (EUA)</span>
+    <span><span style="display:inline-block;width:16px;border-top:2px dashed #BE620F;vertical-align:middle;margin-right:6px;"></span>Meta Brasil (centro, ano a ano)</span>
+    <span><span style="display:inline-block;width:16px;border-top:2px dashed #07C0BD;vertical-align:middle;margin-right:6px;"></span>Meta EUA (2%, formal desde 2012)</span>
+    <span style="color:var(--text-3);">Área sombreada = diferencial · média 1999-2026 = <strong style="color:var(--text);">3,6 pp</strong> (mediana 3,1)</span>
+  </div>
+  <div class="note">Fontes: IPCA/IBGE e CPI/BLS (via FRED), séries mensais acumuladas em 12 meses, jan/1999-jun/2026 (out/2025 do CPI interpolado — lacuna de divulgação). Hoje: Brasil 4,6% × EUA 3,5%. O diferencial recente está comprimido pelo choque de inflação nos EUA — estruturalmente, com os EUA revertendo a 2%, ele retorna à casa de 3pp.</div>
+
+  <div class="subhead">Selic, inflação e juro real</div>
+  <div class="body-p">Séries mensais em <strong>acumulado 12 meses</strong>. Plotamos o <strong>juro real</strong> como terceira variável — área hachurada a partir da linha do zero, medida por Fisher (juros nominais descontada a inflação). Ele é estruturalmente alto no Brasil e só mergulhou fortemente negativo na pandemia, atingindo <strong>−6,6% em outubro de 2021</strong> — o precedente doméstico que fundamenta o juro real negativo do cenário de Stress.</div>
+  <div id="chart-selic-ipca" style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:20px 18px 12px; margin-bottom:12px;"></div>
+  <div style="display:flex; gap:22px; flex-wrap:wrap; margin-bottom:10px; font-size:var(--fs-sm); color:var(--text-2);">
+    <span><span style="display:inline-block;width:16px;height:3px;background:#1E9492;vertical-align:middle;margin-right:6px;"></span>Juros nominais (CDI, acum. 12m)</span>
+    <span><span style="display:inline-block;width:16px;height:3px;background:#993715;vertical-align:middle;margin-right:6px;"></span>IPCA (acum. 12m)</span>
+    <span><span style="display:inline-block;width:16px;height:11px;background:#B0742A;opacity:.6;vertical-align:middle;margin-right:6px;"></span>Juro real (área, por Fisher)</span>
+  </div>
+  <div class="note">Fontes: CDI (CETIP/B3) e IPCA/IBGE em acumulado 12 meses, desde jan/1999 (base Comdinheiro até set/2003; histórico do modelo a partir de out/2003 — séries validadas na sobreposição). Marcos: crise cambial de 1999 e crise de confiança de 2002-03 (juros nominais de 20-30%), recessão de 2015-16, pandemia de 2020-21 (juro real de −6,6% em out/2021) e o ciclo de aperto atual.</div>
+
+  <div class="subhead">Fiscal e atividade — a âncora sob pressão</div>
+  <div class="body-p">O pilar fiscal é hoje o mais frágil do tripé — e a variável que governa o juro real de equilíbrio dos cenários. A meta do arcabouço foi formalmente cumprida em 2024 (déficit primário de 0,09% do PIB) e 2025 (0,1%), mas no limite e com exceções — e uma meta de déficit ~zero <strong>não estabiliza a dívida</strong>. Nas projeções da consultoria BRCG, o primário segue negativo e a dívida bruta entra em trajetória ascendente, enquanto a atividade desacelera.</div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card rust"><div class="kpi-label">Primário do setor público</div><div class="kpi-value down">−0,6%</div><div class="kpi-sub">do PIB em 2026 e 2027; −0,4% em 2028 (BRCG)</div></div>
+    <div class="kpi-card rust"><div class="kpi-label">Dívida bruta (DBGG)</div><div class="kpi-value down">94,2%</div><div class="kpi-sub">do PIB em 2028 — de 83,7% em 2026 (+10,5pp em 2 anos)</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">Pressão do Congresso</div><div class="kpi-value">R$ 111 bi</div><div class="kpi-sub">por ano em ampliação de gastos (BRCG)</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">PIB</div><div class="kpi-value">2,0 → 1,1%</div><div class="kpi-sub">desaceleração 2026-2028; potencial ~1,5%</div></div>
+  </div>
+
+  <div id="chart-dbgg" style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:20px 18px 8px; margin-bottom:12px;">
+    <svg viewBox="0 0 640 230" width="640" height="230" style="max-width:100%;height:auto;display:block;">
+      <line x1="40" y1="190" x2="620" y2="190" stroke="var(--text-3)" stroke-width="1.2"/>
+      <rect x="80"  y="126.1" width="130" height="63.9"  fill="#B0742A" opacity="0.85" rx="3"/>
+      <rect x="255" y="104.1" width="130" height="85.9"  fill="#B06120" opacity="0.9" rx="3"/>
+      <rect x="430" y="77.1"  width="130" height="112.9" fill="#993715" opacity="0.9" rx="3"/>
+      <text x="145" y="114" text-anchor="middle" font-size="20" font-weight="600" fill="var(--text)">83,7%</text>
+      <text x="320" y="92"  text-anchor="middle" font-size="20" font-weight="600" fill="var(--text)">88,4%</text>
+      <text x="495" y="65"  text-anchor="middle" font-size="20" font-weight="600" fill="var(--text)">94,2%</text>
+      <text x="145" y="214" text-anchor="middle" font-size="15" fill="var(--text-3)">2026</text>
+      <text x="320" y="214" text-anchor="middle" font-size="15" fill="var(--text-3)">2027</text>
+      <text x="495" y="214" text-anchor="middle" font-size="15" fill="var(--text-3)">2028</text>
+      <text x="40" y="30" font-size="15" fill="var(--text-3)">Dívida bruta do governo geral (% do PIB) — projeção BRCG jul/2026</text>
+    </svg>
+  </div>
+  <div class="note">Fontes: Tesouro Nacional (resultados 2024-25) e projeções da consultoria BRCG (jul/2026). Uma dívida que sobe ~10pp em dois anos sem plano de estabilização é o que sustenta o juro real de equilíbrio elevado do Básico (6%) e, se a erosão continuar, a migração ao Pessimista (7,8%).</div>
+
+</section>
+
+<!-- ================= T13 · CURVAS DE JUROS (HISTÓRICO) ================= -->
+<section class="section" id="t13">
+  <div class="eyebrow">Curvas de Juros · Contexto Histórico</div>
+  <div class="sec-title">Prêmios e implícitas através dos ciclos</div>
+  <div class="sec-desc">A calibragem dos prêmios por vértice usa a história completa (2006-2026) das curvas pré e real. Três medidas organizam a leitura: o <strong>prêmio da curva pré sobre a Selic</strong>, a <strong>inflação implícita</strong> (e seu prêmio sobre a expectativa) e as <strong>inclinações</strong> — cada uma com comportamento típico em cada fase do ciclo monetário.</div>
+  <div class="divider"></div>
+
+  <div class="subhead">Os seis vértices do modelo (durations ANBIMA)</div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Curva</th><th>Curto</th><th>Intermediário</th><th>Longo</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">Pré (nominal)</td><td>IRF-M 1 · 0,55a</td><td>IRF-M · 2,52a</td><td>IRF-M 1+ · 3,19a</td></tr>
+        <tr><td class="asset-name">Real (NTN-B)</td><td>IMA-B 5 · 1,69a</td><td>IMA-B · 5,88a</td><td>IMA-B 5+ · 9,32a</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Durations exatas da posição de <strong>31/07/2026</strong> (ANBIMA) — são insumo do modelo e evoluem no tempo. Como as Bs são mais longas que os pré, a implícita por vértice é extraída das <strong>curvas zero-cupom da ANBIMA (ETTJ prefixada e IPCA, modelo de Svensson) lidas no mesmo prazo</strong> — implícita(τ) = (1+pré(τ))/(1+real(τ))−1, com τ = duration do vértice.</div>
+
+  <div class="subhead">Prêmio de risco de inflação (implícita − expectativa Focus) — distribuição histórica (2006-2026)</div>
+  <div class="body-p">O prêmio, medido como <strong>inflação implícita menos a expectativa Focus no horizonte correspondente</strong>, por prazo e em percentis. A leitura central: o prêmio <strong>cresce com o prazo</strong> (mediana de 0,2% no 1 ano a 1,1% no 10 anos) e o <strong>nível atual está acima do percentil 75 em toda a curva</strong> — proteção contra inflação está historicamente cara.</div>
+  <div id="chart-pri-fan" style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:20px 18px 10px; margin-bottom:12px;"></div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Prazo</th><th>1a</th><th>3a</th><th>5a</th><th>7a</th><th>10a</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">Máximo</td><td>2,51</td><td>3,01</td><td>3,07</td><td>3,20</td><td>3,39</td></tr>
+        <tr><td class="asset-name">Percentil 75</td><td>0,57</td><td>0,94</td><td>1,44</td><td>1,78</td><td>1,93</td></tr>
+        <tr><td class="asset-name">Mediana</td><td>0,22</td><td>0,54</td><td>0,75</td><td>0,91</td><td>1,08</td></tr>
+        <tr><td class="asset-name">Percentil 25</td><td>−0,18</td><td>0,22</td><td>0,43</td><td>0,58</td><td>0,68</td></tr>
+        <tr><td class="asset-name">Mínimo</td><td>−1,61</td><td>−0,43</td><td>−0,22</td><td>−0,15</td><td>−0,12</td></tr>
+        <tr><td class="asset-name" style="color:var(--raya-teal-light);">Atual (jul/26)</td><td class="num-neg">0,64</td><td class="num-neg">1,44</td><td class="num-neg">1,94</td><td class="num-neg">2,23</td><td class="num-neg">2,53</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Em pontos percentuais ao ano; base 2006-2026. Prêmio = implícita da curva ANBIMA em cada prazo − <strong>expectativa Focus no horizonte correspondente</strong> (não é a meta). O eixo horizontal são os <strong>prazos da curva</strong> (1 a 10 anos) — os vértices do modelo se leem nos prazos das suas durations: IMA-B 5 ≈ 2a · IMA-B ≈ 6a · IMA-B 5+ ≈ 9a. Coerente com a literatura do BCB (Vicente &amp; Graminho, 2015: prêmio médio de 0,20-0,66% para 1-4 anos, crescente no prazo).</div>
+
+  <div class="subhead">Implícita − meta de inflação — a medida da credibilidade (2006-2026)</div>
+  <div class="body-p">Complementando a análise acima (implícita − expectativa Focus), aqui a implícita contra o <strong>centro da meta vigente em cada ano</strong>. Mediana de <strong>+1,0 a +1,3pp</strong> em toda a curva — o mercado convive há duas décadas com uma implícita acima da meta — e o nível <strong>atual (+2,3 a +3,4pp) está acima do percentil 75 em todos os vértices</strong>, nos máximos fora dos episódios de crise.</div>
+  <div id="chart-implmeta" style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:20px 18px 10px; margin-bottom:12px;"></div>
+  <div style="display:flex; gap:22px; flex-wrap:wrap; margin-bottom:10px; font-size:var(--fs-sm); color:var(--text-2);">
+    <span><span style="display:inline-block;width:16px;height:3px;background:#07C0BD;vertical-align:middle;margin-right:6px;"></span>2a (≈ IMA-B 5)</span>
+    <span><span style="display:inline-block;width:16px;height:3px;background:#B0742A;vertical-align:middle;margin-right:6px;"></span>6a (≈ IMA-B)</span>
+    <span><span style="display:inline-block;width:16px;height:3px;background:#993715;vertical-align:middle;margin-right:6px;"></span>9a (≈ IMA-B 5+)</span>
+  </div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Vértice</th><th>mín</th><th>p25</th><th>mediana</th><th>p75</th><th>máx</th><th>atual (jul/26)</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">2a (≈ IMA-B 5)</td><td>−1,86</td><td>−0,01</td><td>+1,05</td><td>+1,78</td><td>+4,59</td><td class="num-neg">+2,34</td></tr>
+        <tr><td class="asset-name">6a (≈ IMA-B)</td><td>−0,79</td><td>+0,54</td><td>+1,24</td><td>+2,00</td><td>+4,21</td><td class="num-neg">+3,00</td></tr>
+        <tr><td class="asset-name">9a (≈ IMA-B 5+)</td><td>−0,74</td><td>+0,69</td><td>+1,33</td><td>+2,17</td><td>+4,01</td><td class="num-neg">+3,41</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Meta = centro vigente em cada ano (4,5% até 2018, decrescendo a 3,0%). Base: curvas zero-cupom ANBIMA (Svensson) e implícitas calculadas na base ETTJ consolidada da Raya; mensal, jan/2006-jul/2026.</div>
+
+  <div class="subhead">Prêmio da curva pré sobre a Selic — os extremos do ciclo</div>
+  <div class="body-p">O prêmio do pré é <strong>contracíclico à posição do juro</strong>: máximo no fundo do ciclo (véspera de alta), mínimo — e negativo — nos platôs de juro alto em que o mercado precifica cortes. A amplitude histórica vai de <strong>−3,7 a +7,5 pontos</strong>.</div>
+  <div id="chart-premio-ciclo" style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:20px 18px 10px; margin-bottom:12px;"></div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Momento</th><th>Contexto</th><th>Prêmio (10a)</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">mar/2021</td><td style="text-align:left;font-size:var(--fs-xs);">Selic 2% — fundo do ciclo, véspera da alta</td><td class="num-pos">+6,98 (máx ~+7,5)</td></tr>
+        <tr><td class="asset-name">ago/2018</td><td style="text-align:left;font-size:var(--fs-xs);">Selic 6,5% — piso pré-eleição</td><td class="num-pos">+6,44</td></tr>
+        <tr><td class="asset-name">nov/2008</td><td style="text-align:left;font-size:var(--fs-xs);">crise global</td><td class="num-pos">+3,45</td></tr>
+        <tr><td class="asset-name">jul/2013</td><td style="text-align:left;font-size:var(--fs-xs);">taper tantrum</td><td class="num-pos">+2,56</td></tr>
+        <tr><td class="asset-name">out/2016</td><td style="text-align:left;font-size:var(--fs-xs);">1º corte do ciclo Temer</td><td class="num-neg">−2,81</td></tr>
+        <tr><td class="asset-name">jun/2023</td><td style="text-align:left;font-size:var(--fs-xs);">véspera do 1º corte — platô de 13,75%</td><td class="num-neg">−2,74 (3a: −3,32)</td></tr>
+        <tr><td class="asset-name">dez/25-mar/26</td><td style="text-align:left;font-size:var(--fs-xs);">platô de 15% precificando cortes</td><td class="num-neg">−2,0 a −2,5</td></tr>
+        <tr><td class="asset-name" style="color:var(--raya-teal-light);">jul/2026 (atual)</td><td style="text-align:left;font-size:var(--fs-xs);">início do ciclo de corte</td><td>+0,52 (3a +0,23 · 5a +0,48)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="reading-card rv">
+    <div class="reading-title">A leitura de ciclo — o que a medida diz (e o que não diz)</div>
+    <div class="reading-body">O que o gráfico mede é o <strong>spread observado</strong>: a taxa pré longa menos a Selic corrente — ou seja, <strong>quanto de movimento futuro o mercado já embutiu na curva</strong>. No fundo do ciclo (mar/21: +6,98) o spread é máximo porque a curva precifica um ciclo inteiro de alta; nos platôs que precificam cortes (jun/23: −2,74), fica negativo. <strong>O spread não é ganho garantido</strong>: quem comprou duration em mar/21 embolsava o prêmio apenas se a alta viesse <em>menor</em> que a precificada — e ela veio maior (Selic foi a 13,75%). O retorno de duration é sempre <strong>a diferença entre a trajetória que se materializa e a que estava precificada</strong> — e é exatamente essa comparação (nossa trajetória × a embutida na curva) que o modelo faz em cada cenário.</div>
+  </div>
+
+  <div class="subhead">Prêmio do pré sobre a Selic — série mensal completa (2006-2026)</div>
+  <div class="body-p">Com a base completa da ETTJ (betas de Svensson diários, 247 meses), o spread da curva pré sobre a Selic corrente por vértice — a medida de quanto movimento futuro o mercado embute na curva:</div>
+  <div id="chart-spread-serie" style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:20px 18px 10px; margin-bottom:12px;"></div>
+  <div style="display:flex; gap:22px; flex-wrap:wrap; margin-bottom:10px; font-size:var(--fs-sm); color:var(--text-2);">
+    <span><span style="display:inline-block;width:16px;height:3px;background:#07C0BD;vertical-align:middle;margin-right:6px;"></span>0,5a (≈ IRF-M 1)</span>
+    <span><span style="display:inline-block;width:16px;height:3px;background:#B0742A;vertical-align:middle;margin-right:6px;"></span>3a (≈ IRF-M 1+)</span>
+    <span><span style="display:inline-block;width:16px;height:3px;background:#993715;vertical-align:middle;margin-right:6px;"></span>9a (pré longo)</span>
+  </div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Vértice</th><th>mín</th><th>p25</th><th>mediana</th><th>p75</th><th>máx</th><th>atual (jul/26)</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">0,5a (≈ IRF-M 1)</td><td>−3,11</td><td>−0,67</td><td>+0,17</td><td>+0,96</td><td>+4,62</td><td>−0,59</td></tr>
+        <tr><td class="asset-name">3a (≈ IRF-M 1+)</td><td>−4,17</td><td>−0,49</td><td>+1,05</td><td>+2,29</td><td>+6,31</td><td>+0,03</td></tr>
+        <tr><td class="asset-name">9a (pré longo)</td><td>−3,71</td><td>−0,04</td><td>+1,37</td><td>+3,16</td><td>+7,19</td><td>+0,68</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Em pontos percentuais; mensal (fim de mês), jan/2006-jul/2026 (247 obs); Selic corrente aproximada pelo CDI do mês anualizado. Os percentis altos são dominados pelos fundos de ciclo (2015-16, 2021) — a distribuição mistura prêmio de prazo e posição no ciclo.</div>
+
+  <div class="reading-card">
+    <div class="reading-title">Duas medidas diferentes do mesmo prêmio — e qual delas o modelo usa</div>
+    <div class="reading-body">A tabela acima mede <strong>pré − Selic corrente</strong>: é o spread observável, e mistura prêmio de prazo com posição no ciclo. O modelo, porém, constrói a taxa pré como <strong>Selic média projetada no horizonte + prêmio</strong> — ou seja, o objeto que ele consome é <strong>pré − CDI médio efetivamente realizado no prazo</strong> (medida <em>ex-post</em>), que já exclui a variação esperada do juro. As duas medidas divergem, e a diferença é justamente a surpresa de política monetária.</div>
+  </div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Vértice</th><th>Medida</th><th>mediana</th><th>p25</th><th>p75</th><th>amplitude interquartil</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">~0,5a</td><td>ex-ante (pré − Selic corrente)</td><td>+0,17</td><td>−0,68</td><td>+0,97</td><td>1,65</td></tr>
+        <tr><td class="asset-name"></td><td><strong>ex-post (pré − CDI médio realizado)</strong></td><td><strong>+0,11</strong></td><td>−0,05</td><td>+0,37</td><td class="num-pos"><strong>0,42</strong></td></tr>
+        <tr><td class="asset-name">~3a</td><td>ex-ante</td><td>+1,08</td><td>−0,51</td><td>+2,30</td><td>2,81</td></tr>
+        <tr><td class="asset-name"></td><td><strong>ex-post</strong></td><td><strong>+1,46</strong></td><td>−0,58</td><td>+3,13</td><td>3,71</td></tr>
+        <tr><td class="asset-name">~9a</td><td>ex-ante</td><td>+1,38</td><td>−0,04</td><td>+3,20</td><td>3,24</td></tr>
+        <tr><td class="asset-name"></td><td><strong>ex-post</strong></td><td><strong>+2,78</strong></td><td>+2,06</td><td>+3,39</td><td class="num-pos"><strong>1,33</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Em pontos percentuais ao ano. A medida <em>ex-post</em> é mais estável no vértice longo (amplitude interquartil de 1,33 contra 3,24) porque não carrega a posição no ciclo. Limitação a registrar: a série <em>ex-post</em> de 9 anos termina em mar/2017 por construção (exige 112 meses de CDI realizado à frente) e cobre 2006-2017, a janela em que a Selic mais surpreendeu para baixo na história do regime — é uma medida enviesada para cima. O prêmio de prazo nominal do modelo (0,15 / 1,05 / 1,35pp no Básico) está calibrado na mediana <em>ex-ante</em>; a leitura <em>ex-post</em> fica registrada como referência alternativa mais alta.</div>
+
+  <div class="subhead">Implícita e inclinações — extremos e regimes</div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Medida</th><th>Mínimo histórico</th><th>Máximo histórico</th><th>Atual (jul/26)</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">Implícita 1a</td><td>1,12 (abr/2020, COVID)</td><td class="num-neg">9,06 (dez/2015, desancoragem)</td><td>~5,6</td></tr>
+        <tr><td class="asset-name">Implícita 3a <span style="font-size:var(--fs-xs);color:var(--text-3);">(≈ vértice IMA-B 5)</span></td><td colspan="2" style="text-align:center;font-size:var(--fs-xs);color:var(--text-3);">—</td><td>5,55</td></tr>
+        <tr><td class="asset-name">Implícita 5a <span style="font-size:var(--fs-xs);color:var(--text-3);">(≈ vértice IMA-B, dur ~5,9a)</span></td><td colspan="2" style="text-align:center;font-size:var(--fs-xs);color:var(--text-3);">—</td><td>5,85</td></tr>
+        <tr><td class="asset-name">Implícita 10a <span style="font-size:var(--fs-xs);color:var(--text-3);">(≈ vértice IMA-B 5+, dur ~9,3a)</span></td><td>4,17 (abr/2020) — piso ~4 fora do COVID</td><td class="num-neg">8,42 (dez/2015)</td><td>6,31</td></tr>
+        <tr><td class="asset-name">Inclinação nominal 10a−1a</td><td>−1,5 (2015-16)</td><td class="num-pos">+6,2 (1T2021)</td><td>positiva moderada</td></tr>
+        <tr><td class="asset-name">Inclinação real 30a−20a</td><td colspan="2" style="text-align:center;">sempre ~±0,4 — a cauda longa é flat em qualquer regime</td><td>~flat</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="reading-card cambio">
+    <div class="reading-title">Os regimes como referência dos cenários</div>
+    <div class="reading-body">A dispersão real × implícita por período político desenha quatro estados calibráveis: <strong>2017-19</strong> (ancoragem: real 4,5-5,5%, implícita 4,5-5,5% — a referência do Otimista), <strong>2020-21</strong> (real de 0% a negativo — o precedente do Stress), <strong>2015-16</strong> (desancoragem: implícita 7-9,5% — o caminho do Stress), e o <strong>regime atual</strong> (real 6-8% — entre o Básico e o Pessimista). Em ciclos de alta, a estrutura da implícita <strong>inverte</strong> (curta acima da longa, como em 2022).</div>
+  </div>
+  <div class="note">Fontes: painel público de curvas de juros (dados ANBIMA/B3, 2006-2026), expectativas Focus/BCB, e Vicente &amp; Graminho (BCB, 2015). Valores extraídos em jul/2026.</div>
+
+  <div class="subhead">Da estatística ao modelo — prêmios por vértice</div>
+  <div class="reading-card">
+    <div class="reading-title">Como a história vira premissa</div>
+    <div class="reading-body">Os prêmios entram no modelo como <strong>premissa por vértice</strong>. A curva nominal usa três prêmios de prazo (vértices de 0,5, 3 e 9 anos); a curva real usa o <strong>prêmio de prazo real (RTP)</strong>, definido no vértice de 9,32a e distribuído pelas demais durations por forma funcional. Cada trajetória parte do <strong>observado hoje</strong> e converge, no longo prazo, ao <strong>percentil histórico coerente com cada cenário</strong>: o Otimista ao p25 (prêmios comprimidos, regime crível), o Básico à mediana, o Pessimista a um p75 moderado e o Stress a níveis de crise. A <strong>inflação implícita não é premissa: é resultado do modelo</strong> — sai da identidade (1+pré)/(1+real)−1 na duration de cada índice — e é usada como teste de consistência contra a implícita negociada no mercado e contra o prêmio de risco de inflação (PRI) histórico.</div>
+  </div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Cenário (percentil de referência)</th><th>Pré 0,5a</th><th>Pré 3a</th><th>Pré 9a *</th><th>PRI 2a **</th><th>PRI 6a **</th><th>PRI 9a **</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">Observado hoje (jul/26)</td><td>−0,59</td><td>+0,03</td><td>+0,68</td><td>+1,15</td><td>+2,09</td><td>+2,44</td></tr>
+        <tr><td class="asset-name">Otimista (p25)</td><td>0,10</td><td>0,70</td><td>0,90</td><td>0,08</td><td>0,53</td><td>0,64</td></tr>
+        <tr><td class="asset-name">Básico (mediana)</td><td>0,15</td><td>1,05</td><td>1,35</td><td>0,41</td><td>0,82</td><td>1,04</td></tr>
+        <tr><td class="asset-name">Pessimista (p75 moderado)</td><td>0,40</td><td>1,70</td><td>2,20</td><td>0,72</td><td>1,62</td><td>1,90</td></tr>
+        <tr><td class="asset-name">Stress (níveis de crise)</td><td class="num-neg">0,95</td><td class="num-neg">2,30</td><td class="num-neg">3,15</td><td class="num-neg">2,80</td><td class="num-neg">3,06</td><td class="num-neg">3,37</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Prêmios de equilíbrio (longo prazo) em pontos percentuais ao ano; a trajetória de cada vértice converge do observado hoje ao valor de equilíbrio do cenário por decaimento exponencial com meia-vida de 18 meses. Pré = prêmio de prazo nominal sobre a Selic média no horizonte. <strong>*</strong> O vértice de 9 anos da curva pré não é consumido por nenhuma classe de ativo — a duration mais longa dos índices prefixados é a do IRF-M 1+ (3,19a) —, existindo apenas para dar forma à extrapolação da curva nominal. <strong>**</strong> O PRI é o prêmio de risco de inflação sobre a inflação projetada; com a inflação implícita como output do modelo, estas linhas passam a funcionar como referência histórica e teste de consistência, não como insumo de precificação das NTN-B.</div>
+
+  <div class="subhead">O prêmio de prazo real (RTP) — o insumo da curva real</div>
+  <div class="reading-card">
+    <div class="reading-title">O que a NTN-B paga acima do juro real esperado</div>
+    <div class="reading-body">A taxa real de cada vértice tem dois componentes: o <strong>juro real esperado</strong> na janela da duration — que sai da trajetória de Selic e de IPCA do cenário — e o <strong>prêmio de prazo real (RTP)</strong>, que é o que o investidor exige para carregar duration real. Medido <em>ex-post</em> na história (prêmio de prazo nominal menos prêmio de risco de inflação, vértice a vértice), o RTP <strong>cresce com a duration</strong> e tem mediana de <strong>+1,70pp</strong> no vértice longo, com faixa de medições de <strong>0,26 a 4,25pp</strong> conforme a subjanela — a dispersão tem causa conhecida: os juros reais caíram entre 2003 e 2014 e subiram entre 2015 e 2026, e nenhum retorno realizado é o prêmio <em>ex-ante</em>.</div>
+  </div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Vértice</th><th>duration</th><th>obs.</th><th>Prêmio nominal</th><th>Prêmio de inflação</th><th>RTP mediana</th><th>RTP p25</th><th>RTP p75</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">IRF-M 1</td><td>0,55a</td><td>240</td><td>+0,16</td><td>+0,41</td><td>−0,30</td><td>−0,77</td><td>+0,22</td></tr>
+        <tr><td class="asset-name">IMA-B 5</td><td>1,69a</td><td>227</td><td>+0,64</td><td>+0,41</td><td>+0,03</td><td>−1,02</td><td>+1,78</td></tr>
+        <tr><td class="asset-name">IRF-M</td><td>2,52a</td><td>217</td><td>+1,11</td><td>+0,46</td><td>+0,62</td><td>−1,27</td><td>+2,23</td></tr>
+        <tr><td class="asset-name">IRF-M 1+</td><td>3,19a</td><td>209</td><td>+1,60</td><td>+0,53</td><td>+1,17</td><td>−1,18</td><td>+2,65</td></tr>
+        <tr><td class="asset-name">IMA-B</td><td>5,88a</td><td>176</td><td>+2,31</td><td>+0,85</td><td>+1,32</td><td>−0,01</td><td>+2,55</td></tr>
+        <tr><td class="asset-name">IMA-B 5+</td><td>9,32a</td><td>135</td><td>+2,87</td><td>+1,02</td><td class="num-pos"><strong>+1,70</strong></td><td>+1,08</td><td>+2,36</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Em pontos percentuais ao ano. Prêmio nominal medido <em>ex-post</em> (taxa pré menos CDI médio realizado no prazo da duration); prêmio de inflação medido <em>ex-ante</em> (implícita da curva ANBIMA menos expectativa Focus no horizonte correspondente, interpolado por duration); RTP = a diferença entre os dois. Os vértices intermediários têm amplitude interquartil grande — a forma da curva de RTP não é bem identificada pelos dados; o vértice longo é o mais estreito.</div>
+
+  <div class="reading-card cambio">
+    <div class="reading-title">O nível deliberado — 0,50pp no vértice longo</div>
+    <div class="reading-body">O Comitê fixou o RTP de equilíbrio em <strong>0,50pp no vértice de 9,32a</strong> — o piso da faixa medida, alinhado ao spread realizado da subjanela 2015-2026 (+0,26pp) e não à mediana da série completa. É uma <strong>deliberação, não uma estimativa central</strong>. O teste de coerência com o resto da renda fixa fecha: 0,50pp em 9,32a de duration equivalem a <strong>0,054pp por ano de duration</strong>, abaixo de todos os spreads realizados por unidade de duration do mercado brasileiro — em particular o do crédito privado (~0,44pp por ano no IDA-IPCA), que paga cerca do dobro da B longa por unidade de risco de prazo. A B longa não fica mais atrativa que o crédito.</div>
+  </div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Vértice (duration)</th><th>1,69a</th><th>2,52a</th><th>3,19a</th><th>5,88a</th><th>9,32a</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">RTP de equilíbrio (LTCA)</td><td>0,14</td><td>0,19</td><td>0,22</td><td>0,35</td><td class="num-pos"><strong>0,50</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Forma por duration: RTP(d) = 0,50 × (d/9,32)<sup>0,75</sup>, em pontos percentuais ao ano. O expoente reproduz o crescimento côncavo com o prazo documentado em Vicente &amp; Graminho (BCB, 2015) e é preferido à forma medida crua, cujos vértices intermediários são dominados por ruído (ver amplitudes interquartis acima). O nível de equilíbrio é comum aos cinco cenários: o que diferencia a taxa real entre eles é o juro real esperado, não o prêmio de prazo.</div>
+
+  <div class="subhead">O RTP hoje — a leitura do mercado no ponto de partida</div>
+  <div class="body-p">No m0 o RTP não é premissa: é <strong>extraído da curva ANBIMA</strong> em cada vértice, comparando o yield real observado com o juro real que a trajetória do cenário implica na mesma janela. Como a trajetória de Selic e de IPCA difere entre cenários, a leitura difere um pouco em cada um. O resultado é que o modelo <strong>parte exatamente do preço de mercado</strong>, sem cunha de ajuste, e o movimento de yield ao longo do horizonte é a normalização explícita do prêmio até o equilíbrio.</div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Cenário</th><th>1,69a (m0)</th><th>5,88a (m0)</th><th>9,32a (m0)</th><th>→ 9,32a (LTCA)</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">Otimista</td><td>−1,33</td><td>−0,34</td><td>+0,56</td><td>+0,50</td></tr>
+        <tr><td class="asset-name">Básico</td><td>−0,64</td><td>−0,39</td><td>+0,23</td><td>+0,50</td></tr>
+        <tr><td class="asset-name">Pessimista</td><td>+0,18</td><td>−0,32</td><td>−0,28</td><td>+0,50</td></tr>
+        <tr><td class="asset-name">Stress</td><td>+0,22</td><td>−1,05</td><td class="num-neg">−1,45</td><td>+0,50</td></tr>
+        <tr><td class="asset-name">Sensibilidade</td><td>−0,64</td><td>−0,26</td><td>+0,48</td><td>+0,50</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Em pontos percentuais ao ano, na posição de 31/07/2026. A leitura central: no vértice longo o prêmio de prazo real está hoje <strong>comprimido em relação ao equilíbrio</strong> (+0,23pp no Básico contra 0,50pp de destino) e nos vértices intermediários está <strong>negativo</strong> — o mercado paga menos do que o juro real médio que a nossa trajetória de política monetária implica para esses prazos. A normalização até o LTCA é o que produz o efeito-preço das NTN-B nas projeções, distribuído ao longo do horizonte e não concentrado no início.</div>
+</section>
+
+<!-- ================= T14 · RENDA FIXA ================= -->
+<section class="section" id="t14">
+  <div class="eyebrow">Classes de Ativos · Renda Fixa</div>
+  <div class="sec-title">Renda fixa — premissas e trajetórias</div>
+  <div class="sec-desc">As duas curvas são construídas de forma independente, cada uma com o seu prêmio de prazo. A taxa <strong>pré</strong> de cada vértice é a <strong>Selic média no horizonte + o prêmio de prazo nominal (TP)</strong>. A taxa <strong>real</strong> é o <strong>juro real esperado na janela da duration</strong> — Fisher das médias de Selic e IPCA — capitalizado pelo <strong>prêmio de prazo real (RTP)</strong>: real = (1+E[real])×(1+RTP)−1. A <strong>inflação implícita</strong> é o output que fecha as duas curvas. O ponto de partida (m0) é a curva ANBIMA de <strong>31/07</strong> e o RTP do m0 é calibrado nela vértice a vértice — o modelo parte exatamente do mercado e converge ao equilíbrio de cada cenário por <strong>decaimento exponencial com meia-vida de 18 meses</strong>.</div>
+  <div class="divider"></div>
+
+  <div class="subhead">Pré longo (IRF-M 1+) — yield projetado por cenário (% a.a.)</div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Cenário</th><th>m0</th><th>m6</th><th>m12</th><th>m18</th><th>m30</th><th>m60</th><th>m120</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">Otimista</td><td>14,29</td><td>13,31</td><td>12,27</td><td>11,25</td><td>10,37</td><td>9,33</td><td class="num-pos">8,96</td></tr>
+        <tr><td class="asset-name">Básico</td><td>14,29</td><td>14,17</td><td>13,91</td><td>13,43</td><td>12,61</td><td>11,66</td><td>11,31</td></tr>
+        <tr><td class="asset-name">Pessimista</td><td>14,29</td><td>14,58</td><td>14,79</td><td>14,75</td><td>14,58</td><td>14,85</td><td>14,97</td></tr>
+        <tr><td class="asset-name">Stress</td><td>14,29</td><td>15,41</td><td>16,71</td><td>18,12</td><td>21,34</td><td class="num-neg">35,63</td><td class="num-neg">47,58</td></tr>
+        <tr><td class="asset-name">Sensibilidade</td><td>14,29</td><td>14,13</td><td>13,83</td><td>13,30</td><td>12,36</td><td>11,22</td><td>10,81</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subhead">B longa (IMA-B 5+) — yield real projetado por cenário (% a.a.)</div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Cenário</th><th>m0</th><th>m6</th><th>m12</th><th>m18</th><th>m30</th><th>m60</th><th>m120</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">Otimista</td><td>7,77</td><td>7,52</td><td>7,25</td><td>6,98</td><td>6,49</td><td class="num-pos">5,84</td><td class="num-pos">5,62</td></tr>
+        <tr><td class="asset-name">Básico</td><td>7,77</td><td>7,69</td><td>7,61</td><td>7,45</td><td>7,10</td><td>6,67</td><td>6,54</td></tr>
+        <tr><td class="asset-name">Pessimista</td><td>7,77</td><td>7,95</td><td>8,12</td><td>8,18</td><td>8,20</td><td>8,34</td><td class="num-neg">8,40</td></tr>
+        <tr><td class="asset-name">Stress</td><td>7,77</td><td>8,33</td><td>8,79</td><td class="num-neg">9,16</td><td class="num-neg">9,73</td><td class="num-neg">10,36</td><td class="num-neg">10,55</td></tr>
+        <tr><td class="asset-name">Sensibilidade</td><td>7,77</td><td>7,61</td><td>7,46</td><td>7,24</td><td>6,80</td><td>6,24</td><td>6,06</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Yields em % a.a. nos vértices longos do modelo (IRF-M 1+, dur ~3,2a; IMA-B 5+, dur ~9,3a); meses contados a partir de 31/07 (m0). As trajetórias são monótonas em todos os cenários: o yield herda a monotonicidade das médias de Selic e IPCA, e o único movimento adicional é a convergência do prêmio de prazo real ao seu nível de equilíbrio. No <strong>Stress</strong> a B longa <strong>sobe</strong> de 7,77% para 10,55% real — a Selic é reprimida abaixo do neutro, mas o juro real exigido nos títulos indexados sobe: o papel perde no efeito-preço e ganha no carrego. É o pré que é destruído nesse cenário, não a B.</div>
+
+  <div class="subhead">O carrego no equilíbrio — por que carregar B longa em vez de CDI</div>
+  <div class="body-p">No LTCA, o prêmio de prazo real de <strong>0,50pp</strong> no vértice de 9,32a é o que separa a B longa do caixa. Convertido para termos nominais pela inflação de equilíbrio de cada cenário, o carrego da B longa fica consistentemente <strong>~55 pontos-base acima da Selic de equilíbrio</strong> — o prêmio deliberado, e não um resíduo da construção da curva.</div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Cenário</th><th>B 5+ real</th><th>Inflação eq.</th><th>B 5+ nominal-equiv.</th><th>Selic LTCA</th><th>Spread vs Selic</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">Otimista</td><td>5,62%</td><td>3,00%</td><td>8,79%</td><td>8,25%</td><td class="num-pos">+0,54pp</td></tr>
+        <tr><td class="asset-name">Básico</td><td>6,54%</td><td>4,00%</td><td>10,80%</td><td>10,25%</td><td class="num-pos">+0,55pp</td></tr>
+        <tr><td class="asset-name">Pessimista</td><td>8,40%</td><td>5,00%</td><td>13,82%</td><td>13,25%</td><td class="num-pos">+0,57pp</td></tr>
+        <tr><td class="asset-name">Stress</td><td>10,55%</td><td>32,00%</td><td>45,93%</td><td>45,25%</td><td class="num-pos">+0,68pp</td></tr>
+        <tr><td class="asset-name">Sensibilidade</td><td>6,06%</td><td>4,00%</td><td>10,30%</td><td>9,75%</td><td class="num-pos">+0,55pp</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Nominal-equivalente = (1 + yield real) × (1 + inflação de equilíbrio) − 1, no vértice de 9,32a. O spread é o prêmio de prazo real expresso em termos nominais; a diferença entre cenários vem apenas do termo cruzado com a inflação. Coerência com crédito privado: 0,50pp no vértice de 9,32a equivalem a <strong>0,054pp por ano de duration</strong>, abaixo de todos os spreads realizados por unidade de duration da renda fixa brasileira — a B longa não fica mais atrativa que o crédito.</div>
+
+  <div class="subhead">Crédito privado — spreads por cenário</div>
+  <div class="body-p">Os spreads de crédito partem do <strong>observado hoje</strong> e convergem ao nível de equilíbrio de cada cenário; o retorno da classe é <strong>CDI + spread − duration × Δspread</strong> — o carrego mais (ou menos) o efeito-preço da variação do spread sobre a duration de cada segmento.</div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Spread sobre o CDI (pp)</th><th>Hoje (m0)</th><th>Otimista</th><th>Básico</th><th>Pessimista</th><th>Stress</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">High grade <span style="font-size:var(--fs-xs);color:var(--text-3);">(dur 1a)</span></td><td>0,4</td><td>~0,75</td><td>0,8</td><td>pico ~1,5 → 0,4</td><td class="num-neg">2,5</td></tr>
+        <tr><td class="asset-name">Mid yield <span style="font-size:var(--fs-xs);color:var(--text-3);">(dur 2a)</span></td><td>1,5</td><td>1,5</td><td>2,0</td><td>pico ~3,5 → 1,0</td><td class="num-neg">4,5</td></tr>
+        <tr><td class="asset-name">High yield <span style="font-size:var(--fs-xs);color:var(--text-3);">(dur 3a)</span></td><td>2,0</td><td>3,0</td><td>3,5</td><td>pico ~4,5 → 2,5</td><td class="num-neg">6,5</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Spreads de equilíbrio; no Otimista, comprimem em relação ao Básico. No Pessimista, os spreads abrem no curto prazo (pico indicado) e normalizam em seguida. Os spreads atuais estão historicamente comprimidos: mesmo no Básico, a normalização subtrai retorno via efeito-preço antes de devolvê-lo em carrego.</div>
+</section>
+
+<!-- ================= T15 · RENDA VARIÁVEL LOCAL ================= -->
+<section class="section" id="t15">
+  <div class="eyebrow">Classes de Ativos · Renda Variável Local</div>
+  <div class="sec-title">Renda variável — múltiplos e lucros</div>
+  <div class="sec-desc">A bolsa é precificada por <strong>P/E × Earnings Yield</strong>, na linhagem de Grinold-Kroner: o retorno esperado combina o <strong>earnings yield</strong> (lucro corrente sobre preço), o <strong>crescimento dos lucros</strong> de cada cenário e a <strong>variação do múltiplo</strong> (re-rating ou de-rating), mais o <strong>dividend yield de 3,5%</strong>.</div>
+  <div class="divider"></div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card navy"><div class="kpi-label">IBOV hoje</div><div class="kpi-value">177.999</div><div class="kpi-sub">pontos (31/07)</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">P/E atual</div><div class="kpi-value">8,46×</div><div class="kpi-sub">desconto relevante sobre a média histórica (10,55×)</div></div>
+    <div class="kpi-card up"><div class="kpi-label">Earnings yield</div><div class="kpi-value">11,82%</div><div class="kpi-sub">lucro corrente sobre preço (1 ÷ P/E)</div></div>
+    <div class="kpi-card gold"><div class="kpi-label">Dividend yield</div><div class="kpi-value">3,5%</div><div class="kpi-sub">premissa comum a todos os cenários</div></div>
+  </div>
+
+  <div class="subhead">IBOV — premissas por cenário</div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Cenário</th><th>P/E alvo</th><th>Earnings yield</th><th style="text-align:left;">Racional</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">Otimista</td><td class="num-pos">10,55×</td><td>14,02%</td><td style="text-align:left;font-size:var(--fs-xs);">Re-rating à média histórica com a retomada de credibilidade; lucros aceleram</td></tr>
+        <tr><td class="asset-name">Básico</td><td>8,46×</td><td>11,82%</td><td style="text-align:left;font-size:var(--fs-xs);">Sem re-rating: o múltiplo mantém o desconto e o retorno vem dos lucros e dividendos</td></tr>
+        <tr><td class="asset-name">Pessimista</td><td class="num-neg">5,87×</td><td>9,62%</td><td style="text-align:left;font-size:var(--fs-xs);">De-rating ao mínimo histórico (−2 desvios-padrão); lucros pressionados pelo juro alto</td></tr>
+        <tr><td class="asset-name">Stress</td><td class="num-neg">5,87×</td><td class="num-neg">0% → 6%</td><td style="text-align:left;font-size:var(--fs-xs);">Múltiplo no mínimo histórico e colapso dos lucros (earnings yield a 0%), com recuperação parcial a 6%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">A reprecificação do múltiplo não é distribuída uniformemente pelo horizonte: o P/E converge do observado ao alvo do cenário por <strong>decaimento exponencial com meia-vida de 18 meses</strong>, de modo que o re-rating (ou o de-rating) se concentra nos primeiros trimestres. Isso torna o retorno da bolsa em janelas curtas bem mais sensível ao cenário do que a comparação dos múltiplos-alvo sugere.</div>
+
+  <div class="subhead">Small caps — CAPM sobre o IBOV</div>
+  <div class="formula-box">
+    <div class="formula-eq">Small caps = CDI + β × (IBOV − CDI) + α</div>
+    <div class="formula-cap">Beta e alfa estimados por regressão SMLL × IBOV, em janelas históricas coerentes com o regime de cada cenário.</div>
+  </div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Cenário</th><th>Beta</th><th>Alfa</th><th style="text-align:left;">Janela de estimação</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">Otimista</td><td>1,00</td><td class="num-pos">+3,1%</td><td style="text-align:left;font-size:var(--fs-xs);">2016-2021 — ciclo de queda de juros e re-rating</td></tr>
+        <tr><td class="asset-name">Básico</td><td>1,01</td><td>−0,9%</td><td style="text-align:left;font-size:var(--fs-xs);">Amostra completa 2003-2026</td></tr>
+        <tr><td class="asset-name">Pessimista</td><td>1,09</td><td class="num-neg">−3,6%</td><td style="text-align:left;font-size:var(--fs-xs);">Últimos 10 anos — juro alto persistente</td></tr>
+        <tr><td class="asset-name">Stress</td><td>1,15</td><td class="num-neg">−11% → −5%</td><td style="text-align:left;font-size:var(--fs-xs);">Últimos 5 anos — choque inicial de −11%, normalizando a −5%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">O alfa negativo das janelas recentes reflete o desempenho estrutural das small caps sob juro alto; o alfa positivo do Otimista, o padrão dos ciclos de afrouxamento e re-rating.</div>
+</section>
+
+<!-- ================= T16 · NÃO-CORE ================= -->
+<section class="section" id="t16">
+  <div class="eyebrow">Classes de Ativos · Não-Core</div>
+  <div class="sec-title">Classes não-core — derivadas do núcleo</div>
+  <div class="sec-desc">PE/VC, fundos imobiliários e multimercados têm retornos <strong>derivados da relação histórica</strong> (regressão ou benchmark) com as classes núcleo — juros, inflação e bolsa. Onde não há convicção estatística, a premissa é <strong>neutra</strong>: a classe rende seu benchmark, com pontos de cenário aplicados apenas nos episódios em que o efeito é claro.</div>
+  <div class="divider"></div>
+
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Classe</th><th>Otimista</th><th>Básico</th><th>Pessimista</th><th>Stress</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">Multimercados <span style="font-size:var(--fs-xs);color:var(--text-3);">(% do CDI)</span></td><td class="num-pos">120% → 150%</td><td>120%</td><td>70%</td><td class="num-neg">choque a −40% do CDI no curto prazo; recuperação a 100%</td></tr>
+        <tr><td class="asset-name">DI Ativo <span style="font-size:var(--fs-xs);color:var(--text-3);">(sobre o CDI)</span></td><td class="num-pos">+1,0pp</td><td>+0,5pp</td><td>−0,5pp</td><td class="num-neg">−2,0pp no choque</td></tr>
+        <tr><td class="asset-name">Imobiliários</td><td class="num-pos">+25% em 12m</td><td>neutro (benchmark)</td><td>+8% em 12m</td><td class="num-neg">−12% em 6m</td></tr>
+        <tr><td class="asset-name">PE/VC</td><td>neutro (benchmark)</td><td>neutro (benchmark)</td><td>+1% em 12m</td><td class="num-neg">−6% em 6m</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Multimercados e DI Ativo: geração de valor sobre o CDI coerente com a dispersão histórica da indústria em cada regime de juros. Imobiliários e PE/VC: neutros ao benchmark, com pontos de cenário — retornos pontuais nas janelas indicadas — onde o efeito do regime sobre ativos reais e ilíquidos é claro.</div>
+</section>
+
+<!-- ================= T17 · CENÁRIO GLOBAL ================= -->
+<section class="section" id="t17">
+  <div class="eyebrow">Classes de Ativos · Offshore</div>
+  <div class="sec-title">Cenário global — premissas em US$</div>
+  <div class="sec-desc">O bloco offshore parte de um quadro global comum — que se diferencia por cenário apenas no juro americano — e converte os retornos em US$ para o portfólio local, com ou sem hedge cambial.</div>
+  <div class="divider"></div>
+
+  <div class="political-grid">
+    <div class="political-card">
+      <div class="tag teal">EUA</div>
+      <div class="political-title">Inflação acima da meta, atividade sustentada</div>
+      <div class="reading-body">Inflação rodando <strong>3,5% contra a meta de 2%</strong>, expansão fiscal persistente e o ciclo de CAPEX de inteligência artificial sustentando atividade e bolsas. O Fed permanece em <strong>modo de manutenção</strong>, sem espaço para afrouxar com a inflação resistente.</div>
+    </div>
+    <div class="political-card p2">
+      <div class="tag amber">Europa</div>
+      <div class="political-title">ECB em ciclo de alta</div>
+      <div class="reading-body">Na contramão do Fed, o Banco Central Europeu está em <strong>ciclo de alta de juros</strong>, respondendo à sua própria dinâmica de inflação.</div>
+    </div>
+    <div class="political-card p3">
+      <div class="tag navy">China</div>
+      <div class="political-title">Crescimento fraco</div>
+      <div class="reading-body">Atividade em desaceleração estrutural, crescendo <strong>~4,4%</strong> — abaixo do padrão da última década, com o setor imobiliário ainda em ajuste.</div>
+    </div>
+  </div>
+
+  <div class="subhead">Juro americano (SOFR) por cenário</div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Premissa</th><th>Hoje</th><th>Otimista</th><th>Básico</th><th>Pessimista</th><th>Stress</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">SOFR (equilíbrio)</td><td>3,66%</td><td>2,50%</td><td>2,75%</td><td>3,50%</td><td class="num-neg">mergulha a 1,0% e volta a 2,5%</td></tr>
+        <tr><td class="asset-name">Inflação EUA</td><td>3,5%</td><td colspan="4" style="text-align:center;">convergência a 2,0% no equilíbrio em todos os cenários</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subhead">Retornos em US$ e conversão</div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Classe</th><th style="text-align:left;">Premissa de retorno</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">Renda fixa global (US$)</td><td style="text-align:left;">SOFR + ~1pp</td></tr>
+        <tr><td class="asset-name">Renda variável global (US$)</td><td style="text-align:left;">Reversão a 7% a.a. no longo prazo (referência: prêmio de risco de Damodaran)</td></tr>
+        <tr><td class="asset-name">Alternatives (US$)</td><td style="text-align:left;">~5,5% a.a.</td></tr>
+        <tr><td class="asset-name">Hedge cambial</td><td style="text-align:left;">Diferencial de juros (CDI − SOFR) − custo de basis de ~1pp</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">No cenário de Stress doméstico, o juro americano reage à crise emergente com corte (SOFR a 1,0%) e posterior normalização a 2,5%. Retornos offshore hedgeados: retorno em US$ + (CDI − SOFR) − basis.</div>
+</section>
+
+<!-- ================= T2 · TRIPÉ & REGIME ================= -->
+<section class="section" id="t2">
+  <div class="eyebrow">Arcabouço</div>
+  <div class="sec-title">O tripé macroeconômico brasileiro</div>
+  <div class="sec-desc">Os cenários se organizam em torno de uma pergunta única: <strong>quão preservado está o regime econômico conquistado após o Plano Real?</strong> O Básico e o Otimista supõem o tripé intacto; o Pessimista erode o pilar fiscal; o Stress rompe o regime por completo. Entender os três pilares e sua história é o que dá sentido à calibragem.</div>
+  <div class="divider"></div>
+
+  <div class="political-grid">
+    <div class="political-card">
+      <div class="tag teal">Pilar 1</div>
+      <div class="political-title">Câmbio flutuante</div>
+      <div class="reading-body">Desde 1999, o real flutua livremente. Absorve choques externos via preço, não via reservas. No modelo, o câmbio de longo prazo evolui por <strong>paridade do poder de compra (PPP)</strong> — diferencial de inflação Brasil × EUA.</div>
+    </div>
+    <div class="political-card p2">
+      <div class="tag amber">Pilar 2</div>
+      <div class="political-title">Metas de inflação</div>
+      <div class="reading-body">A âncora nominal da economia. O Banco Central persegue uma meta (hoje 3%, banda ±1,5pp). No modelo, é a <strong>inflação de equilíbrio</strong> que, junto ao juro real, define a Selic de longo prazo via Fisher.</div>
+    </div>
+    <div class="political-card p3">
+      <div class="tag navy">Pilar 3</div>
+      <div class="political-title">Responsabilidade fiscal</div>
+      <div class="reading-body">A LRF (2000), o teto de gastos (2016) e o arcabouço fiscal (2023) limitam o gasto público. É o pilar mais frágil hoje — e o que o Pessimista supõe erodido e o Stress supõe rompido.</div>
+    </div>
+  </div>
+
+  <div class="subhead">A linha do tempo do regime</div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-date">1980 – Junho/1994</div>
+      <div class="tl-title">Hiperinflação</div>
+      <div class="tl-body">Inflação de <strong>1.700% (1989), ~2.948% (1990) e ~2.500% (1993)</strong>, chegando a mais de 80% ao mês em 1994. Indexação generalizada e moeda sem valor de reserva.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-date">1º de Julho de 1994</div>
+      <div class="tl-title">Plano Real</div>
+      <div class="tl-body">Nova moeda (o Real), precedida pela URV (fev/1994). Fim da hiperinflação e nascimento do regime econômico atual. <strong>É o marco que o Stress desfaz.</strong></div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-date">Junho de 1999</div>
+      <div class="tl-title">Regime de metas de inflação</div>
+      <div class="tl-body">O Decreto 3.088/1999 institui as metas de inflação como âncora nominal, após o fim da âncora cambial. É o segundo marco que o cenário de Stress rompe.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-date">2000</div>
+      <div class="tl-title">Lei de Responsabilidade Fiscal</div>
+      <div class="tl-body">Consolida o pilar fiscal do tripé, disciplinando o endividamento de estados e União.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-date">2016 → 2023</div>
+      <div class="tl-title">Teto de gastos e arcabouço fiscal</div>
+      <div class="tl-body">A EC 95/2016 (teto de gastos) foi substituída pelo <strong>arcabouço fiscal em 2023</strong>. A credibilidade desse pilar é a variável central dos cenários adversos.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-date">Hoje · 2026</div>
+      <div class="tl-title">Selic 14,25% · IPCA ~5% · real ~8-9%</div>
+      <div class="tl-body">Após pico de 15%, o Copom inicia corte cauteloso. Juro real entre os mais altos do mundo, meta de 3% não cumprida desde 2023. É o ponto de partida (m0) de todos os cenários.</div>
+    </div>
+  </div>
+
+  <div class="reading-card cambio">
+    <div class="reading-title">Por que isso organiza os cenários</div>
+    <div class="reading-body"><strong>Básico e Otimista:</strong> tripé intacto, inflação convergindo à meta, juro real normalizando. <strong>Pessimista:</strong> pilar fiscal erode — prêmio de risco estrutural mais alto, mas BC ainda ortodoxo. <strong>Stress:</strong> ruptura do tripé e do regime de metas — retorno ao estágio de alta inflação e dominância fiscal (a "turquização").</div>
+  </div>
+</section>
+
+<!-- ================= T3 · FISHER ================= -->
+<section class="section" id="t3">
+  <div class="eyebrow">Mecânica</div>
+  <div class="sec-title">A regra de Fisher e as três inflações</div>
+  <div class="sec-desc">A Selic de longo prazo de cada cenário <strong>não é digitada solta</strong>: ela deriva do juro real de equilíbrio (r*) e da inflação de equilíbrio, pela equação de Fisher. Isso garante coerência interna — não é possível ter um juro nominal que implique um juro real incompatível com a premissa do cenário.</div>
+  <div class="divider"></div>
+
+  <div class="formula-box">
+    <div class="formula-eq">Selic = (1 + r*) × (1 + π) − 1</div>
+    <div class="formula-cap">O juro nominal é o juro real de equilíbrio (r*) capitalizado pela inflação de equilíbrio (π). A soma simples (r* + π) é uma aproximação; o termo cruzado (r* × π) importa ~0,2pp neste nível de juros.</div>
+  </div>
+
+  <div class="subhead">As três inflações — cada uma tem seu papel</div>
+  <div class="political-grid">
+    <div class="political-card">
+      <div class="tag navy">Trajetória</div>
+      <div class="political-title">Inflação corrente (acum. 12m)</div>
+      <div class="reading-body">No ponto de partida (m0) é um dado observado; ao longo da trajetória, é <strong>consequência das demais premissas do modelo</strong> — câmbio (repasse via bens comercializáveis), preços administrados, fiscal (credibilidade da meta e expectativas) e Selic. É a inflação 12 meses projetada que resulta da política inputada em cada cenário.</div>
+    </div>
+    <div class="political-card p2">
+      <div class="tag amber">Calibragem</div>
+      <div class="political-title">Inflação de equilíbrio</div>
+      <div class="reading-body">O patamar para onde cada cenário converge. É com ela que o modelo é <strong>calibrado</strong>: define a Selic de longo prazo via Fisher (casada com o r*) e ancora a trajetória de juros e das demais variáveis nominais.</div>
+    </div>
+    <div class="political-card p3">
+      <div class="tag teal">Mercado</div>
+      <div class="political-title">Inflação implícita</div>
+      <div class="reading-body">O breakeven precificado nas NTN-B. No m0 é o dado de mercado que fecha a curva nominal contra a curva real; ao longo da trajetória é <strong>output do modelo</strong> — as duas curvas são construídas de forma independente e a implícita é o que resulta delas. Serve como <strong>parâmetro de credibilidade do regime</strong>: comprimida quando a âncora é crível, igual ou acima da corrente quando o mercado precifica desancoragem.</div>
+    </div>
+  </div>
+
+  <div class="subhead">Fisher aplicado — Selic de longo prazo por cenário</div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead>
+        <tr>
+          <th>Cenário</th>
+          <th>Juro real r*</th>
+          <th>Inflação eq.</th>
+          <th>Fisher exato</th>
+          <th>Selic LTCA (0,25%)</th>
+          <th>Real embutido</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="asset-name">Básico</td><td>6,00%</td><td>4,00%</td><td>10,24%</td><td class="num-pos">10,25%</td><td>6,01%</td></tr>
+        <tr><td class="asset-name">Otimista</td><td>5,00%</td><td>3,00%</td><td>8,15%</td><td class="num-pos">8,25%</td><td>5,10%</td></tr>
+        <tr><td class="asset-name">Pessimista</td><td>7,80%</td><td>5,00%</td><td>13,19%</td><td>13,25%</td><td>7,86%</td></tr>
+        <tr><td class="asset-name">Stress · Turquização</td><td>10,00%</td><td>32,00%</td><td>45,20%</td><td class="num-neg">45,25%</td><td>10,00%</td></tr>
+        <tr><td class="asset-name">Sensibilidade <span style="font-size:var(--fs-xs);color:var(--text-3);">(peso 0%)</span></td><td>5,50%</td><td>4,00%</td><td>9,72%</td><td>9,75%</td><td>5,53%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">A convenção brasileira arredonda a Selic em passos de 0,25pp. A Selic de longo prazo é premissa digitada; quando não informada, é inferida por Fisher. Em todos os cenários o real embutido bate o r* premissa.</div>
+
+  <div class="reading-card cambio">
+    <div class="reading-title">O Stress: arbitragem no caminho, Fisher no equilíbrio</div>
+    <div class="reading-body">A ruptura de regime é justamente a hipótese de que as relações de equilíbrio deixam de funcionar — mas ela vale para o <strong>caminho</strong>, não para o destino. Na fase de dominância fiscal a Selic é <strong>arbitrada pelo Comitê</strong> e fica deliberadamente abaixo do neutro: no ano 5, Selic de 20% contra inflação de 30% produz juro real de <strong>−7,7%</strong>, o coração da turquização. O <strong>LTCA, porém, é estado estacionário</strong> — nele a Selic volta a obedecer Fisher com o r* do próprio cenário. Com r* de 10% (a dominância fiscal precifica risco no juro real de equilíbrio) e inflação de 32%, o Fisher dá 45,20% e a Selic de equilíbrio fica em <strong>45,25%</strong>: ortodoxia forçada com juro real de dois dígitos, o retrato da Turquia de hoje. Um juro real de equilíbrio permanentemente abaixo do neutro não seria um estado estacionário — seria a ruptura sem fim.</div>
+  </div>
+
+  <div class="subhead">Regras de repasse — como a inflação dos cenários deriva do Básico</div>
+  <div class="body-p">A trajetória de inflação do <strong>Básico</strong> é a referência (BRCG). As inflações do Otimista e do Pessimista <strong>não são digitadas soltas</strong>: derivam do Básico por duas regras de repasse, aplicadas às diferenças de câmbio e de Selic entre cada cenário e o cenário de referência. O Stress, cenário de ruptura, é arbitrado.</div>
+  <div class="political-grid">
+    <div class="political-card p2">
+      <div class="tag amber">Câmbio</div>
+      <div class="political-title">Repasse cambial (~15 meses)</div>
+      <div class="reading-body">Uma variação de <strong>10% no câmbio</strong> transfere <strong>~1,2pp ao IPCA</strong>, distribuídos ao longo de ~15 meses, via bens comercializáveis. Quando os preços administrados são contidos — hipótese do Pessimista —, o repasse cai a <strong>~0,8pp</strong>.</div>
+    </div>
+    <div class="political-card">
+      <div class="tag teal">Juros</div>
+      <div class="political-title">Efeito da política monetária</div>
+      <div class="reading-body"><strong>+100bps de Selic mantidos por 15 meses</strong> reduzem a inflação em <strong>~18bps</strong>. É o canal que faz a Selic mais alta do Otimista em 2026 (14,5% no 4T26) acelerar a convergência da inflação ao centro da meta.</div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Inflação (IPCA acum. ano)</th><th>2026</th><th>2027</th><th>2028</th><th>Equilíbrio</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">Otimista (derivada)</td><td>~4,1%</td><td>~3,1%</td><td>2,0-2,9%</td><td class="num-pos">3,0%</td></tr>
+        <tr><td class="asset-name">Básico (referência BRCG)</td><td>5,2%</td><td>4,6%</td><td>3,9%</td><td>4,0%</td></tr>
+        <tr><td class="asset-name">Pessimista (derivada)</td><td class="num-neg">6,2%</td><td class="num-neg">5,6%</td><td>4,9%</td><td>5,0%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Derivação: câmbio e Selic de cada cenário contra o Básico, com as regras de repasse acima. No Pessimista, o repasse cambial usa ~0,8pp por 10% de câmbio (preços administrados contidos).</div>
+</section>
+
+<!-- ================= T4 · OS CINCO CENÁRIOS ================= -->
+<section class="section" id="t4">
+  <div class="eyebrow">Panorama</div>
+  <div class="sec-title">Os cinco cenários lado a lado</div>
+  <div class="sec-desc">Cada cenário é uma hipótese coerente sobre o estado do tripé macroeconômico no longo prazo. O que muda entre eles são três parâmetros amarrados — juro real de equilíbrio, inflação de equilíbrio e a Selic que deles resulta — mais a narrativa que os justifica.</div>
+  <div class="divider"></div>
+
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead>
+        <tr>
+          <th>Cenário</th><th>r*</th><th>Inflação</th><th>Implícita 9,3a *</th><th>Selic LTCA</th><th>Prob.</th><th>Tese central</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="asset-name">Básico</td><td>6,0%</td><td>4,0%</td><td>4,75%</td><td class="num-pos">10,25%</td><td>40%</td>
+          <td style="text-align:left; font-size:var(--fs-xs);">Tripé intacto; convergência lenta e imperfeita à meta.</td>
+        </tr>
+        <tr>
+          <td class="asset-name">Otimista</td><td>5,0%</td><td>3,0%</td><td>3,34%</td><td class="num-pos">8,25%</td><td>20%*</td>
+          <td style="text-align:left; font-size:var(--fs-xs);">Consolidação fiscal; inflação ancora no centro da meta.</td>
+        </tr>
+        <tr>
+          <td class="asset-name">Pessimista</td><td>7,8%</td><td>5,0%</td><td>6,51%</td><td>13,25%</td><td>30%</td>
+          <td style="text-align:left; font-size:var(--fs-xs);">Erosão do arcabouço; prêmio de risco fiscal congelado no nível de hoje.</td>
+        </tr>
+        <tr>
+          <td class="asset-name">Stress</td><td>10,0%<br><span style="font-size:var(--fs-xs);color:var(--text-3);">−7,7% no ano 5</span></td><td>32%</td><td class="num-neg">34,2%</td><td class="num-neg">45,25%</td><td>10%*</td>
+          <td style="text-align:left; font-size:var(--fs-xs);">Ruptura do regime; dominância fiscal no caminho (juro real −7,7% no ano 5) e ortodoxia forçada no equilíbrio.</td>
+        </tr>
+        <tr>
+          <td class="asset-name">Sensibilidade</td><td>5,5%</td><td>4,0%</td><td>4,76%</td><td>9,75%</td><td>0%</td>
+          <td style="text-align:left; font-size:var(--fs-xs);">Básico com o juro neutro de livro-texto (r* 5,5%) — sensibilidade ao principal fator do modelo.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note"><strong>*</strong> A inflação implícita é <strong>output</strong> do modelo, no vértice de 9,32a e no equilíbrio de longo prazo: resulta da comparação entre a curva nominal e a curva real de cada cenário, e não é premissa. Fica acima da inflação de equilíbrio em todos os cenários — o prêmio de risco de inflação embutido no equilíbrio vai de 0,34pp no Otimista a 2,24pp no Stress.</div>
+
+  <div class="political-grid">
+    <div class="political-card">
+      <div class="pill-scenario ps-base">Básico · 40%</div>
+      <div class="reading-body">O Brasil de hoje que <strong>caminha, devagar, para a normalização</strong>. Inflação não bate a meta de 3%, mas ancora perto de 4%; o juro real de equilíbrio fica em 6,0%, alto para padrões globais. É o mundo-base da carteira.</div>
+    </div>
+    <div class="political-card">
+      <div class="pill-scenario ps-otim">Otimista · 20%*</div>
+      <div class="reading-body">Reformas avançam, a trajetória de dívida estabiliza e a <strong>credibilidade da meta se restaura</strong>. Inflação no centro (3%), juro real em 5%. Cenário de re-rating dos ativos brasileiros.</div>
+    </div>
+    <div class="political-card p2">
+      <div class="pill-scenario ps-pess">Pessimista · 30%</div>
+      <div class="reading-body">A âncora fiscal se afrouxa sem substituto crível. O <strong>prêmio de risco de hoje vira permanente</strong>: juro real de equilíbrio a 7,8%, inflação a 5%. BC segue ortodoxo — juro alto, mas positivo (ver aba Pessimista).</div>
+    </div>
+    <div class="political-card rust">
+      <div class="pill-scenario ps-stress">Stress · 10%*</div>
+      <div class="reading-body">A turquização: <strong>o regime pós-1994 se perde</strong>. Dominância fiscal no meio do caminho — juro real de −7,7% no ano 5 — e ortodoxia forçada no longo prazo: Selic de 45,25% contra inflação de 32%, com juro real de equilíbrio de 10%. Câmbio em disparada. O pior caso modelável (ver aba Stress).</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= T11 · BÁSICO ================= -->
+<section class="section" id="t11">
+  <div class="eyebrow">Cenário Base · Probabilidade 40%</div>
+  <div class="sec-title">Básico — higher for longer</div>
+  <div class="sec-desc">O Básico não é um cenário benigno: supõe que o país <strong>não melhora estruturalmente seus fundamentos</strong>. A inflação ancora em 4% — acima do centro da meta —, a dívida segue em alta e o juro neutro fica mais alto por mais tempo. É o Brasil de hoje caminhando devagar, sem crise e sem redenção.</div>
+  <div class="divider"></div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card up"><div class="kpi-label">Juro real de equilíbrio</div><div class="kpi-value">6,0%</div><div class="kpi-sub">deliberação do Comitê RAYA — acima dos 5,5% de referência de longo prazo</div></div>
+    <div class="kpi-card up"><div class="kpi-label">Inflação de equilíbrio</div><div class="kpi-value">4,0%</div><div class="kpi-sub">a "meta de facto" — o centro de 3% funciona como piso</div></div>
+    <div class="kpi-card up"><div class="kpi-label">Selic LTCA (Fisher)</div><div class="kpi-value">10,25%</div><div class="kpi-sub">(1,06 × 1,04) − 1 = 10,24% → 10,25%</div></div>
+    <div class="kpi-card gold"><div class="kpi-label">Câmbio</div><div class="kpi-value">PPP</div><div class="kpi-sub">diferencial de inflação BR−US (~2pp) + prêmio</div></div>
+  </div>
+
+  <div class="reading-card">
+    <div class="reading-title">A trajetória de referência (BRCG, jul/2026) — o "déjà vu"</div>
+    <div class="reading-body">O cenário de referência da consultoria BRCG desenha a rota dos primeiros anos: a inflação volta a acelerar e obriga o Banco Central a <strong>ressubir o juro em 2027</strong> — o "déjà vu" que dá nome ao cenário — antes do ciclo de queda. É essa transição que as âncoras trimestrais do modelo reproduzem antes de pousar no equilíbrio de longo prazo.</div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Trajetória do Básico (BRCG jul/26)</th><th>2026</th><th>2027</th><th>2028</th><th>LTCA</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">Selic (fim de ano)</td><td>14,00%</td><td class="num-neg">15,25%</td><td>13,50%</td><td class="num-pos">10,25%</td></tr>
+        <tr><td class="asset-name">IPCA (acum. ano)</td><td>5,2%</td><td>4,6%</td><td>3,9%</td><td>4,0%</td></tr>
+        <tr><td class="asset-name">Câmbio (R$/US$)</td><td>5,05</td><td>5,15</td><td>5,20</td><td>≈6,00*</td></tr>
+        <tr><td class="asset-name">PIB (crescimento)</td><td>2,0%</td><td>1,3%</td><td>1,1%</td><td>~1,5%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Fonte: cenário de referência BRCG (jul/2026). A Selic encerra 2026 em 14,0% (corte no 3T26) e volta a subir a partir de meados de 2027, respondendo ao repique inflacionário, com pico de 15,25% no fim de 2027; entre o 4,6% de 2027 e o 3,9% de 2028, a trajetória da inflação passa por uma âncora intermediária de 4,3% (m21). O LTCA é o equilíbrio do modelo (Fisher com r* 6% e inflação 4%). * Câmbio no LTCA (10 anos) evoluído por <strong>PPP</strong> a partir de 2028: diferencial de inflação Brasil−EUA de ~2pp a.a. leva os 5,20 a ≈6,00 no ano 10.</div>
+
+  <div class="subhead">Os fundamentos</div>
+  <div class="political-grid">
+    <div class="political-card p2">
+      <div class="tag amber">Inflação</div>
+      <div class="political-title">A meta de facto é 4%</div>
+      <div class="reading-body">Nos 27 anos do regime, a inflação passou <strong>76% dos meses acima do centro</strong> e a média sem os picos é ~5,8%. A leitura da BRCG converge: o centro de 3% opera como <strong>piso</strong>, e a autoridade monetária trabalha, na prática, com a banda de 3-4,5%. Ancorar o Básico em 4% é reconhecer o regime como ele é.</div>
+    </div>
+    <div class="political-card rust">
+      <div class="tag rust">Fiscal</div>
+      <div class="political-title">Dívida em trajetória ascendente</div>
+      <div class="reading-body">Primário do setor público em torno de <strong>−0,4 a −0,6% do PIB</strong> ao ano e dívida bruta subindo de <strong>~84% para ~94% do PIB até 2028</strong> (projeção BRCG) — uma trajetória que não estabiliza. É o que sustenta o juro neutro elevado: sem consolidação, o prêmio de risco fiscal não comprime.</div>
+    </div>
+    <div class="political-card">
+      <div class="tag teal">Juros</div>
+      <div class="political-title">Neutro em 6% — a deliberação</div>
+      <div class="reading-body">A premissa utilizada no trimestre anterior era de <strong>5,5%</strong>, alinhada à projeção do próprio Banco Central. O Comitê deliberou subir para <strong>6,0%</strong> por duas razões: as <strong>dificuldades de consolidação fiscal</strong> do Brasil e o já conhecido problema de <strong>superestimativa da ociosidade (hiato do produto)</strong> — documentado tanto na análise da BRCG quanto na literatura do modelo estrutural do próprio BC —, que leva a política calibrada pelo hiato oficial a subestimar a pressão inflacionária e, na prática, a exigir um juro neutro maior. Os 5,5% permanecem vivos no cenário de <strong>Sensibilidade</strong>.</div>
+    </div>
+  </div>
+
+  <div class="reading-card cambio">
+    <div class="reading-title">Básico × Sensibilidade — o teste do fator mais importante</div>
+    <div class="reading-body">A Sensibilidade é o <strong>Básico com o juro neutro de 5,5%</strong> (Selic de equilíbrio 9,75% em vez de 10,25%) e peso zero. Comparar os dois isola o efeito do <strong>juro real de equilíbrio</strong> — hoje o parâmetro mais importante do modelo — sobre toda a cadeia: curva de juros, prêmios, câmbio e retornos esperados. Meio ponto de r* de diferença propaga-se por todas as classes de ativos: na curva real, a NTN-B longa fica em <strong>6,54%</strong> no Básico contra <strong>6,06%</strong> na Sensibilidade — meio ponto de juro neutro vale 48 pontos-base no yield real de 9 anos, e o mesmo diferencial reaparece na Selic, na curva pré, no câmbio e no custo de oportunidade de todas as classes.</div>
+  </div>
+</section>
+
+<!-- ================= T12 · OTIMISTA ================= -->
+<section class="section" id="t12">
+  <div class="eyebrow">Cenário Alternativo · Probabilidade 20%</div>
+  <div class="sec-title">Otimista — retomada de credibilidade</div>
+  <div class="sec-desc">O Otimista é o cenário em que <strong>governo e Banco Central mais pragmáticos</strong> reconstroem as âncoras: a consolidação fiscal estabiliza a dívida, a meta de 3% volta a ser crível e o juro real recua ao patamar de equilíbrio histórico. É o cenário de re-rating dos ativos brasileiros.</div>
+  <div class="divider"></div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card up"><div class="kpi-label">Juro real de equilíbrio</div><div class="kpi-value up">5,0%</div><div class="kpi-sub">prêmio de risco fiscal comprime</div></div>
+    <div class="kpi-card up"><div class="kpi-label">Inflação de equilíbrio</div><div class="kpi-value up">3,0%</div><div class="kpi-sub">o centro da meta volta a ser crível</div></div>
+    <div class="kpi-card up"><div class="kpi-label">Selic LTCA (Fisher)</div><div class="kpi-value up">8,25%</div><div class="kpi-sub">(1,05 × 1,03) − 1 = 8,15% → 8,25%</div></div>
+    <div class="kpi-card gold"><div class="kpi-label">Câmbio</div><div class="kpi-value">↓</div><div class="kpi-sub">apreciação — referência BRCG alternativa: R$ 4,60 → 4,25</div></div>
+  </div>
+
+  <div class="reading-card">
+    <div class="reading-title">A Selic do Otimista — o custo pago à vista</div>
+    <div class="reading-body">No Otimista, o Banco Central <strong>não corta em 2026</strong>: pragmático, sobe a Selic a <strong>14,5% no 4T26</strong> e paga à vista o custo de reancorar as expectativas. O aperto adicional encurta o ciclo: de 2027 em diante a Selic roda <strong>~2pp abaixo do Básico</strong> (13,25% no fim de 2027, 11,5% no fim de 2028), chegando a 8,25% no equilíbrio. A inflação é <strong>derivada por regra de repasse</strong> (câmbio + juros — ver aba A Regra de Fisher): a apreciação cambial e o juro mais alto a levam ao centro da meta.</div>
+  </div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead><tr><th>Trajetória do Otimista</th><th>2026</th><th>2027</th><th>2028</th><th>LTCA</th></tr></thead>
+      <tbody>
+        <tr><td class="asset-name">Selic (fim de ano)</td><td class="num-neg">14,50%</td><td>13,25%</td><td>11,50%</td><td class="num-pos">8,25%</td></tr>
+        <tr><td class="asset-name">IPCA (acum. ano, derivado)</td><td>~4,1%</td><td>~3,1%</td><td>2,0-2,9%</td><td>3,0%</td></tr>
+        <tr><td class="asset-name">Câmbio (R$/US$)</td><td>4,60</td><td>4,40</td><td>4,25</td><td>PPP</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Selic: sem o corte de 2026 do Básico; alta a 14,5% no 4T26 e trajetória ~2pp abaixo do Básico de 2027 em diante. Inflação derivada do Básico pelas regras de repasse (câmbio e juros); câmbio da trajetória alternativa BRCG, evoluindo por PPP após 2028.</div>
+
+  <div class="subhead">O que precisa acontecer</div>
+  <div class="political-grid">
+    <div class="political-card">
+      <div class="tag teal">Fiscal</div>
+      <div class="political-title">Consolidação crível</div>
+      <div class="reading-body">Um ajuste que leve o primário a superávit suficiente para <strong>estabilizar a dívida/PIB</strong>. É a condição-mãe: sem ela, nem a meta re-ancora nem o neutro cede. Historicamente associada a ciclos de reforma (2016-2019: teto de gastos, previdência — período em que a inflação rodou <em>abaixo</em> do centro).</div>
+    </div>
+    <div class="political-card">
+      <div class="tag teal">Metas</div>
+      <div class="political-title">3% vira âncora de verdade</div>
+      <div class="reading-body">Com o fiscal resolvido, as expectativas convergem ao centro — como nos períodos de maior credibilidade do regime (2006-2009, 2017-2019, únicos anos fechados abaixo do centro). A inflação implícita comprime junto, reduzindo o custo nominal de toda a curva.</div>
+    </div>
+    <div class="political-card">
+      <div class="tag teal">Preços de ativos</div>
+      <div class="political-title">Re-rating</div>
+      <div class="reading-body">Prêmios comprimem em cadeia: juro real de 5%, curva bull, câmbio apreciando (referência do cenário alternativo otimista da BRCG: <strong>R$ 4,60 em 2026 → 4,25 em 2028</strong>), múltiplos da bolsa expandindo do patamar deprimido atual. É o cenário em que os ativos brasileiros fecham o desconto histórico.</div>
+    </div>
+  </div>
+
+  <div class="reading-card">
+    <div class="reading-title">Por que 20% — e não mais</div>
+    <div class="reading-body">O Otimista exige uma <strong>inflexão de regime fiscal</strong> que os números correntes não mostram: a dívida segue em trajetória ascendente e a inflação corre acima do teto em 2026. Partindo de um ponto entre o Básico e o Pessimista, a migração para o Otimista requer eventos — eleição, reforma, choque positivo — que têm probabilidade real, mas não são o caminho central. Daí os 20%: relevante o bastante para pesar na alocação, sem ancorar a carteira em esperança.</div>
+  </div>
+</section>
+
+<!-- ================= T5 · PESSIMISTA ================= -->
+<section class="section" id="t5">
+  <div class="eyebrow">Cenário Adverso I</div>
+  <div class="sec-title">Pessimista — erosão do arcabouço fiscal</div>
+  <div class="sec-desc">O Pessimista não é uma crise: é um <strong>Brasil que nunca normaliza</strong>. A âncora fiscal se afrouxa — perda do teto de gastos ou das medidas que o substituíram — sem colapso do regime. O prêmio de risco fiscal, hoje cíclico, torna-se estrutural. O Banco Central mantém a ortodoxia, com juro real alto e positivo.</div>
+  <div class="divider"></div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card amber"><div class="kpi-label">Juro real de equilíbrio</div><div class="kpi-value">7,8%</div><div class="kpi-sub">vs. 6,0% no Básico</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">Inflação de equilíbrio</div><div class="kpi-value">5,0%</div><div class="kpi-sub">meta implícita ~4,5%</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">Selic LTCA (Fisher)</div><div class="kpi-value">13,25%</div><div class="kpi-sub">(1,078 × 1,05) − 1 = 13,19% → 13,25%</div></div>
+    <div class="kpi-card"><div class="kpi-label">Real embutido</div><div class="kpi-value">7,86%</div><div class="kpi-sub">consistente com o r* de 7,8%</div></div>
+    <div class="kpi-card gold"><div class="kpi-label">Câmbio</div><div class="kpi-value">5,90</div><div class="kpi-sub">trajetória BRCG pessimista: 5,45 (26) → 5,90 (28); risco-país elevado</div></div>
+  </div>
+
+  <div class="reading-card rv">
+    <div class="reading-title">A tese em uma frase</div>
+    <div class="reading-body">A premissa é que o <strong>juro real neutro de equilíbrio estimado hoje (~7,8%)</strong> se mantém no longo prazo, em vez de recuar. O juro real <em>corrente</em> (~8-9%) é ainda mais alto porque a política monetária precisa rodar acima do neutro para levar a inflação à meta e estabilizar a Selic; o Pessimista projeta a persistência do <strong>neutro elevado</strong>, não do juro corrente restritivo. É o cenário em que o estresse fiscal não cede.</div>
+  </div>
+
+  <div class="subhead">O mecanismo: prêmio de risco fiscal</div>
+  <div class="body-p">O que distingue o Pessimista do Stress é o <strong>modo de falha</strong>. Aqui, a instituição não quebra: o Banco Central continua perseguindo a meta e mantendo juro real positivo. O que se deteriora é o <strong>preço da dívida soberana</strong> — o mercado exige um prêmio permanentemente mais alto para financiar um Estado com trajetória fiscal frouxa. O juro real de equilíbrio sobe e ali fica.</div>
+
+  <div class="reading-card">
+    <div class="reading-title">Mudança de premissa — cenário 30/06 → 30/07</div>
+    <div class="reading-body">Na virada do cenário de <strong>30/06 para o de 30/07</strong>, o juro real de equilíbrio do Pessimista passou a <strong>7,8%</strong> — a estimativa corrente do juro neutro, mantida no longo prazo. Fica acima do Básico (6%, "higher for longer") e da referência de livro-texto (5,5%, cenário de Sensibilidade), e abaixo do juro real corrente restritivo (~8-9%). A inflação de equilíbrio de 5% supõe uma âncora de metas menos crível. Resultado: Selic de equilíbrio de 13,25%.</div>
+  </div>
+</section>
+
+<!-- ================= T6 · STRESS / TURQUIZAÇÃO ================= -->
+<section class="section" id="t6">
+  <div class="eyebrow">Cenário Adverso II</div>
+  <div class="sec-title">Stress — Dominância Fiscal</div>
+  <div class="sec-desc">O Stress tem uma definição precisa: <strong>perder o regime econômico conquistado com o Plano Real (1994) e o regime de metas de inflação (1999)</strong>, retrocedendo ao estágio anterior de alta inflação e dominância fiscal. O análogo internacional é a Turquia — a crise de 2021-2022 (heterodoxia, juro real negativo) no meio do caminho e a Turquia atual (ortodoxia forçada) no equilíbrio de longo prazo — não a hiperinflação plena da Venezuela ou do Brasil pré-94, que é inmodelável.</div>
+  <div class="divider"></div>
+
+  <div class="alert-banner rust">
+    <div class="alert-icon">▲</div>
+    <div class="alert-text"><strong>O que define a turquização não é a inflação alta — é o Banco Central não reagir</strong>A marca da fase de ruptura é o <strong>juro real negativo</strong>: por dominância fiscal ou captura política, a autoridade monetária deixa de subir o juro o suficiente para conter a inflação. A inflação alta é consequência; a rendição do BC é a causa. No longo prazo, o custo se impõe e a ortodoxia volta — forçada.</div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card rust"><div class="kpi-label">Inflação</div><div class="kpi-value down">32%</div><div class="kpi-sub">30% no ano 5; 32% no equilíbrio (Turquia hoje ~32%)</div></div>
+    <div class="kpi-card rust"><div class="kpi-label">Juro real no auge (ano 5)</div><div class="kpi-value down">−7,7%</div><div class="kpi-sub">m60: Selic 20% × inflação 30% — referência: Brasil, COVID 2020-21</div></div>
+    <div class="kpi-card rust"><div class="kpi-label">Selic LTCA (Fisher, r* 10%)</div><div class="kpi-value down">45,25%</div><div class="kpi-sub">ortodoxia forçada — r* de 10% × inflação de 32%; referência: Turquia atual</div></div>
+    <div class="kpi-card rust"><div class="kpi-label">Juro real de equilíbrio (r*)</div><div class="kpi-value down">10%</div><div class="kpi-sub">a dominância fiscal precifica risco no juro real de equilíbrio</div></div>
+    <div class="kpi-card rust"><div class="kpi-label">PIB</div><div class="kpi-value down">−2%</div><div class="kpi-sub">no ano 5; recuperação a 0,5% no equilíbrio</div></div>
+    <div class="kpi-card gold"><div class="kpi-label">Câmbio</div><div class="kpi-value">↑↑</div><div class="kpi-sub">forte depreciação via PPP (inflação de 30-32% BR vs. 2% US)</div></div>
+  </div>
+
+  <div class="reading-card rust">
+    <div class="reading-title">O arco do cenário — dominância no caminho, capitulação no fim</div>
+    <div class="reading-body">O Stress não é um estado único: é um <strong>arco em duas fases</strong>. Na primeira, dominância fiscal — o Banco Central, capturado, deixa a Selic (20% no ano 5) muito abaixo da inflação (30%): <strong>juro real de −7,7% no auge da ruptura</strong>. Na segunda, o custo se impõe e vem a <strong>capitulação: ortodoxia forçada</strong> — a Selic é levada a <strong>45,25%</strong> contra uma inflação que se estabiliza em 32%, o que corresponde a um <strong>juro real de equilíbrio de 10%</strong>, o retrato da Turquia de hoje. A arbitragem do Comitê vale para o caminho; o LTCA é estado estacionário e volta a obedecer Fisher com o r* do cenário. A atividade acompanha: o PIB desacelera até <strong>−2% no ano 5</strong> e se recupera a 0,5% no equilíbrio.</div>
+  </div>
+
+  <div class="reading-card rust">
+    <div class="reading-title">Repressão financeira: a distância entre o juro do caixa e o juro dos títulos</div>
+    <div class="reading-body">O que o Banco Central controla é a Selic; o juro real exigido nos títulos é do mercado. No auge da ruptura essas duas coisas se separam: o <strong>juro real do CDI vai a −7,7%</strong> enquanto o <strong>juro real da NTN-B longa sobe para perto de 10%</strong>. É essa distância que define a repressão financeira — e é ela que determina o comportamento das classes no cenário. O papel indexado à inflação <strong>protege</strong> (perde no efeito-preço da alta do juro real e recupera no carrego); o <strong>prefixado é destruído</strong>, porque carrega uma taxa nominal fixada antes da desancoragem; e o <strong>caixa perde poder de compra</strong> de forma contínua durante toda a fase de dominância.</div>
+  </div>
+
+  <div class="subhead">Referências internacionais de desancoragem</div>
+  <div class="table-wrap">
+    <table class="asset-table">
+      <thead>
+        <tr><th>Caso</th><th>Episódio</th><th>Pico de inflação</th><th>Juro real no auge</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="asset-name">Turquia — hoje</td><td style="text-align:left;font-size:var(--fs-xs);">2024-26, virada ortodoxa</td><td>~32% (jun/26)</td><td class="num-pos">+4 a +9%</td></tr>
+        <tr><td class="asset-name">Turquia — crise</td><td style="text-align:left;font-size:var(--fs-xs);">2021-23, heterodoxia</td><td>85,5% (out/22)</td><td class="num-neg">~ −40%</td></tr>
+        <tr><td class="asset-name">Brasil — pré-Real</td><td style="text-align:left;font-size:var(--fs-xs);">até jul/1994</td><td>1.000 – 2.500% a.a.</td><td>negativo/indexado</td></tr>
+        <tr><td class="asset-name">Venezuela</td><td style="text-align:left;font-size:var(--fs-xs);">2017-21, hiperinflação</td><td>~65.000 – 130.000% (2018)</td><td>irrelevante</td></tr>
+        <tr><td class="asset-name">Argentina</td><td style="text-align:left;font-size:var(--fs-xs);">recorrente — excluída</td><td>câmbio/inflação oficiais não valem</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="reading-card rust">
+    <div class="reading-title">Por que 30% de inflação — e não pré-94 ou Venezuela</div>
+    <div class="reading-body">Brasil pré-94 (2.500%) e Venezuela (milhares por cento) servem de <strong>narrativa, não de número</strong>. Acima de ~40-50% de inflação, o próprio modelo perde sentido: o câmbio explode de forma não-linear, a indexação retorna e "juro real" e "inflação implícita" deixam de ser variáveis observáveis. <strong>30% é o teto útil</strong> do que o motor representa — a Turquia de 2022/hoje, a fronteira antes do abismo venezuelano. A Argentina fica de fora pela mesma razão: câmbio e inflação oficiais deixam de valer.</div>
+  </div>
+
+  <div class="reading-card cambio">
+    <div class="reading-title">A referência do juro real negativo — o precedente doméstico</div>
+    <div class="reading-body">O pico turco de −40% (2022) foi um pico de meses, não um equilíbrio. A âncora do juro real negativo é <strong>o próprio Brasil no COVID (2020-21)</strong>: Selic a 2% com IPCA rodando 10-11% produziu um juro real de <strong>~ −7% a −8%</strong> por um período prolongado — sem virar Venezuela. No Stress, esse é o retrato do <strong>ano 5 (m60): Selic de 20% contra inflação de 30%, juro real de −7,7% no auge da ruptura</strong>. Uma turquização moderada, não o abismo.</div>
+  </div>
+
+  <div class="alert-banner navy">
+    <div class="alert-icon">◆</div>
+    <div class="alert-text"><strong>Nota de premissa</strong>No Stress, a <strong>trajetória</strong> de Selic é arbitrada pelo Comitê — a premissa do cenário é justamente que, na fase de ruptura, as relações de equilíbrio deixam de funcionar. O <strong>equilíbrio de longo prazo</strong>, por definição estacionário, volta a obedecer Fisher: r* de 10% contra inflação de 32% dá Selic de 45,25%. O −7,7% é o juro real do auge da ruptura (ano 5). Como a curva real do modelo é construída a partir do juro real de equilíbrio do cenário, e não do Fisher da Selic arbitrada, a NTN-B longa converge a 10,55% real no LTCA. A inflação implícita do Stress, output do modelo, chega a 34,2% — acima da inflação corrente, invertendo a lógica do Básico.</div>
+  </div>
+</section>
+
+<!-- ================= T7 · FONTES ================= -->
+<section class="section" id="t7">
+  <div class="eyebrow">Rastreabilidade</div>
+  <div class="sec-title">Fontes &amp; notas de metodologia</div>
+  <div class="sec-desc">As referências históricas e de mercado que sustentam a calibragem dos cenários, e as notas de metodologia que amarram as premissas.</div>
+  <div class="divider"></div>
+
+  <div class="subhead">Fontes das referências</div>
+  <ul class="bullet-list" style="max-width:900px;">
+    <li><strong>Brasil, hiperinflação e Plano Real:</strong> Wikipedia — Hyperinflation in Brazil; Latinometrics — Brazil inflation 1980-2026.</li>
+    <li><strong>Regime de metas (1999):</strong> IMF — Implementing Inflation Targeting in Brazil; Banco Central do Brasil — Inflation targeting track record.</li>
+    <li><strong>Turquia atual (inflação ~32%, juro real de +4 a +9%):</strong> Turkish Minute (jul/2026); FocusEconomics — Turkey monetary policy, jul/2026.</li>
+    <li><strong>Turquia, crise (85,5% em out/2022):</strong> CNBC — Turkey inflation tops 85%.</li>
+    <li><strong>Venezuela:</strong> Cato Institute — Venezuela's hyperinflation; Bloomberg — 1,37 milhão % em 2018.</li>
+    <li><strong>Brasil hoje (Selic 14,25% / IPCA ~5%):</strong> Rio Times — Brazil Focus Survey (jul/2026); Trading Economics — Brazil interest rate.</li>
+  </ul>
+
+  <div class="subhead">Referências acadêmicas (estudos públicos)</div>
+  <ul class="bullet-list" style="max-width:900px;">
+    <li><strong>Mulvey, J. M.; Gould, G.; Morgan, C. (2000).</strong> "An Asset and Liability Management System for Towers Perrin-Tillinghast." <em>Interfaces</em>, 30(1), 96-114 — sistema CAP:Link (cascata) + OPT:Link (otimização multiperíodo).</li>
+    <li><strong>Mulvey, J. M.; Thorlacius, A. E. (1998).</strong> "The Towers Perrin Global Capital Market Scenario Generation System" — equações da cascata.</li>
+    <li><strong>Banco Central do Brasil — modelo SAMBA:</strong> WP 239 (2011); Revisão do modelo (2019); WP 578 (2023, "Brazilian Macroeconomic Dynamics Redux") — IS + Phillips + UIP + regra de Taylor.</li>
+    <li><strong>Grinold, R.; Kroner, K. (2002).</strong> "The Equity Risk Premium" — decomposição de retorno de ações (bolsa via P/E × Earnings Yield).</li>
+    <li><strong>Damodaran, A.</strong> "Equity Risk Premiums: Determinants, Estimation and Implications" (atualização anual) — referência do prêmio de risco da renda variável global.</li>
+    <li><strong>Laubach, T.; Williams, J. (2003)</strong> — juro real de equilíbrio (r*); <strong>Taylor, J. (1993)</strong> — regra de política monetária.</li>
+  </ul>
+  <div class="note">Todos os itens são estudos públicos e entram como fonte citável em qualquer material do modelo. Documento de premissas de <strong>julho de 2026</strong>, com revisão metodológica das curvas de juros em <strong>agosto de 2026</strong> (curva real por prêmio de prazo real, inflação implícita como output e transição entre âncoras por decaimento exponencial).</div>
+
+  <div class="subhead">Notas de metodologia</div>
+  <div class="reading-card">
+    <div class="reading-title">Selic de longo prazo = Fisher, não digitada</div>
+    <div class="reading-body">A Selic LTCA deriva de <strong>Fisher(r*, inflação de equilíbrio)</strong>, arredondada ao passo de 0,25pp — o que impede inconsistências entre o juro nominal e o juro real premissa do cenário. No <strong>Stress</strong>, a arbitragem do Comitê incide sobre a <strong>trajetória</strong> (na fase de ruptura as relações de equilíbrio deixam de valer, e o juro real chega a −7,7% no ano 5), mas o <strong>equilíbrio de longo prazo permanece Fisher-consistente</strong> com o r* do próprio cenário: 10% de juro real contra 32% de inflação dão Selic de 45,25%. Um juro real permanentemente distante do neutro não caracterizaria um estado estacionário.</div>
+  </div>
+
+  <div class="reading-card">
+    <div class="reading-title">Curva real por prêmio de prazo real (RTP) e inflação implícita como output</div>
+    <div class="reading-body">As curvas nominal e real são construídas de forma independente, cada uma com o seu prêmio de prazo: a nominal é a <strong>Selic média projetada no horizonte da duration + prêmio de prazo nominal</strong>; a real é o <strong>juro real esperado na mesma janela × (1 + RTP)</strong>. A <strong>inflação implícita</strong> resulta da identidade entre as duas — (1+pré)/(1+real)−1 — e não é premissa. Nos cenários em que a Selic é arbitrada na fase de ruptura, o juro real esperado é construído a partir da trajetória de r* do cenário, e não do Fisher da Selic arbitrada. O RTP do ponto de partida é extraído da curva ANBIMA vértice a vértice, de modo que o modelo parte do preço de mercado observado; a convergência ao nível de equilíbrio se dá por decaimento exponencial com meia-vida de 18 meses.</div>
+  </div>
+
+  <div class="reading-card">
+    <div class="reading-title">Bases de dados dos prêmios medidos</div>
+    <div class="reading-body">Curvas zero-cupom da <strong>ANBIMA (ETTJ prefixada e IPCA, modelo de Svensson)</strong>, série mensal jan/2006 a jul/2026, e <strong>retornos mensais dos índices ANBIMA e do CDI</strong> de out/2003 a jun/2026 (273 meses). O prêmio de prazo nominal <em>ex-post</em> exige o CDI realizado ao longo de toda a duration: no vértice de 9,3 anos isso limita a amostra a jan/2006-mar/2017 (135 observações), janela em que a Selic mais surpreendeu para baixo — a medida é enviesada para cima e está registrada como tal. Os prêmios de risco de inflação usam a implícita da curva contra a <strong>expectativa Focus no horizonte correspondente</strong>, não contra o centro da meta: usar a meta contaria a descrença no regime duas vezes, já que a inflação projetada de cada cenário também se afasta dela.</div>
+  </div>
+
+  <div class="reading-card rv">
+    <div class="reading-title">Escolhas de calibragem em aberto</div>
+    <div class="reading-body">Duas escolhas estão registradas como <strong>deliberação, e não como estimativa central</strong>. (i) O <strong>RTP de equilíbrio de 0,50pp</strong> é o piso da faixa medida (0,26 a 4,25pp no vértice longo); a mediana da série completa é 1,70pp, o que levaria a NTN-B longa a algo próximo de CDI + 180 pontos-base e alteraria a alocação de forma relevante. (ii) O <strong>prêmio de prazo nominal</strong> está calibrado nos percentis da medida <em>ex-ante</em> (mediana de 1,37pp no vértice de 9 anos), enquanto o objeto que o modelo consome é a medida <em>ex-post</em> (mediana de 2,78pp); a diferença permanece como referência alternativa, não aplicada.</div>
+  </div>
+  <div class="reading-card cambio">
+    <div class="reading-title">Câmbio por PPP · Small cap por CAPM · offshore hedgeado</div>
+    <div class="reading-body">O câmbio de longo prazo evolui pelo diferencial de inflação (PPP). O small cap usa CAPM (beta/alpha estimados por regressão SMLL × IBOV). A renda fixa global hedgeada rende o retorno em dólar mais o diferencial de juros (CDI − SOFR) menos o basis dos contratos.</div>
+  </div>
+  <div class="reading-card rv">
+    <div class="reading-title">A curva de juros — três curvas acopladas</div>
+    <div class="reading-body">A estrutura a termo é construída a partir de <strong>três curvas acopladas</strong> — <strong>pré (nominal), linkada (real, NTN-B) e inflação (breakeven)</strong> — internamente consistentes por Fisher (nominal ≈ real + inflação). É o que permite precificar de forma coerente, em cada cenário, tanto os títulos nominais quanto os indexados à inflação.</div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">Raya Advisory · Alocador Multiperíodo · Premissas de Cenário</div>
+    <div class="footer-disc">Documento de metodologia. As premissas aqui descritas são hipóteses de trabalho para modelagem de alocação e não constituem previsão ou recomendação de investimento. Elaborado com base em fontes públicas consideradas confiáveis.</div>
+  </div>
+</footer>
+
+<script>
+function showTab(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const el=document.getElementById(id); if(el) el.classList.add('active');
+  if(btn) btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+const root=document.documentElement;
+const themeBtn=document.getElementById('theme-toggle'), themeIcon=document.getElementById('theme-icon'), themeLabel=document.getElementById('theme-label');
+function applyTheme(t){ root.setAttribute('data-theme',t);
+  if(t==='dark'){themeIcon.textContent='☀';themeLabel.textContent='Claro';} else {themeIcon.textContent='☾';themeLabel.textContent='Escuro';}
+  try{localStorage.setItem('raya-theme-premissas',t);}catch(e){} }
+themeBtn.addEventListener('click',()=>{const c=root.getAttribute('data-theme'); applyTheme(c==='dark'?'light':'dark');});
+try{const s=localStorage.getItem('raya-theme-premissas'); if(s) applyTheme(s);}catch(e){}
+const ZMIN=0.8,ZMAX=2.0,ZSTEP=0.1,ZDEF=1.0; let zBefore=ZDEF;
+const zVal=document.getElementById('zoom-val'),zIn=document.getElementById('zoom-in'),zOut=document.getElementById('zoom-out');
+function applyZoom(z,save=true){ z=Math.round(z*10)/10; z=Math.max(ZMIN,Math.min(ZMAX,z));
+  document.body.style.zoom=z; zVal.textContent=Math.round(z*100)+'%';
+  zVal.style.color=z>=1.4?'var(--raya-teal-light)':(z<=0.9?'var(--raya-copper-mid)':'');
+  if(save){try{localStorage.setItem('raya-zoom-premissas',z);}catch(e){}} return z; }
+function getZoom(){const v=parseFloat(document.body.style.zoom||ZDEF); return isNaN(v)?ZDEF:v;}
+zIn.addEventListener('click',()=>applyZoom(getZoom()+ZSTEP));
+zOut.addEventListener('click',()=>applyZoom(getZoom()-ZSTEP));
+zVal.addEventListener('click',()=>applyZoom(ZDEF));
+document.addEventListener('keydown',(e)=>{ if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return; if(e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.key==='+'||e.key==='='){applyZoom(getZoom()+ZSTEP);e.preventDefault();}
+  else if(e.key==='-'||e.key==='_'){applyZoom(getZoom()-ZSTEP);e.preventDefault();}
+  else if(e.key==='0'){applyZoom(ZDEF);e.preventDefault();} });
+try{const sz=parseFloat(localStorage.getItem('raya-zoom-premissas')); if(!isNaN(sz))applyZoom(sz,false); else applyZoom(ZDEF,false);}catch(e){applyZoom(ZDEF,false);}
+const PZOOM=1.4, pBtn=document.getElementById('present-toggle');
+pBtn.addEventListener('click',()=>{ const c=root.getAttribute('data-presentation');
+  if(c==='on'){ root.removeAttribute('data-presentation'); pBtn.classList.remove('active'); pBtn.textContent='▣ Apresentação'; applyZoom(zBefore||ZDEF); if(document.fullscreenElement)document.exitFullscreen(); }
+  else { zBefore=getZoom(); root.setAttribute('data-presentation','on'); pBtn.classList.add('active'); pBtn.textContent='▣ Sair Apres.'; applyZoom(PZOOM,false); if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{}); } });
+document.addEventListener('fullscreenchange',()=>{ if(!document.fullscreenElement && root.getAttribute('data-presentation')==='on'){ root.removeAttribute('data-presentation'); pBtn.classList.remove('active'); pBtn.textContent='▣ Apresentação'; applyZoom(zBefore||ZDEF); } });
+
+/* ────── GRÁFICO: DIFERENCIAL DE INFLAÇÃO BRASIL × EUA ────── */
+/* chart-diff (Brasil × EUA) agora é MENSAL e roda no fim do script, após os dados globais */
+
+/* ────── DADOS MENSAIS 1999-2026 (IPCA e CDI acum. 12m; IBGE/CETIP via Comdinheiro + histórico do modelo) ────── */
+var IPCA12M=[1.65,2.24,3.02,3.35,3.14,3.32,4.57,5.69,6.25,7.5,8.65,8.94,8.85,7.86,6.92,6.77,6.47,6.51,7.06,7.85,7.77,6.65,5.98,5.97,5.92,6.27,6.44,6.61,7.04,7.35,7.05,6.41,6.46,7.19,7.61,7.67,7.62,7.51,7.75,7.98,7.77,7.66,7.51,7.46,7.93,8.44,10.93,12.53,14.47,15.85,16.57,16.77,17.24,16.57,15.43,15.07,15.14,13.98,11.02,9.3,7.71,6.69,5.89,5.26,5.15,6.06,6.81,7.18,6.7,6.86,7.24,7.6,7.41,7.39,7.54,8.07,8.05,7.27,6.57,6.02,6.04,6.36,6.22,5.69,5.7,5.51,5.32,4.63,4.23,4.03,3.97,3.84,3.7,3.26,3.02,3.14,2.99,3.02,2.96,3.0,3.18,3.69,3.74,4.18,4.15,4.12,4.19,4.46,4.56,4.61,4.73,5.04,5.58,6.06,6.37,6.17,6.25,6.41,6.39,5.9,5.84,5.9,5.61,5.53,5.2,4.8,4.5,4.36,4.34,4.17,4.22,4.31,4.59,4.83,5.17,5.26,5.22,4.84,4.6,4.49,4.7,5.2,5.63,5.91,5.99,6.01,6.3,6.51,6.55,6.71,6.87,7.23,7.31,6.97,6.64,6.5,6.22,5.85,5.24,5.1,4.99,4.92,5.2,5.24,5.28,5.45,5.53,5.84,6.15,6.31,6.59,6.49,6.5,6.7,6.27,6.09,5.86,5.84,5.77,5.91,5.59,5.68,6.15,6.28,6.37,6.52,6.5,6.51,6.75,6.59,6.56,6.41,7.14,7.7,8.13,8.17,8.47,8.89,9.56,9.53,9.49,9.93,10.48,10.67,10.71,10.36,9.39,9.28,9.32,8.84,8.74,8.97,8.48,7.87,6.99,6.29,5.35,4.76,4.57,4.08,3.6,3.0,2.71,2.46,2.54,2.7,2.8,2.95,2.86,2.84,2.68,2.76,2.86,4.39,4.48,4.19,4.53,4.56,4.05,3.75,3.78,3.89,4.58,4.94,4.66,3.37,3.22,3.43,2.89,2.54,3.27,4.31,4.19,4.0,3.3,2.4,1.88,2.13,2.31,2.44,3.14,3.92,4.31,4.52,4.56,5.2,6.1,6.76,8.06,8.35,8.99,9.68,10.25,10.67,10.74,10.06,10.38,10.54,11.3,12.13,11.73,11.89,10.07,8.73,7.17,6.47,5.9,5.78,5.77,5.6,4.65,4.18,3.94,3.16,3.99,4.61,5.19,4.82,4.68,4.62,4.51,4.5,3.93,3.69,3.93,4.23,4.5,4.24,4.42,4.76,4.87,4.83,4.56,5.06,5.48,5.53,5.32,5.35,5.23,5.13,5.17,4.68,4.46,4.26,4.44,3.81,4.14,4.39,4.72,4.64];
+var CDI12M=[27.96,28.26,29.65,30.39,30.81,30.86,30.77,30.87,29.56,27.61,26.11,25.13,24.23,23.13,20.93,19.75,19.2,18.91,18.53,18.36,18.06,17.95,17.77,17.32,17.11,16.61,16.39,16.27,16.1,15.97,16.2,16.44,16.56,16.85,17.06,17.29,17.6,17.88,18.02,18.37,18.45,18.5,18.53,18.35,18.42,18.55,18.71,19.11,19.62,20.3,20.78,21.24,21.9,22.55,23.21,23.59,23.94,23.94,23.71,23.26,22.41,21.51,21.04,20.22,19.35,18.61,17.69,17.14,16.65,16.15,16.04,16.17,16.31,16.46,16.63,16.89,17.21,17.63,17.89,18.32,18.62,18.86,19.01,19.0,19.05,18.97,18.85,18.46,18.21,17.74,17.34,16.88,16.37,16.01,15.6,15.05,14.65,14.34,13.93,13.77,13.48,13.17,12.95,12.65,12.37,12.18,11.98,11.82,11.65,11.57,11.33,11.28,11.12,11.17,11.27,11.29,11.62,11.89,12.07,12.37,12.51,12.57,12.72,12.66,12.54,12.33,12.02,11.66,11.22,10.69,10.32,9.9,9.47,9.19,8.96,8.77,8.75,8.78,8.86,9.07,9.24,9.36,9.52,9.74,9.96,10.23,10.41,10.6,10.86,11.04,11.16,11.37,11.47,11.56,11.62,11.59,11.63,11.51,11.4,11.25,10.97,10.63,10.31,9.89,9.45,9.15,8.81,8.41,8.09,7.81,7.52,7.41,7.25,7.2,7.23,7.24,7.41,7.61,7.79,8.05,8.32,8.65,8.89,9.12,9.42,9.66,9.92,10.1,10.32,10.47,10.62,10.81,10.91,10.95,11.25,11.39,11.53,11.8,12.07,12.34,12.57,12.75,13.0,13.23,13.37,13.58,13.72,13.84,13.98,14.09,14.01,14.13,14.13,14.07,14.04,14.0,14.04,13.89,13.76,13.46,13.26,12.87,12.53,12.07,11.55,11.11,10.59,9.95,9.4,8.97,8.41,8.12,7.68,7.37,7.09,6.84,6.66,6.55,6.47,6.42,6.38,6.41,6.34,6.34,6.37,6.32,6.35,6.28,6.28,6.21,6.09,5.97,5.79,5.58,5.45,5.2,4.88,4.62,4.23,3.88,3.56,3.22,2.99,2.77,2.54,2.37,2.23,2.15,2.18,2.27,2.43,2.7,2.99,3.32,3.77,4.4,5.0,5.65,6.41,7.08,7.89,8.66,9.39,10.2,10.9,11.49,11.97,12.37,12.81,13.0,13.28,13.37,13.48,13.54,13.58,13.55,13.44,13.42,13.3,13.05,12.87,12.74,12.36,12.33,12.01,11.69,11.51,11.21,11.06,10.98,10.84,10.87,10.92,11.12,11.26,11.45,11.78,12.13,12.54,12.87,13.3,13.69,13.98,14.31,14.49,14.5,14.79,14.83,14.76,14.78];
+var METAS={1999:8,2000:6,2001:4,2002:3.5,2003:4,2004:5.5,2005:4.5,2006:4.5,2007:4.5,2008:4.5,2009:4.5,2010:4.5,2011:4.5,2012:4.5,2013:4.5,2014:4.5,2015:4.5,2016:4.5,2017:4.5,2018:4.5,2019:4.25,2020:4.0,2021:3.75,2022:3.5,2023:3.25,2024:3.0,2025:3.0,2026:3.0};
+
+/* ────── GRÁFICO: INFLAÇÃO (IPCA acum. 12m) E META DESDE 1999 ────── */
+(function(){
+  var el=document.getElementById('chart-ipca99'); if(!el) return;
+  var n=IPCA12M.length, startY=1999;
+  var W=1000,H=430,ml=52,mr=20,mt=24,mb=58;
+  var pw=W-ml-mr,ph=H-mt-mb,vmin=0,vmax=18;
+  function X(i){return ml+i*(pw/(n-1));} function Y(v){return mt+ph-(v-vmin)/(vmax-vmin)*ph;}
+  var g='';
+  for(var v=vmin;v<=vmax;v+=2){var yy=Y(v).toFixed(1);
+    g+='<line x1="'+ml+'" y1="'+yy+'" x2="'+(W-mr)+'" y2="'+yy+'" stroke="var(--border)" stroke-width="1"/>';
+    g+='<text x="'+(ml-8)+'" y="'+(Y(v)+5).toFixed(1)+'" text-anchor="end" font-size="14" fill="var(--text-3)">'+v+'%</text>';}
+  for(var i=0;i<n;i++){var yr=startY+Math.floor(i/12); if(i%12===0 && yr%3===0){g+='<text x="'+X(i).toFixed(1)+'" y="'+(mt+ph+24)+'" text-anchor="middle" font-size="14" fill="var(--text-3)">'+yr+'</text>';}}
+  var mp='',ip='';
+  for(var i=0;i<n;i++){var yr=startY+Math.floor(i/12); mp+=(i?' ':'')+X(i).toFixed(1)+','+Y(METAS[yr]).toFixed(1); ip+=(i?' ':'')+X(i).toFixed(1)+','+Y(IPCA12M[i]).toFixed(1);}
+  g+='<polyline fill="none" stroke="#07C0BD" stroke-width="2" stroke-dasharray="6 5" points="'+mp+'"/>';
+  g+='<polyline fill="none" stroke="#993715" stroke-width="2.4" points="'+ip+'"/>';
+  el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" style="max-width:100%;height:auto;display:block;">'+g+'</svg>';
+})();
+
+/* ────── GRÁFICO: JUROS NOMINAIS, INFLAÇÃO E JURO REAL — MENSAL desde 1999 (acum. 12m) ────── */
+(function(){
+  var el=document.getElementById('chart-selic-ipca'); if(!el) return;
+  var n=IPCA12M.length, startY=1999;
+  var jr=IPCA12M.map(function(ip,i){return ((1+CDI12M[i]/100)/(1+ip/100)-1)*100;});
+  var W=1000,H=480,ml=52,mr=20,mt=24,mb=58;
+  var pw=W-ml-mr,ph=H-mt-mb,vmin=-8,vmax=32;
+  function X(i){return ml+i*(pw/(n-1));} function Y(v){return mt+ph-(v-vmin)/(vmax-vmin)*ph;}
+  var g='<defs><pattern id="hatchReal" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#B0742A" stroke-width="1.6" opacity="0.55"/></pattern></defs>';
+  for(var v=vmin;v<=vmax;v+=4){var yy=Y(v).toFixed(1);
+    g+='<line x1="'+ml+'" y1="'+yy+'" x2="'+(W-mr)+'" y2="'+yy+'" stroke="'+(v===0?'var(--text-3)':'var(--border)')+'" stroke-width="'+(v===0?'1.3':'1')+'"/>';
+    g+='<text x="'+(ml-8)+'" y="'+(Y(v)+5).toFixed(1)+'" text-anchor="end" font-size="14" fill="var(--text-3)">'+v+'%</text>';}
+  for(var i=0;i<n;i++){var yr=startY+Math.floor(i/12); if(i%12===0 && yr%3===0){g+='<text x="'+X(i).toFixed(1)+'" y="'+(mt+ph+24)+'" text-anchor="middle" font-size="14" fill="var(--text-3)">'+yr+'</text>';}}
+  var y0=Y(0).toFixed(1);
+  var area='M'+X(0).toFixed(1)+' '+y0;
+  for(var i=0;i<n;i++){area+=' L'+X(i).toFixed(1)+' '+Y(jr[i]).toFixed(1);}
+  area+=' L'+X(n-1).toFixed(1)+' '+y0+' Z';
+  g+='<path d="'+area+'" fill="url(#hatchReal)"/>';
+  var jp='',sp='',ip='';
+  for(var i=0;i<n;i++){jp+=(i?' ':'')+X(i).toFixed(1)+','+Y(jr[i]).toFixed(1); sp+=(i?' ':'')+X(i).toFixed(1)+','+Y(CDI12M[i]).toFixed(1); ip+=(i?' ':'')+X(i).toFixed(1)+','+Y(IPCA12M[i]).toFixed(1);}
+  g+='<polyline fill="none" stroke="#B0742A" stroke-width="1.8" points="'+jp+'"/>';
+  g+='<polyline fill="none" stroke="#1E9492" stroke-width="2.2" points="'+sp+'"/>';
+  g+='<polyline fill="none" stroke="#993715" stroke-width="2.2" points="'+ip+'"/>';
+  el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" style="max-width:100%;height:auto;display:block;">'+g+'</svg>';
+})();
+
+/* ────── GRÁFICO: INFLAÇÃO BRASIL × EUA — MENSAL (acum. 12m) ────── */
+var USCPI12M=[1.67,1.67,1.73,2.28,2.09,1.97,2.14,2.26,2.63,2.56,2.62,2.68,2.79,3.22,3.76,3.01,3.13,3.73,3.6,3.35,3.46,3.45,3.44,3.44,3.72,3.53,2.98,3.22,3.56,3.19,2.72,2.72,2.59,2.13,1.89,1.6,1.2,1.14,1.36,1.64,1.24,1.07,1.47,1.75,1.52,2.03,2.25,2.48,2.76,3.15,3.03,2.18,1.89,1.95,2.06,2.22,2.38,2.04,1.93,2.04,2.03,1.69,1.74,2.29,2.9,3.17,2.94,2.55,2.54,3.19,3.62,3.34,2.84,3.05,3.21,3.36,2.87,2.54,3.07,3.65,4.74,4.35,3.34,3.34,4.02,3.64,3.42,3.61,3.98,4.18,4.1,3.93,2.01,1.41,1.97,2.52,2.08,2.42,2.8,2.59,2.71,2.69,2.32,1.9,2.83,3.61,4.37,4.11,4.29,4.14,3.97,3.9,4.09,4.94,5.5,5.31,4.95,3.73,1.1,-0.02,-0.11,0.01,-0.45,-0.58,-1.02,-1.23,-1.96,-1.48,-1.38,-0.22,1.91,2.81,2.62,2.15,2.29,2.21,2.0,1.12,1.34,1.15,1.12,1.17,1.08,1.44,1.7,2.12,2.62,3.08,3.46,3.5,3.58,3.75,3.81,3.52,3.45,3.06,3.01,2.9,2.58,2.27,1.74,1.65,1.42,1.69,1.95,2.16,1.8,1.76,1.68,2.02,1.52,1.14,1.39,1.72,1.89,1.54,1.09,0.88,1.23,1.51,1.56,1.12,1.61,2.02,2.17,2.06,1.97,1.72,1.68,1.61,1.23,0.65,-0.23,-0.09,-0.02,-0.1,0.04,0.18,0.23,0.24,0.01,0.13,0.44,0.64,1.24,0.85,0.89,1.17,1.08,1.08,0.87,1.06,1.55,1.69,1.68,2.05,2.51,2.81,2.44,2.18,1.86,1.64,1.73,1.93,2.18,2.02,2.17,2.13,2.15,2.26,2.33,2.47,2.78,2.81,2.85,2.64,2.33,2.49,2.15,2.0,1.49,1.52,1.88,2.0,1.8,1.67,1.83,1.74,1.68,1.73,2.09,2.32,2.6,2.34,1.49,0.31,0.2,0.72,1.0,1.28,1.39,1.23,1.18,1.32,1.37,1.67,2.67,4.13,4.92,5.3,5.25,5.15,5.35,6.24,6.9,7.17,7.56,7.94,8.57,8.23,8.54,8.98,8.46,8.22,8.19,7.76,7.12,6.4,6.33,5.96,4.92,4.95,4.13,3.07,3.29,3.72,3.69,3.25,3.13,3.32,3.09,3.16,3.49,3.36,3.24,2.97,2.94,2.61,2.43,2.58,2.72,2.87,2.99,2.8,2.38,2.33,2.38,2.68,2.74,2.94,3.02,2.86,2.7,2.65,2.39,2.43,3.29,3.78,4.17,3.46];
+(function(){
+  var el=document.getElementById('chart-diff'); if(!el) return;
+  var n=IPCA12M.length, startY=1999;
+  var W=1000,H=470,ml=58,mr=22,mt=26,mb=60;
+  var pw=W-ml-mr, ph=H-mt-mb, vmin=-4, vmax=18;
+  function X(i){return ml+i*(pw/(n-1));} function Y(v){return mt+ph-(v-vmin)/(vmax-vmin)*ph;}
+  var g='';
+  for(var v=vmin; v<=vmax; v+=2){ var yy=Y(v).toFixed(1);
+    g+='<line x1="'+ml+'" y1="'+yy+'" x2="'+(W-mr)+'" y2="'+yy+'" stroke="'+(v===0?'var(--text-3)':'var(--border)')+'" stroke-width="'+(v===0?'1.2':'1')+'"/>';
+    g+='<text x="'+(ml-9)+'" y="'+(Y(v)+5).toFixed(1)+'" text-anchor="end" font-size="14" fill="var(--text-3)">'+v+'%</text>';}
+  for(var i=0;i<n;i++){var yr=startY+Math.floor(i/12); if(i%12===0 && yr%3===0){g+='<text x="'+X(i).toFixed(1)+'" y="'+(mt+ph+24)+'" text-anchor="middle" font-size="14" fill="var(--text-3)">'+yr+'</text>';}}
+  var area='M';
+  for(var i=0;i<n;i++){ area+=(i?' L':'')+X(i).toFixed(1)+' '+Y(IPCA12M[i]).toFixed(1); }
+  for(var j=n-1;j>=0;j--){ area+=' L'+X(j).toFixed(1)+' '+Y(USCPI12M[j]).toFixed(1); }
+  area+=' Z';
+  g+='<path d="'+area+'" fill="var(--raya-gold)" opacity="0.13"/>';
+  var metabr='';
+  for(var i=0;i<n;i++){var yr=startY+Math.floor(i/12); metabr+=(i?' ':'')+X(i).toFixed(1)+','+Y(METAS[yr]).toFixed(1);}
+  g+='<polyline fill="none" stroke="#BE620F" stroke-width="1.8" stroke-dasharray="7 6" opacity="0.85" points="'+metabr+'"/>';
+  var i2012=(2012-startY)*12;
+  g+='<line x1="'+X(i2012).toFixed(1)+'" y1="'+Y(2).toFixed(1)+'" x2="'+(W-mr)+'" y2="'+Y(2).toFixed(1)+'" stroke="#07C0BD" stroke-width="1.8" stroke-dasharray="7 6" opacity="0.85"/>';
+  var up='',bp='';
+  for(var i=0;i<n;i++){ up+=(i?' ':'')+X(i).toFixed(1)+','+Y(USCPI12M[i]).toFixed(1); bp+=(i?' ':'')+X(i).toFixed(1)+','+Y(IPCA12M[i]).toFixed(1); }
+  g+='<polyline fill="none" stroke="#07C0BD" stroke-width="2.2" points="'+up+'"/>';
+  g+='<polyline fill="none" stroke="#BE620F" stroke-width="2.4" points="'+bp+'"/>';
+  el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" style="max-width:100%;height:auto;display:block;">'+g+'</svg>';
+})();
+
+/* ────── GRÁFICO: FAN CHART DO PRI POR PRAZO (percentis 2006-2026) ────── */
+(function(){
+  var el=document.getElementById('chart-pri-fan'); if(!el) return;
+  var pz=[1,2,3,4,5,6,7,8,9,10];
+  var mn=[-1.61,-0.92,-0.43,-0.31,-0.22,-0.17,-0.15,-0.13,-0.12,-0.12];
+  var p25=[-0.18,0.08,0.22,0.33,0.43,0.53,0.58,0.61,0.64,0.68];
+  var med=[0.22,0.41,0.54,0.66,0.75,0.82,0.91,0.97,1.04,1.08];
+  var p75=[0.57,0.72,0.94,1.23,1.44,1.62,1.78,1.84,1.90,1.93];
+  var mx=[2.51,2.80,3.01,3.07,3.07,3.06,3.20,3.32,3.37,3.39];
+  var at=[0.64,1.15,1.44,1.74,1.94,2.09,2.23,2.34,2.44,2.53];
+  var W=1000,H=430,ml=56,mr=20,mt=26,mb=56,n=10;
+  var pw=W-ml-mr,ph=H-mt-mb,vmin=-2,vmax=4;
+  function X(i){return ml+i*(pw/(n-1));} function Y(v){return mt+ph-(v-vmin)/(vmax-vmin)*ph;}
+  var g='';
+  for(var v=vmin;v<=vmax;v+=1){var yy=Y(v).toFixed(1);
+    g+='<line x1="'+ml+'" y1="'+yy+'" x2="'+(W-mr)+'" y2="'+yy+'" stroke="'+(v===0?'var(--text-3)':'var(--border)')+'" stroke-width="'+(v===0?'1.2':'1')+'"/>';
+    g+='<text x="'+(ml-8)+'" y="'+(Y(v)+5).toFixed(1)+'" text-anchor="end" font-size="14" fill="var(--text-3)">'+v+'pp</text>';}
+  for(var i=0;i<n;i++){g+='<text x="'+X(i).toFixed(1)+'" y="'+(mt+ph+24)+'" text-anchor="middle" font-size="14" fill="var(--text-3)">'+pz[i]+'a</text>';}
+  function band(lo,hi,color,op){var d='M';
+    for(var i=0;i<n;i++)d+=(i?' L':'')+X(i).toFixed(1)+' '+Y(hi[i]).toFixed(1);
+    for(var j=n-1;j>=0;j--)d+=' L'+X(j).toFixed(1)+' '+Y(lo[j]).toFixed(1);
+    return '<path d="'+d+' Z" fill="'+color+'" opacity="'+op+'"/>';}
+  g+=band(mn,mx,'var(--raya-slate)','0.30');
+  g+=band(p25,p75,'var(--raya-teal)','0.35');
+  function line(a,color,wd,dash){var p='';for(var i=0;i<n;i++)p+=(i?' ':'')+X(i).toFixed(1)+','+Y(a[i]).toFixed(1);return '<polyline fill="none" stroke="'+color+'" stroke-width="'+wd+'"'+(dash?' stroke-dasharray="'+dash+'"':'')+' points="'+p+'"/>';}
+  g+=line(med,'#F0EEE6',2,'');
+  g+=line(at,'#07C0BD',2.8,'');
+  for(var i=0;i<n;i++){g+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(at[i]).toFixed(1)+'" r="3" fill="#07C0BD"/>';}
+  g+='<text x="'+(X(9)-4)+'" y="'+(Y(at[9])-10)+'" text-anchor="end" font-size="15" font-weight="600" fill="#07C0BD">Atual</text>';
+  g+='<text x="'+(X(9)-4)+'" y="'+(Y(med[9])+20)+'" text-anchor="end" font-size="14" fill="var(--text-2)">Mediana</text>';
+  g+='<text x="'+(X(5))+'" y="'+(Y(mx[5])-8)+'" text-anchor="middle" font-size="13" fill="var(--text-3)">faixa mín-máx</text>';
+  g+='<text x="'+(X(6))+'" y="'+(Y(p75[6])-8)+'" text-anchor="middle" font-size="13" fill="var(--raya-teal-light)">p25-p75</text>';
+  el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" style="max-width:100%;height:auto;display:block;">'+g+'</svg>';
+})();
+
+/* ────── GRÁFICO: PRÊMIO PRÉ×SELIC — EXTREMOS DO CICLO (2006-2026) ────── */
+(function(){
+  var el=document.getElementById('chart-premio-ciclo'); if(!el) return;
+  // [ano decimal, prêmio pp, rótulo, tipo(+1 fundo de ciclo/-1 platô), vértice]
+  var pts=[[2008.9,3.45,'nov/08',1],[2013.5,2.56,'jul/13',1],[2016.8,-2.81,'out/16',-1],[2018.6,6.44,'ago/18',1],[2021.2,6.98,'mar/21',1],[2023.5,-2.74,'jun/23',-1],[2026.1,-2.25,'1T26',-1],[2026.55,0.52,'hoje',0]];
+  var W=1000,H=430,ml=56,mr=56,mt=26,mb=56;
+  var pw=W-ml-mr,ph=H-mt-mb,x0=2006,x1=2027,vmin=-4,vmax=8;
+  function X(y){return ml+(y-x0)/(x1-x0)*pw;} function Y(v){return mt+ph-(v-vmin)/(vmax-vmin)*ph;}
+  // eixo direito: Selic (0-28%)
+  function YR(v){return mt+ph-(v-0)/(18-0)*ph;}
+  var selicYE=[[2006,13.25],[2007,11.25],[2008,13.75],[2009,8.75],[2010,10.75],[2011.5,12.5],[2011,11.0],[2012,7.25],[2012.8,7.25],[2013,10.0],[2014,11.75],[2015,14.25],[2016.8,14.25],[2016,13.75],[2017,7.0],[2018,6.5],[2019,4.5],[2019.6,6.5],[2020,2.0],[2021.17,2.0],[2021,9.25],[2022.6,13.75],[2022,13.75],[2023.6,13.75],[2023,11.75],[2024,12.25],[2025.6,15.0],[2025,15.0],[2026.55,14.25]].sort(function(a,b){return a[0]-b[0];});
+  var g='';
+  var sp='';
+  selicYE.forEach(function(p,i){sp+=(i?' ':'')+X(p[0]).toFixed(1)+','+YR(p[1]).toFixed(1);});
+  g+='<polyline fill="none" stroke="var(--text-3)" stroke-width="1.8" stroke-dasharray="6 5" opacity="0.8" points="'+sp+'"/>';
+  for(var v=0;v<=18;v+=6){g+='<text x="'+(W-mr+8)+'" y="'+(YR(v)+5).toFixed(1)+'" text-anchor="start" font-size="13" fill="var(--text-3)">'+v+'%</text>';}
+  g+='<text x="'+(W-mr+8)+'" y="'+(mt-8)+'" text-anchor="start" font-size="12" fill="var(--text-3)">Selic</text>';
+  for(var v=vmin;v<=vmax;v+=2){var yy=Y(v).toFixed(1);
+    g+='<line x1="'+ml+'" y1="'+yy+'" x2="'+(W-mr)+'" y2="'+yy+'" stroke="'+(v===0?'var(--text-3)':'var(--border)')+'" stroke-width="'+(v===0?'1.2':'1')+'"/>';
+    g+='<text x="'+(ml-8)+'" y="'+(Y(v)+5).toFixed(1)+'" text-anchor="end" font-size="14" fill="var(--text-3)">'+(v>0?'+':'')+v+'</text>';}
+  for(var y=2006;y<=2026;y+=4){g+='<text x="'+X(y).toFixed(1)+'" y="'+(mt+ph+24)+'" text-anchor="middle" font-size="14" fill="var(--text-3)">'+y+'</text>';}
+  // faixas de contexto
+  g+='<text x="'+X(2007).toFixed(1)+'" y="'+(Y(7.2))+'" font-size="13" fill="var(--text-3)">prêmio máximo no fundo do ciclo (véspera de alta)</text>';
+  g+='<text x="'+X(2007).toFixed(1)+'" y="'+(Y(-3.4))+'" font-size="13" fill="var(--text-3)">prêmio negativo nos platôs que precificam cortes</text>';
+  // linha guia em 0 já feita; pontos
+  pts.forEach(function(p){
+    var col = p[3]>0 ? '#07C0BD' : (p[3]<0 ? '#E05555' : '#B59875');
+    g+='<line x1="'+X(p[0]).toFixed(1)+'" y1="'+Y(0).toFixed(1)+'" x2="'+X(p[0]).toFixed(1)+'" y2="'+Y(p[1]).toFixed(1)+'" stroke="'+col+'" stroke-width="2" opacity="0.45"/>';
+    g+='<circle cx="'+X(p[0]).toFixed(1)+'" cy="'+Y(p[1]).toFixed(1)+'" r="5.5" fill="'+col+'"/>';
+    var dy = p[1]>=0 ? -12 : 20;
+    g+='<text x="'+X(p[0]).toFixed(1)+'" y="'+(Y(p[1])+dy).toFixed(1)+'" text-anchor="middle" font-size="13" font-weight="600" fill="var(--text)">'+p[2]+' '+(p[1]>0?'+':'')+p[1].toFixed(2)+'</text>';
+  });
+  el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" style="max-width:100%;height:auto;display:block;">'+g+'</svg>';
+})();
+
+/* ────── SÉRIES MENSAIS ETTJ 2006-2026 (base ETTJ_final Raya; 247 obs, jan/06-jul/26) ────── */
+var ETTJ_SP05=[-2.16,1.26,-3.11,1.27,-1.26,-0.5,-0.53,-2.11,0.24,-0.73,-0.01,0.18,-1.16,1.47,-1.15,-0.05,-1.49,-0.23,-1.21,-1.29,1.02,-0.47,0.74,0.91,-0.12,1.47,1.43,1.2,1.92,1.36,0.42,1.38,0.33,-0.31,1.59,-1.51,-1.69,0.28,-2.4,-0.78,-0.32,-0.6,-1.13,0.08,0.18,0.25,0.78,0.18,1.11,2.39,0.32,2.5,1.43,1.46,-0.01,-0.4,0.16,0.69,1.31,-0.12,1.19,1.74,0.45,1.74,-0.12,0.47,0.29,-1.9,-1.16,-0.47,-0.68,-1.27,-1.48,0.15,-1.23,-0.4,-1.17,-0.3,-1.1,-1.3,0.66,-0.43,0.29,0.39,-0.23,1.54,0.86,0.4,1.18,1.58,0.08,0.95,0.91,0.04,1.33,0.49,0.67,1.05,1.41,0.67,0.05,0.57,-1.04,0.18,-0.02,-0.1,1.73,0.63,0.98,2.71,0.19,1.69,1.44,0.76,-0.79,0.28,0.82,0.64,1.55,0.27,0.75,1.37,-0.99,0.38,-0.34,-0.96,-0.24,-1.79,-0.86,-0.11,-0.22,-1.96,-2.26,0.03,-3.11,-0.19,-2.33,-1.26,-1.9,-2.47,-0.89,-1.15,-0.37,-0.07,-0.78,0.64,-0.47,-0.28,0.32,0.37,0.02,0.24,1.3,-0.18,0.41,0.3,-0.41,0.27,0.58,-0.01,-0.5,0.2,-1.45,-0.89,-0.88,-1.45,-0.2,-0.28,-0.4,0.47,-0.94,-0.66,-0.6,-0.61,-0.4,0.12,0.28,0.38,0.47,0.15,0.66,1.35,1.56,1.79,1.61,1.88,2.17,2.02,2.57,4.62,3.62,1.76,2.83,2.93,1.05,2.58,0.36,0.98,0.77,-1.08,0.17,0.81,1.07,-0.62,-0.58,2.07,-1.51,1.92,-0.98,-0.85,-1.25,-2.6,-0.62,-1.16,-0.62,-0.77,-1.84,0.15,-0.58,-0.99,-0.2,0.72,-0.75,0.22,0.93,0.17,3.08,2.54,1.53,2.15,2.6,1.29,0.33,0.97,-1.42,-0.06,-0.9,-1.79,1.03,-1.2,-0.77,1.12,-1.55,0.17,0.31,-0.52,-0.59];
+var ETTJ_SP3=[-3.32,-0.22,-3.62,1.16,0.03,0.48,0.0,-1.76,0.72,-0.39,0.29,-0.0,-1.34,1.15,-1.64,-1.12,-2.62,-0.65,-1.13,-0.51,1.39,0.05,1.9,2.53,1.39,2.66,2.92,2.51,3.08,3.4,0.86,1.22,0.44,2.49,3.45,-1.38,-1.07,1.15,-0.93,1.42,1.66,2.36,1.99,3.28,3.58,3.91,4.52,3.59,4.3,4.96,2.79,4.51,3.06,2.47,1.25,0.46,1.42,1.77,2.26,0.56,2.24,2.16,1.48,2.25,0.07,0.68,0.73,-2.21,-0.71,-0.04,-0.42,-0.53,-0.54,1.19,0.15,0.9,-0.0,0.87,0.2,0.13,2.05,0.62,1.59,1.54,1.27,2.95,2.52,1.34,2.45,3.54,1.83,3.16,2.67,1.47,3.52,2.66,2.6,2.59,3.08,2.17,0.97,1.49,-0.18,0.52,1.05,0.39,1.53,0.75,0.57,2.3,0.06,1.15,0.22,-0.48,-2.21,0.02,1.64,1.81,2.74,1.79,2.08,2.42,-1.08,-1.03,-1.36,-2.6,-2.0,-3.5,-2.58,-1.97,-1.52,-3.14,-3.32,-0.9,-3.61,-0.05,-1.61,-0.35,-0.96,-1.05,0.65,1.0,2.29,2.32,1.56,2.78,1.52,1.81,2.96,3.43,2.79,3.46,4.49,2.03,2.54,2.06,1.03,1.83,2.15,1.57,0.6,0.7,-0.81,0.24,0.23,-0.56,1.23,1.24,1.01,1.81,1.48,1.78,1.88,2.03,1.98,2.94,3.69,4.24,4.43,3.24,4.2,5.42,5.52,5.19,4.63,4.35,4.43,4.38,4.92,6.31,4.29,1.15,2.19,2.06,-0.2,1.67,-0.69,-0.05,-0.41,-3.0,-2.04,-1.34,-0.11,-1.73,-1.55,1.25,-3.0,0.27,-3.4,-3.46,-3.43,-4.17,-1.5,-1.36,-1.41,-1.51,-2.34,0.03,-0.19,-0.07,0.81,2.21,0.47,1.1,1.93,1.27,4.08,4.28,2.05,2.6,2.63,0.11,-0.86,-0.79,-2.77,-1.61,-2.36,-3.27,-0.58,-2.37,-2.1,0.15,-1.75,-0.17,0.25,-0.13,0.03];
+var ETTJ_SP9=[-3.71,-0.88,-3.59,1.03,0.58,0.99,0.74,-1.33,0.92,-0.03,0.64,0.12,-1.06,1.31,-1.57,-1.21,-2.95,-0.69,-1.15,-0.52,1.44,0.3,2.33,2.78,1.37,2.56,2.81,2.28,2.31,2.79,0.01,0.55,0.28,3.2,4.45,-0.5,-0.26,2.46,0.27,2.84,2.43,3.78,3.38,4.67,4.47,5.04,5.45,4.65,5.37,6.05,3.23,4.2,3.2,2.48,1.2,0.31,1.23,1.75,2.26,0.38,2.17,1.82,1.35,2.05,-0.07,0.38,0.56,-1.93,-0.15,0.55,0.49,-0.04,0.45,2.23,1.22,2.24,1.47,2.33,1.26,1.12,3.3,1.74,2.87,2.71,2.45,3.64,3.48,2.31,3.46,3.82,2.14,3.49,3.0,1.64,4.16,3.6,3.02,3.06,3.37,2.4,1.31,1.96,0.13,0.34,0.94,0.08,1.22,0.2,0.17,1.96,-0.15,0.74,-0.33,-1.04,-2.1,0.15,1.21,1.79,2.37,1.65,2.83,3.47,-0.84,-0.97,-1.09,-2.85,-2.41,-3.57,-2.57,-1.98,-1.3,-2.8,-2.86,-0.59,-3.27,0.47,-0.84,0.48,0.11,0.11,1.91,2.02,3.64,3.82,2.78,4.13,3.24,3.64,5.44,5.62,4.81,5.57,6.32,3.76,4.02,3.35,2.35,3.12,3.4,2.76,1.96,1.84,0.38,1.38,1.5,0.74,2.47,2.38,2.33,3.48,4.0,4.58,4.59,4.61,4.44,5.42,6.03,6.21,6.39,5.13,6.02,7.12,7.19,6.88,6.13,5.57,5.4,5.5,6.0,6.34,4.12,1.34,2.26,2.29,0.0,1.81,-0.47,0.3,-0.16,-2.67,-1.54,-1.08,-0.23,-1.65,-1.21,1.86,-2.12,0.83,-2.71,-2.89,-2.7,-3.25,-0.5,-0.68,-0.59,-0.87,-1.54,0.84,0.65,0.75,1.46,2.46,0.46,1.19,1.85,0.99,3.47,3.39,1.93,2.86,2.96,0.71,-0.52,-0.42,-2.3,-0.89,-1.92,-2.6,0.08,-1.87,-1.26,1.01,-1.48,-0.0,0.5,0.03,0.68];
+var ETTJ_IM2=[-0.17,-0.21,-0.32,-0.29,0.26,-0.09,0.09,-0.18,-0.5,-0.46,-0.38,-0.44,-0.39,-0.61,-0.93,-1.09,-1.22,-0.67,-0.53,-0.0,-0.31,-0.42,0.13,0.58,0.52,0.3,0.22,0.81,0.82,1.7,0.7,0.47,0.09,1.32,0.72,-0.38,-0.11,-0.21,-0.46,-0.2,-0.2,-0.13,0.21,0.14,0.51,0.7,0.83,0.86,0.84,0.86,1.01,1.05,0.69,0.67,0.9,0.81,1.08,1.29,1.18,1.21,1.73,1.28,1.75,1.33,0.85,1.16,1.51,1.55,1.7,1.4,1.01,1.03,1.18,1.34,1.24,1.08,0.56,0.5,0.92,0.78,1.21,1.08,1.4,1.45,1.25,0.97,1.07,0.89,0.84,1.27,1.22,1.94,1.85,1.78,1.92,1.95,1.58,1.94,1.93,1.78,1.47,1.6,1.68,1.9,2.32,2.24,2.23,2.19,1.97,2.05,2.07,1.54,1.86,2.04,1.89,2.23,3.65,4.55,4.22,4.59,4.48,3.78,2.3,1.65,1.52,1.22,1.12,1.12,0.9,0.71,0.64,0.43,-0.12,-0.27,-0.13,0.01,-0.1,-0.2,0.17,0.08,-0.04,0.28,0.13,0.11,-0.0,-0.31,-0.26,-0.07,-0.01,-0.12,-0.27,0.29,0.49,-0.27,-0.57,-0.54,-0.29,-0.16,-0.22,-0.23,-0.51,-0.65,-0.62,-0.6,-0.45,-0.46,-0.25,-0.22,-0.42,-0.52,-1.7,-1.86,-1.26,-0.92,-0.86,-0.17,0.11,0.26,0.43,-0.15,0.34,0.67,0.86,1.05,1.49,1.1,1.18,1.37,1.84,2.63,2.58,1.74,2.03,2.26,2.74,3.14,3.02,3.12,2.7,1.95,1.82,2.55,2.74,2.5,3.0,3.22,2.59,2.49,1.42,1.0,1.2,1.29,1.47,1.31,0.93,0.91,1.11,0.96,1.1,1.29,1.56,1.95,1.92,1.99,2.25,2.6,3.29,4.32,3.9,3.58,2.86,2.23,2.18,1.68,1.76,1.78,1.63,1.5,1.33,1.77,1.47,1.6,2.53,2.38,2.44,1.97,2.34];
+var ETTJ_IM6=[0.7,0.6,1.01,0.72,1.33,0.67,0.65,0.4,0.1,0.17,0.1,-0.21,-0.09,-0.28,-0.44,-0.67,-0.79,-0.45,-0.52,-0.02,-0.18,-0.12,0.38,0.59,0.52,0.47,0.56,1.14,1.07,2.0,0.91,0.67,0.56,3.18,2.4,0.33,0.76,0.86,0.69,1.06,0.71,1.3,1.4,1.64,1.62,1.71,1.7,1.75,1.69,1.5,1.26,1.09,0.98,1.0,0.87,0.63,0.95,1.01,1.46,1.32,1.79,1.18,1.69,1.17,1.22,0.98,1.4,1.29,1.2,1.17,0.99,1.04,1.29,1.42,1.5,1.55,1.25,0.82,0.76,0.92,1.26,1.12,1.32,1.25,1.38,1.02,1.33,0.94,1.07,1.29,1.19,1.69,1.41,1.24,1.77,1.99,1.64,1.58,1.53,1.34,1.27,1.37,1.19,0.95,1.56,1.45,1.29,1.44,1.37,1.52,1.75,1.47,1.13,1.18,1.38,2.03,2.95,3.28,3.18,4.03,3.67,3.81,2.42,1.42,1.82,0.87,0.91,1.1,0.78,0.55,0.84,0.7,0.28,0.11,0.03,0.13,0.35,0.12,0.19,0.33,0.2,0.32,0.59,0.37,0.26,0.11,0.18,0.19,0.94,0.93,0.76,1.57,0.99,0.38,0.13,-0.06,0.17,0.29,0.26,0.26,0.15,-0.33,-0.41,-0.31,-0.3,-0.38,-0.3,-0.35,-0.24,-0.11,-0.14,-0.17,-0.15,-0.19,-0.13,0.16,0.38,0.29,0.43,-0.07,0.48,0.98,1.47,1.28,1.13,0.97,1.18,1.79,2.1,2.62,2.23,1.56,2.0,1.95,2.3,2.74,3.03,3.34,2.94,2.42,2.39,2.34,2.93,2.7,3.13,3.45,3.08,2.84,2.41,1.93,2.1,2.24,2.37,2.28,1.71,1.53,1.73,1.87,1.88,2.16,2.32,2.55,2.37,2.55,2.54,2.68,3.11,4.21,3.58,3.9,3.76,3.17,3.11,2.69,2.79,2.69,2.46,2.49,2.42,2.75,2.4,2.54,2.86,2.75,2.8,2.6,3.0];
+var ETTJ_IM9=[1.04,0.95,1.68,1.27,2.21,1.36,1.48,1.03,0.58,0.48,0.39,-0.11,0.07,-0.15,-0.33,-0.52,-0.74,-0.31,-0.37,0.11,-0.01,0.18,0.64,1.04,0.78,0.65,0.87,1.42,1.39,2.47,1.28,1.02,1.16,3.5,2.95,0.81,0.78,1.14,0.74,1.18,0.6,1.67,1.71,1.99,1.87,2.01,2.0,2.18,2.1,2.03,1.59,1.21,1.2,1.1,0.89,0.67,0.97,1.06,1.54,1.37,1.97,1.3,1.7,1.25,1.3,1.06,1.47,1.24,1.14,1.18,1.06,1.09,1.39,1.46,1.56,1.73,1.52,1.0,0.81,1.07,1.39,1.12,1.31,1.21,1.46,1.03,1.37,1.05,1.19,1.15,1.03,1.66,1.33,1.12,1.7,2.03,1.65,1.56,1.52,1.39,1.35,1.34,1.17,0.87,1.48,1.31,1.19,1.27,1.2,1.37,1.71,1.57,1.19,1.32,1.45,2.14,2.87,3.38,3.27,3.99,3.71,3.96,2.52,1.51,1.96,0.97,0.96,1.29,0.88,0.69,0.96,0.88,0.5,0.28,0.11,0.22,0.46,0.25,0.25,0.36,0.27,0.24,0.63,0.46,0.38,0.23,0.27,0.32,1.38,1.34,1.04,1.94,1.27,0.7,0.39,-0.06,0.31,0.43,0.42,0.42,0.39,-0.19,-0.34,-0.21,-0.24,-0.37,-0.32,-0.44,-0.22,-0.04,0.01,0.07,-0.22,-0.26,-0.12,0.1,0.25,0.26,0.5,0.05,0.69,1.16,1.65,1.44,1.37,1.27,1.44,2.05,2.39,2.69,2.24,1.64,2.07,2.15,2.4,2.85,3.13,3.47,3.03,2.58,2.61,2.38,2.96,2.72,3.14,3.46,3.19,2.91,2.56,2.07,2.23,2.4,2.61,2.51,1.86,1.62,1.85,2.0,2.02,2.35,2.44,2.51,2.39,2.6,2.52,2.55,3.01,4.01,3.58,3.98,3.97,3.29,3.33,3.03,3.15,3.07,2.74,2.84,2.78,2.95,2.72,2.93,3.09,3.0,3.09,2.89,3.41];
+function _serieChart(elId, series, cores, vmin, vmax, step){
+  var el=document.getElementById(elId); if(!el) return;
+  var n=series[0].length, startY=2006;
+  var W=1000,H=430,ml=52,mr=20,mt=24,mb=56;
+  var pw=W-ml-mr,ph=H-mt-mb;
+  function X(i){return ml+i*(pw/(n-1));} function Y(v){return mt+ph-(v-vmin)/(vmax-vmin)*ph;}
+  var g='';
+  for(var v=vmin;v<=vmax;v+=step){var yy=Y(v).toFixed(1);
+    g+='<line x1="'+ml+'" y1="'+yy+'" x2="'+(W-mr)+'" y2="'+yy+'" stroke="'+(v===0?'var(--text-3)':'var(--border)')+'" stroke-width="'+(v===0?'1.2':'1')+'"/>';
+    g+='<text x="'+(ml-8)+'" y="'+(Y(v)+5).toFixed(1)+'" text-anchor="end" font-size="14" fill="var(--text-3)">'+(v>0?'+':'')+v+'</text>';}
+  for(var i=0;i<n;i++){var yr=startY+Math.floor(i/12); if(i%12===0 && yr%3===0){g+='<text x="'+X(i).toFixed(1)+'" y="'+(mt+ph+24)+'" text-anchor="middle" font-size="14" fill="var(--text-3)">'+yr+'</text>';}}
+  series.forEach(function(a,si){
+    var p='';
+    for(var i=0;i<n;i++)p+=(i?' ':'')+X(i).toFixed(1)+','+Y(a[i]).toFixed(1);
+    g+='<polyline fill="none" stroke="'+cores[si]+'" stroke-width="1.9" opacity="0.9" points="'+p+'"/>';
+  });
+  el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" style="max-width:100%;height:auto;display:block;">'+g+'</svg>';
+}
+_serieChart('chart-spread-serie',[ETTJ_SP05,ETTJ_SP3,ETTJ_SP9],['#07C0BD','#B0742A','#993715'],-5,8,2);
+_serieChart('chart-implmeta',[ETTJ_IM2,ETTJ_IM6,ETTJ_IM9],['#07C0BD','#B0742A','#993715'],-2,5,1);
+</script>
+</body>
+</html>
